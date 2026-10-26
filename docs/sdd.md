@@ -1,0 +1,834 @@
+# Habit Green: Planeación y SDD del MVP (v5)
+
+Documento de planeación y diseño de software para la app móvil Habit Green (React Native + Expo). Alcance: MVP en 3 semanas, con base para escalar a tiendas.
+
+Cambios de la v5:
+
+- Demo **solo en Android** con development build. iOS se valida después.
+- IA con **nivel gratuito (Gemini)** detrás de la interfaz `AiProvider`, que también admite Claude y OpenAI (3.2, 5.8).
+- **Geofencing básico vuelve** como última entrega y primer recorte. Lottie, Sentry y CI quedan fuera de la demo (2.5).
+- Cronograma por **entregas verticales** (2.2).
+- `generate-plan` devuelve un **borrador**: la app guarda el plan al confirmar. Sin conexión no se puede crear el plan (5.8).
+- Progresión definida: ventana de 14 días, mínimo de ocurrencias, límite de 4 hábitos del plan con desbloqueo a los 90 días (6.3).
+- Rachas por hábito (8). Hábitos archivados en vez de borrados. Categoría fija. Jardín con las 5 plantas desde el inicio. Un accesorio en una sola planta a la vez.
+- Correcciones: `uncomplete_habit` con la misma tolerancia que `complete_habit`, campo `notificar` para el estilo `minimo`, zona horaria actualizada desde el dispositivo y sin notificación matutina.
+
+Cambios de la v4:
+
+- Alcance: **demo funcional** (build de preview) hecha por **una sola persona**. Quedan fuera de la demo el geofencing y Lottie (2.2, 2.5).
+- Se mantiene el offline completo, con un **punto de control al final del día 9** (2.4).
+- Reprogramación a un **día libre fuera del patrón** con la nueva tabla `habit_occurrences` (4, 6.2).
+- Notificaciones con **ventana móvil** de avisos con fecha concreta, por el límite de 64 de iOS (7.1).
+- Nueva sección de sincronización (3.4).
+- Modo tradicional con valores por defecto y mensaje suave al llegar al tope de monedas (6.1, 6.5).
+
+Cambios de la v3:
+
+- Formulario refinado: textos y ayudas por pregunta. En Social, `tiempo_sin_celular` se reemplaza por `tiempo_de_calidad`.
+- Regla de precedencia entre preguntas: **la P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o momento** (5.6).
+- El catálogo semilla agrega `dias_semana` por fila, `duracion_reducida_min` y `momento_fijo` (5.7). Se revisan las filas con saltos grandes o frecuencias poco realistas.
+- Ritmo de XP: **4 XP por nivel** (antes 100), con **tope de 1 hábito por planta al día** que suma XP y tope de 5 hábitos al día que dan monedas (6.1).
+- Precios de los 15 accesorios (6.4).
+- Se agregan la RPC `uncomplete_habit` y las marcas `xp_otorgado` / `monedas_otorgadas` en `habit_logs`.
+- Corrección: el catálogo tiene 16 objetivos (no 14) × 3 niveles = 48 filas base.
+
+Cambios de la v2 (se mantienen): formulario con claves, catálogo semilla, motor determinista con IA solo para textos, guía de UX/UI aplicada a React Native.
+
+## 1. Resumen y alcance
+
+**Producto.** Habit tracker con dos modos: (a) tradicional, donde el usuario crea sus hábitos, y (b) guiado, donde un formulario de 7 preguntas genera un plan que arranca con poca carga y se adapta con el tiempo.
+
+**Público.** Personas de 22 a 45 años, incluidas quienes les cuesta iniciar y sostener hábitos. Idioma inicial: español (tuteo).
+
+**Funcionalidades mínimas del MVP**
+
+1. Formulario inicial de 7 preguntas y generación del plan.
+2. Hábitos con 5 categorías fijas (Salud Física, Trabajo / Estudio, Salud Mental, Finanzas, Social).
+3. Recordatorios por hora, día y ubicación.
+4. Estadísticas semanales, mensuales y anuales.
+5. Recompensas: una planta por categoría (3 fases), monedas y accesorios.
+6. Progresión adaptativa y reprogramación de hábitos fallidos.
+
+**Fuera del MVP:** categorías creadas por el usuario (el modelo ya lo contempla), push remotos, cron en servidor, funciones sociales, pagos, modo oscuro, insignias.
+
+**Fuera de la demo (se agregan antes de publicar):** iOS, Lottie, Sentry, GitHub Actions, temporizador de `distraccion`, eliminar cuenta y formulario para usuarios del modo tradicional.
+
+## 2. Planeación del proyecto
+
+### 2.1 Orden de prioridad
+
+Formulario → plan → hábitos y categorías → notificaciones → recompensas → estadísticas → geolocalización (al final y en versión básica).
+
+### 2.2 Cronograma de 3 semanas (una persona, demo funcional en Android)
+
+La meta es una **build de preview en Android (APK)** con el flujo completo. Se desarrolla con una development build de Android desde la entrega 3. La UI de las pantallas principales sale de los mockups (Figma); las secundarias y los estados se diseñan con las reglas de la sección 9.
+
+**Forma de trabajo:** una persona a medio tiempo, con poca experiencia en el stack. Claude escribe el código por partes y explica cada pieza. El usuario prueba cada entrega con su criterio de prueba antes de pasar a la siguiente. El detalle de tareas y su estado vive en `docs/backlog.md`.
+
+**Entregas verticales.** Al terminar cada una, la app funciona de punta a punta con lo que ya existe. Así, si el tiempo se acaba, siempre hay algo que mostrar.
+
+| # | Entrega | Días (aprox.) | Contenido |
+| --- | --- | --- | --- |
+| 1 | Base | 1–3 | Proyecto Expo + Router + NativeWind con tokens y Nunito. Supabase con esquema, RLS y catálogo semilla. Auth (registro, confirmación de correo, inicio de sesión y recuperación). Componentes base. |
+| 2 | Formulario y plan | 4–7 | Formulario de 7 pasos. Motor de plan. `generate-plan` con `AiProvider` (Gemini). Revisión del plan y «Empezar». |
+| 3 | Hoy y hábitos offline | 8–9 | SQLite, repositorios, cola de sincronización, Hoy, Hábitos, creación manual, check-in. **Punto de control** (2.4). |
+| 4 | Recompensas | 10–11 | `complete_habit` / `uncomplete_habit` con topes, jardín, tienda y accesorios. Animaciones con Reanimated. |
+| 5 | Notificaciones | 12–13 | Ventana móvil, estilos de la P7, precedencia P7/P6 y ánimo rotativo. |
+| 6 | Reprogramación | 14 | `habit_occurrences`, detección al abrir y día libre. |
+| 7 | Estadísticas y rachas | 15–16 | Semana, mes y año. Rachas por hábito. |
+| 8 | Progresión | 17 | Reglas, límite de hábitos del plan y `adjust-plan`. |
+| 9 | Cierre | 18–19 | Pruebas en dispositivo Android, lista 9.7, corrección de errores y APK. |
+| 10 | Geofencing básico | 20–21 | Lugares por hábito y notificación al entrar. **Primer recorte** si falta tiempo; en ese caso, los días 20–21 son margen. |
+
+### 2.3 Requisitos previos
+
+La lista con su estado vive en `docs/backlog.md` («Antes de empezar»). Además de las cuentas, la Entrega 1 necesita:
+
+- Remoto de GitHub con la rama `main`.
+- `.env` local con `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` (plantilla en `.env.example`; `.env` está en `.gitignore`).
+- Supabase CLI instalada y vinculada al proyecto (`supabase link`).
+- Auth de Supabase: URLs de redirección con el esquema `habitgreen://` (y `exp://` para Expo Go) y SMTP propio (por ejemplo, Resend). El SMTP integrado tiene un límite muy bajo y solo envía a los correos del equipo del proyecto.
+- `app.json` con `scheme: "habitgreen"` y `android.package: "com.habitgreen.app"`.
+
+### 2.4 Riesgos y mitigación
+
+| Riesgo | Impacto | Mitigación |
+| --- | --- | --- |
+| Poca experiencia con el stack y medio tiempo (unas 75 h en total, según el backlog) | Alto | Entregas verticales con criterio de prueba. Claude implementa y explica; el usuario verifica cada entrega. Recortes en el orden de 2.5. |
+| Geofencing requiere development build y permiso de ubicación en segundo plano | Alto | Última entrega y primer recorte. Si no alcanza, queda para v1.1. |
+| La IA devuelve JSON inválido o textos poco seguros | Medio | La IA solo escribe textos; los números salen del catálogo. Validar con Zod, reintentar una vez y usar los textos del catálogo si falla. |
+| Límites del nivel gratuito de Gemini (por minuto y por día) | Medio | Al recibir un error de cuota, se usan los textos del catálogo sin mostrar error. `AiProvider` permite cambiar a Claude u OpenAI con variables de entorno. |
+| Alarmas exactas en Android 12+ (`SCHEDULE_EXACT_ALARM`) | Medio | Verificar en la documentación de `expo-notifications` del SDK actual. Probar en un dispositivo físico desde la entrega 5. |
+| Sincronización offline con conflictos | Medio | Registros por día con clave única (hábito + fecha). «Gana el último». Los topes diarios se recalculan en el servidor al sincronizar. |
+| Arte tarde o que no contraste con el fondo oliva | Medio | Placeholders con la misma convención de nombres. Pedir PNG con fondo transparente y contorno oscuro, y mostrar las plantas sobre un panel `bg-claro`. |
+| Contraste del coral y del terracota (ver 9.6) | Medio | Reglas en los componentes base, no en cada pantalla; revisión en la semana 3. |
+| Farmeo de XP o monedas con hábitos manuales triviales | Medio | Topes diarios: 1 hábito por planta suma XP y 5 hábitos dan monedas (6.1). |
+| Alcance excesivo para 3 semanas con una sola persona | Alto | Lottie, Sentry y CI fuera desde el inicio. Geofencing al final. Punto de control del día 9 y recortes en el orden de 2.5. |
+| Offline completo (cola, reconciliación de recompensas) más lento de lo estimado | Alto | **Punto de control al final del día 9:** si la sincronización no funciona de punta a punta (crear hábito, completar, deshacer, reconectar), se pasa a «solo check-in offline»: lectura con caché y cola solo para `complete_habit` / `uncomplete_habit`. |
+| Límite de notificaciones programadas (64 en iOS) | Medio | Ventana móvil con un tope de 60 (7.1), aunque la demo sea en Android, para no rehacerlo al llegar a iOS. |
+
+### 2.5 Recortes
+
+**Fuera de la demo desde el inicio:** iOS, Lottie (quedan las animaciones de Reanimated), Sentry, GitHub Actions, el temporizador de `distraccion` y eliminar cuenta.
+
+**Si el tiempo aprieta, en este orden:**
+
+1. Geofencing básico (quedan solo recordatorios por hora y día).
+2. Offline completo → solo check-in offline (punto de control del día 9). SQLite sigue siendo una caché completa, así que las estadísticas y la reprogramación siguen calculándose en local. Solo se simplifica la subida: la cola envía check-ins y el resto de cambios requiere conexión.
+3. `adjust-plan` con IA (quedan las reglas locales y los textos del catálogo).
+4. Estadísticas anuales (quedan semana y mes).
+
+## 3. Arquitectura
+
+### 3.1 Vista general
+
+La app es offline-first: las acciones se guardan primero en local y se sincronizan con Supabase en segundo plano. La IA nunca se llama desde la app.
+
+```
+App (Expo / React Native)
+  UI: NativeWind (tokens) + Reanimated
+  Estado: Zustand (UI/sesión/formulario) + TanStack Query (servidor)
+  Local: expo-sqlite (hábitos, registros, cola de sincronización)
+  Dominio: motor de plan, catálogo, progresión, reprogramación, recompensas (funciones puras)
+  Nativo: expo-notifications, expo-location + TaskManager
+        |
+        v  HTTPS + JWT
+Supabase
+  Auth | Postgres + RLS + RPC | Edge Functions
+        |
+        v
+AiProvider: Gemini (nivel gratuito, por defecto) | Claude | OpenAI
+  solo desde Edge Functions
+```
+
+### 3.2 Decisiones técnicas
+
+| Tema | Decisión | Motivo |
+| --- | --- | --- |
+| Navegación | Expo Router | Deep links y tipado simples. |
+| Backend | Supabase | Auth, Postgres, RLS y funciones en un solo servicio. |
+| Local | expo-sqlite | Funciona en Expo Go y permite estadísticas offline. |
+| Estado | Zustand + TanStack Query | Separa UI de datos remotos. Como la app lee de SQLite, TanStack Query se limita a llamadas que requieren red: `generate-plan`, `adjust-plan` y Auth. |
+| Persistencia antes de SQLite | `zustand/persist` sobre el almacén clave-valor de `expo-sqlite` | En la Entrega 2 todavía no hay esquema local: el avance del formulario se guarda así y `app_config` se lee directo de Supabase. Desde la Entrega 3 pasa a SQLite. |
+| Iconos | `lucide-react-native` | Iconos de línea con trazo de 2 px y tamaño 24, como pide la guía. Verificar compatibilidad con el SDK antes de instalar. |
+| Gráficas | react-native-gifted-charts | Más simple que Victory Native (requiere Skia). |
+| UI | NativeWind con tokens de la guía | Un solo origen de colores y espaciados. |
+| Tipografía | Nunito vía `expo-font` | Sans-serif humanista recomendada por la guía; respaldo del sistema. |
+| Plan | **Motor determinista + IA solo para textos** | El plan nunca excede el tiempo declarado, aunque la IA falle. |
+| IA | **Interfaz `AiProvider`** con implementaciones para Gemini (por defecto, nivel gratuito), Claude y OpenAI. Se elige con `AI_PROVIDER`. | La IA debe ser gratuita para la demo; cambiar de proveedor no toca el resto del código. |
+| Notificaciones | **P7 decide la cantidad, P6 ajusta** | Evita combinaciones contradictorias. |
+| Reprogramación | Lógica local al abrir la app | Evita depender de un cron en el MVP. |
+| Plataforma de la demo | Solo Android | Las builds de Android son gratuitas y no requieren cuenta de Apple. El código sigue siendo multiplataforma. |
+| Builds | Development build de Android desde la entrega 3 | Necesaria para geofencing y alarmas fiables. Expo Go sirve en las entregas 1 y 2. |
+| Animaciones | Solo Reanimated | Lottie queda fuera de la demo. |
+
+### 3.3 Estructura del proyecto
+
+Las rutas viven en `src/app/`, como indica `AGENTS.md`. Solo hay pantallas ahí; el resto del código va fuera.
+
+```
+src/
+  app/
+    (auth)/            # login, registro
+    (onboarding)/      # modo, formulario (7 pasos), generando, revisión del plan
+    (tabs)/            # hoy, hábitos, estadísticas, jardín, perfil
+    habit/[id].tsx
+    store.tsx
+  components/ ui/    # Button, Card, Field, OptionChip, TabBar, Alert, ProgressSteps
+  theme/             # tokens (colores, tipografía, espaciado, radios, sombras)
+  features/
+    onboarding/      # pantallas, schemas, claves, mapeo
+    plan/            # motor de plan, catálogo, prompts
+    habits/ rewards/ stats/ reminders/
+  db/ sync/ lib/ schemas/
+  i18n/es.ts         # textos de interfaz
+supabase/
+  migrations/ functions/ (generate-plan, adjust-plan)
+assets/ plants/ accessories/ icons/ animations/
+```
+
+**Código compartido con las Edge Functions (propuesta).** El motor de plan, el catálogo de claves y los esquemas Zod se escriben en TypeScript sin dependencias de React Native, en `src/features/plan/domain` y `src/schemas`. Las Edge Functions los importan por ruta relativa desde `supabase/functions/_shared` mediante un script que los copia antes de `supabase functions deploy`. Hay una sola fuente de verdad: la copia no se edita a mano. Las Edge Functions corren en Deno, así que `supabase/functions/deno.json` define un import map (`"zod": "npm:zod@<misma versión que la app>"`) para que el código copiado funcione sin reescribir sus imports. El código compartido no importa nada de React Native ni de Expo.
+
+### 3.4 Sincronización (offline completo)
+
+| Tema | Regla |
+| --- | --- |
+| Identificadores | UUID generados en el cliente para `habits`, `habit_schedules`, `habit_logs`, `habit_occurrences`, `habit_places`, `plans` y `user_accessories`, para poder crear sin conexión. |
+| Cola de salida | Tabla local `outbox` (id, operación, payload, creado_en, intentos). Se procesa en orden. Un `complete` seguido de un `uncomplete` del mismo hábito y fecha que no se han enviado se compactan (se eliminan ambos). |
+| Carga inicial | Al iniciar sesión con SQLite vacío se descargan perfil, `user_settings`, `app_config`, categorías, catálogo, hábitos, horarios, ocurrencias y registros de los últimos 365 días, `plant_progress`, `wallets` y accesorios. |
+| Descarga incremental | Por `updated_at` mayor a la última sincronización. Todas las tablas sincronizadas llevan `updated_at` (actualizado por un trigger). |
+| Borrados | Las tablas sincronizadas no borran filas: llevan `eliminado_en` (timestamptz, nulo) y un borrado actualiza `eliminado_en` y `updated_at`, para que la descarga incremental lo propague a otros dispositivos. Aplica a `habit_logs` (deshacer), `habit_places` y `user_accessories`. Las restricciones únicas siguen valiendo: completar de nuevo un hábito deshecho reutiliza su fila y limpia `eliminado_en`. Las consultas y las políticas de lectura filtran `eliminado_en is null`. |
+| Conflictos | Entidades editables (hábitos, horarios, ajustes): gana el último `updated_at`. Registros: la restricción única (hábito + fecha) y la idempotencia de las RPC. |
+| Recompensas | La app calcula XP y monedas de forma optimista. Después de sincronizar, `plant_progress` y `wallets` se reemplazan por los valores del servidor. Un cambio de fase ya celebrado no se vuelve a animar. |
+| Validación de fecha | `complete_habit` y `uncomplete_habit` aceptan fechas de hasta 7 días atrás en la zona horaria del perfil, para tolerar periodos sin conexión, y nunca fechas futuras. La interfaz solo permite marcar y deshacer el día de hoy. |
+| Zona horaria | Al abrir la app, si la zona del dispositivo es distinta de `profiles.zona_horaria`, se actualiza el perfil antes de sincronizar. Así un check-in de «hoy» nunca llega al servidor como fecha futura. |
+| Rechazos | Si el servidor rechaza una operación (fecha fuera de rango, hábito eliminado), se descarta, se registra en el log de la app (Sentry antes de publicar) y se refresca el estado local. |
+| Cuándo sincroniza | Al abrir la app, al volver a primer plano, al recuperar conexión y después de cada operación si hay red. |
+
+## 4. Modelo de datos (Postgres)
+
+Todas las tablas de usuario llevan `user_id` y RLS: cada usuario solo lee y escribe sus propias filas.
+
+| Tabla | Campos principales | Notas |
+| --- | --- | --- |
+| `profiles` | id (= auth.uid), nombre, zona_horaria, modo (`tradicional` o `guiado`), onboarding_completo | |
+| `onboarding_answers` | user_id, respuestas (jsonb con claves), version_formulario | Ejemplo: `{areas:["salud_fisica","social"],objetivos:["mover_mas","tiempo_de_calidad"],historial:"empieza_y_deja",tiempo:"10_20",momento:"noche",obstaculo:"olvido",acompanamiento:"recordatorio_suave"}`. `version_formulario` = 3. |
+| `user_settings` | user_id, presupuesto_min, estilo_notificaciones, estrategias (text[]), horas_por_momento (jsonb), segundo_aviso (bool), **ultima_evaluacion (date)**, **limite_plan_desbloqueado (bool)** | Derivados del formulario (o valores por defecto en modo tradicional, 6.5); el usuario los edita en Perfil. `segundo_aviso` sale de la precedencia 5.6. Los dos últimos campos sirven a la progresión (6.3). |
+| `categories` | id, clave, nombre, es_sistema, user_id (nulo si es del sistema) | Las 5 del MVP son del sistema. |
+| `habit_catalog` | objetivo, nivel (1–3), variante (`base` o `sin_recursos`), titulo, descripcion, duracion_min, **duracion_reducida_min**, **dias_semana (int[], ISO 1 = lunes … 7 = domingo)**, **momento_fijo** (nulo o clave de momento), sin_recursos (bool), categoria | Catálogo semilla editable sin publicar versión (5.7). |
+| `plans` | id, user_id, origen (`ia` o `catalogo`), json_plan, activo, creado_en | Se crea cuando el usuario confirma el plan (5.8), con UUID del cliente. Versionado al ajustar. `creado_en` cuenta los 90 días del desbloqueo (6.3). |
+| `habits` | id, user_id, category_id, plan_id (nulo si es manual), objetivo (nulo si es manual), nivel, usa_duracion_reducida (bool), titulo, descripcion, duracion_min, activo, **archivado_en (timestamptz, nulo)** | `category_id` no cambia después de crear el hábito. «Eliminar» = archivar: se oculta, se cancelan sus avisos y su historial se conserva. `activo` = falso significa pausado. |
+| `habit_schedules` | id, habit_id, dias_semana (int[]), hora (time, nulo si es flexible), flexible (bool), **notificar (bool)**, **vigente_desde (date)**, **vigente_hasta (date, nulo si es el actual)** | La hora del recordatorio vive solo aquí. Al editar un horario se cierra el vigente y se crea otro, para que las estadísticas pasadas no cambien. `notificar` vale verdadero por defecto, salvo con el estilo `minimo` (7.1). |
+| `habit_occurrences` | id, habit_id, fecha_original (date), fecha_nueva (date, nula si se descarta), estado (`movida`, `descartada`), creado_en | Excepciones al patrón semanal (6.2). Única por (habit_id, fecha_original). |
+| `habit_logs` | id, habit_id, category_id, fecha (date), estado (`hecho`), completado_en, **xp_otorgado (bool)**, **monedas_otorgadas (bool)** | Único por (habit_id, fecha). Las marcas permiten aplicar y revertir los topes diarios. La reprogramación vive en `habit_occurrences`, no aquí. |
+| `habit_places` | id, habit_id, nombre, lat, lng, radio_m | Lugares para geofencing (7.2), hasta 3 por hábito. Reemplaza a la tabla `reminders`: la hora ya vive en `habit_schedules`. |
+| `plant_progress` | user_id, category_id, xp, nivel, fase | Único por (user_id, category_id). |
+| `wallets` | user_id, saldo | |
+| `coin_transactions` | id, user_id, monto, motivo, ref_id, creado_en | Auditoría. |
+| `accessories` | id, tipo (`sombrero`, `lentes`, `maceta`), nombre, precio, orden (1–5), imagen | 15 en total; precios en 6.4. |
+| `user_accessories` | user_id, accessory_id, categoria_equipada (nula si no está equipado) | Un accesorio comprado se equipa en una sola planta a la vez; equiparlo en otra lo quita de la anterior. Cada planta admite como máximo un accesorio por tipo. |
+| `ai_requests` | id, user_id, funcion, estado, tokens, creado_en | Límites de uso. |
+| `app_config` | clave, valor (jsonb) | Constantes de recompensas y topes, umbrales de progresión, horas por defecto y precios. La app la cachea en SQLite. |
+
+## 5. Formulario inicial y plan
+
+### 5.1 Pasos, textos y claves
+
+Una pregunta por pantalla, con `ProgressSteps` («Paso 3 de 7»), ayuda breve debajo del título y opción de volver sin perder respuestas. Los textos viven en `i18n/es.ts`; en la base de datos solo se guardan claves.
+
+| # | Pregunta | Ayuda | Tipo | Opciones (texto → clave) |
+| --- | --- | --- | --- | --- |
+| 1 | ¿En qué áreas te gustaría empezar? | Elige hasta 2. Podrás sumar más cuando estas ya sean parte de tu día. | Hasta 2 | Salud física → `salud_fisica` · Trabajo / Estudio → `trabajo` · Salud mental → `salud_mental` · Finanzas → `finanzas` · Social → `social` |
+| 2 | ¿Qué te gustaría lograr primero? | Elige hasta 2. | Hasta 2, solo de las áreas elegidas | Ver 5.2 |
+| 3 | Cuando has intentado crear un hábito, ¿qué suele pasar? | No hay respuesta mala: nos ayuda a empezar a tu ritmo. | Única | Es mi primera vez → `primera_vez` · Empiezo con ganas, pero lo dejo en pocos días → `empieza_y_deja` · Lo sostengo unas semanas y luego lo suelto → `semanas_y_suelta` · Casi siempre logro mantenerlo → `mantiene` |
+| 4 | ¿Cuánto tiempo al día te gustaría dedicarle? | Es tu límite. Empezaremos con menos para que sea fácil. | Única | Menos de 10 min → `menos_10` · 10 a 20 min → `10_20` · 20 a 40 min → `20_40` · Más de 40 min → `mas_40` |
+| 5 | ¿En qué momento del día tienes más espacio libre? | Podrás ajustar la hora exacta al revisar tu plan. | Única | Mañana → `manana` · Mediodía → `mediodia` · Tarde → `tarde` · Noche → `noche` · Varía mucho, mi horario cambia → `varia` |
+| 6 | ¿Qué es lo que más se te complica para ser constante? | Elige la que más se parezca a ti. | Única | No me alcanza el tiempo → `poco_tiempo` · Se me olvida → `olvido` · Pierdo la motivación → `motivacion` · Me desanimo cuando fallo un día → `desanimo` · Me distraigo fácilmente → `distraccion` · No tengo los recursos o el espacio → `recursos` |
+| 7 | ¿Cómo te gustaría que Habit Green te acompañe? | Puedes cambiarlo cuando quieras en Perfil. | Única | Un resumen cada noche con lo de mañana → `resumen_nocturno` · Un aviso suave a la hora de cada hábito → `recordatorio_suave` · Avisos con mensajes de ánimo → `recordatorio_y_animo` · Lo mínimo, prefiero llevarlo yo → `minimo` |
+
+### 5.2 Objetivos por área (pregunta 2)
+
+La pantalla muestra las opciones agrupadas por área con encabezados H3.
+
+| Área | Opciones (texto → clave) |
+| --- | --- |
+| `salud_fisica` | Moverme más → `mover_mas` · Dormir mejor → `dormir_mejor` · Comer mejor → `comer_mejor` · Tomar más agua → `tomar_agua` |
+| `trabajo` | Organizar mejor mi día → `organizar_dia` · Procrastinar menos → `procrastinar_menos` · Aprender algo nuevo → `aprender_algo` |
+| `salud_mental` | Manejar mejor el estrés → `manejar_estres` · Desconectarme de las pantallas → `desconectar_pantallas` · Tomarme tiempo para mí → `tiempo_para_mi` |
+| `finanzas` | Saber en qué gasto → `saber_gastos` · Empezar a ahorrar → `empezar_ahorrar` · Evitar compras impulsivas → `evitar_impulsivas` |
+| `social` | Mantener contacto con las personas que quiero → `mantener_contacto` · Pasar tiempo de calidad con alguien → `tiempo_de_calidad` · Conocer gente nueva → `conocer_gente` |
+
+`tiempo_de_calidad` reemplaza a `tiempo_sin_celular` para no duplicar `desconectar_pantallas`: se centra en la presencia con otra persona, no en el celular.
+
+### 5.3 Validación (Zod)
+
+- Pregunta 1: 1 a 2 valores. Pregunta 2: 1 a 2 valores, todos pertenecientes a las áreas elegidas.
+- Si el usuario cambia las áreas en la pregunta 1, se eliminan los objetivos que ya no corresponden.
+- Preguntas 3 a 7: una opción obligatoria.
+- Al intentar elegir un tercer elemento, no se bloquea en silencio: se muestra el mensaje «Elige hasta 2 para empezar con poca carga. Podrás agregar más después».
+- El avance se guarda en Zustand y se persiste en local (`zustand/persist` sobre `expo-sqlite`, 3.2) para retomarlo si se cierra la app.
+
+### 5.4 Parámetros derivados (motor de plan, funciones puras)
+
+| Entrada | Salida |
+| --- | --- |
+| P1 y P2 | Un hábito ancla por objetivo (máximo 2). |
+| P3 | Nivel inicial: `primera_vez`, `empieza_y_deja`, `semanas_y_suelta` → 1; `mantiene` → 2. Con `semanas_y_suelta` se activan mensajes de apoyo en las semanas 3 y 4. |
+| P4 | `presupuesto_min`: 10, 20, 40 o 60. |
+| P5 | Hora del recordatorio: `manana` 08:00, `mediodia` 13:00, `tarde` 17:00, `noche` 20:30; `varia` → flexible (ventana 17:00 y segundo aviso a las 20:00). Configurable en `app_config`. Si la fila del catálogo tiene `momento_fijo`, ese momento gana sobre la P5. |
+| P6 | `estrategias` (ver 5.5). |
+| P7 | `estilo_notificaciones` (ver 5.6 y sección 7). |
+
+**Reglas del motor**
+
+1. Duración máxima por hábito = `presupuesto_min / número de hábitos`.
+2. Para cada hábito se toma el nivel inicial; si su duración excede el máximo, se baja de nivel. Todos los hábitos de nivel 1 duran 5 minutos o menos, así que siempre cabe al menos el nivel 1.
+3. Los días de la semana salen de `dias_semana` de la fila del catálogo (ya no hay una regla global por nivel).
+4. Con `poco_tiempo`, la duración es `duracion_reducida_min` de la fila.
+5. Con `recursos`, se usa la variante `sin_recursos` cuando la fila base no lo es.
+6. Si hay `momento_fijo`, la hora del recordatorio sale de ese momento; si no, de la P5.
+
+### 5.5 Estrategias de apoyo (pregunta 6)
+
+| Clave | Efecto |
+| --- | --- |
+| `poco_tiempo` | Duración = `duracion_reducida_min`; el resumen destaca «hábitos de pocos minutos». |
+| `olvido` | Segundo aviso si el hábito no se completó, según la precedencia de 5.6. |
+| `motivacion` | Mensajes de ánimo en los avisos y celebración más visible al completar (planta y monedas). |
+| `desanimo` | Reprogramación automática y silenciosa con aviso suave; ningún texto menciona fallos o rachas rotas. |
+| `distraccion` | Un solo aviso breve por hábito y temporizador opcional al abrir el hábito. |
+| `recursos` | Solo variantes del catálogo sin equipo ni espacio especial. |
+
+### 5.6 Precedencia entre P7 y P6
+
+Regla general: **la P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o su momento.**
+
+| Combinación | Regla |
+| --- | --- |
+| `olvido` + `recordatorio_suave` o `recordatorio_y_animo` | Segundo aviso 2 h después de la hora del hábito si no se completó. |
+| `olvido` + `minimo` | Sin segundo aviso. La revisión del plan muestra el interruptor «Segundo aviso», apagado por defecto. |
+| `olvido` + `resumen_nocturno` | Como no hay aviso por hábito, se agrega uno solo al día a la hora del momento (P5 o `momento_fijo`), no «2 h después». |
+| `olvido` + `varia` | La ventana ya tiene avisos a las 17:00 y 20:00; no se suma nada. |
+| `distraccion` + `recordatorio_y_animo` | Un solo aviso por hábito, con el ánimo dentro del mismo texto, de una línea. |
+| `distraccion` + cualquier estilo | Nunca más de un aviso por hábito al día. |
+| `motivacion` + `minimo` | Sin avisos extra; el ánimo se muestra solo dentro de la app (celebraciones). |
+| `desanimo` + cualquier estilo | Solo cambia el tono y activa la reprogramación silenciosa. |
+
+### 5.7 Catálogo de hábitos semilla
+
+16 objetivos × 3 niveles = 48 filas base, más variantes `sin_recursos` donde hace falta. Son acciones generales y de bajo riesgo; no hay consejos médicos, dietas ni de inversión, ni cantidades sensibles (calorías, montos, horas de sueño). Los textos son editables en `habit_catalog`.
+
+**Principios**
+
+1. Nivel 1 de 5 minutos o menos, con un verbo concreto y un final claro.
+2. Entre un nivel y el siguiente, como máximo el doble o el triple de duración o de frecuencia.
+3. Se progresa en una sola dimensión a la vez: duración, frecuencia o complejidad.
+4. El usuario elige las cantidades sensibles («una cantidad pequeña que yo elija»).
+
+**Campos nuevos**
+
+- `dias_semana`: días ISO (1 = lunes … 7 = domingo). Patrones por defecto: 1 día → [7]; 2 → [2,5]; 3 → [1,3,5]; 4 → [1,2,4,6]; 5 → [1,2,3,4,5]; 6 → [1,2,3,4,5,6]. Algunas filas usan otro día (por ejemplo, sábado para actividades sociales).
+- `duracion_reducida_min`: versión corta para `poco_tiempo` y para días difíciles.
+- `momento_fijo`: si existe, gana sobre la P5 (por ejemplo, `dormir_mejor` siempre es de noche).
+
+**Catálogo**
+
+Min = `duracion_min`; Red. = `duracion_reducida_min`; — = sin momento fijo.
+
+| Objetivo | Nv | Título | Min | Red. | Días | Momento fijo | Sin recursos |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `mover_mas` | 1 | Caminar 5 min | 5 | 2 | 1,2,4,6 | — | Sí |
+| `mover_mas` | 2 | Caminar 15 min | 15 | 5 | 1,2,3,4,5 | — | Sí |
+| `mover_mas` | 3 | Caminar o moverme 30 min | 30 | 10 | 1,2,3,4,5 | — | Sí |
+| `dormir_mejor` | 1 | Dejar el celular lejos de la cama | 2 | 1 | 1,2,4,6 | `noche` | Sí |
+| `dormir_mejor` | 2 | Rutina de 10 min antes de dormir | 10 | 5 | 1,2,3,4,5 | `noche` | Sí |
+| `dormir_mejor` | 3 | Hora fija para acostarme y rutina de 20 min | 20 | 10 | 1,2,3,4,5,6 | `noche` | Sí |
+| `comer_mejor` | 1 | Sumar una fruta o verdura a una comida | 5 | 2 | 1,2,4,6 | — | Sí |
+| `comer_mejor` | 2 | Planear mis comidas del día | 10 | 5 | 1,2,3,4,5 | `manana` | Sí |
+| `comer_mejor` | 3 | Preparar una comida casera | 30 | 15 | 1,3,5 | — | No |
+| `comer_mejor` | 3 (sin recursos) | Elegir una opción con verdura al comer fuera | 10 | 5 | 1,2,3,4,5 | — | Sí |
+| `tomar_agua` | 1 | Tomar un vaso de agua al despertar | 1 | 1 | 1,2,4,6 | `manana` | Sí |
+| `tomar_agua` | 2 | Un vaso de agua con cada comida | 3 | 1 | 1,2,3,4,5 | — | Sí |
+| `tomar_agua` | 3 | Rellenar mi botella tres veces al día | 5 | 3 | 1,2,3,4,5,6 | — | Sí |
+| `organizar_dia` | 1 | Escribir mi prioridad del día | 3 | 1 | 1,2,4,6 | — | Sí |
+| `organizar_dia` | 2 | Planear mi día en 3 tareas | 10 | 5 | 1,2,3,4,5 | — | Sí |
+| `organizar_dia` | 3 | Plan del día y revisión por la noche | 15 | 8 | 1,2,3,4,5 | — | Sí |
+| `procrastinar_menos` | 1 | 5 min en la tarea que estoy evitando | 5 | 2 | 1,2,4,6 | — | Sí |
+| `procrastinar_menos` | 2 | Bloque de enfoque de 15 min | 15 | 5 | 1,2,3,4,5 | — | Sí |
+| `procrastinar_menos` | 3 | Bloque de enfoque de 25 min | 25 | 10 | 1,2,3,4,5 | — | Sí |
+| `aprender_algo` | 1 | Leer o estudiar 5 min | 5 | 2 | 1,2,4,6 | — | Sí |
+| `aprender_algo` | 2 | Estudiar 15 min | 15 | 5 | 1,2,3,4,5 | — | Sí |
+| `aprender_algo` | 3 | Estudiar 30 min | 30 | 10 | 1,2,3,4,5 | — | Sí |
+| `manejar_estres` | 1 | Respirar profundo 2 min | 2 | 1 | 1,2,4,6 | — | Sí |
+| `manejar_estres` | 2 | Pausa de respiración de 5 min | 5 | 2 | 1,2,3,4,5 | — | Sí |
+| `manejar_estres` | 3 | Pausa guiada de 10 min | 10 | 5 | 1,2,3,4,5,6 | — | Sí |
+| `desconectar_pantallas` | 1 | Dejar el celular boca abajo 5 min | 5 | 2 | 1,2,4,6 | — | Sí |
+| `desconectar_pantallas` | 2 | 15 min sin pantallas | 15 | 5 | 1,2,3,4,5 | — | Sí |
+| `desconectar_pantallas` | 3 | 30 min sin pantallas | 30 | 10 | 1,2,3,4,5 | — | Sí |
+| `tiempo_para_mi` | 1 | 5 min para algo que disfruto | 5 | 2 | 1,2,4,6 | — | Sí |
+| `tiempo_para_mi` | 2 | 15 min para mí | 15 | 5 | 1,2,3,4,5 | — | Sí |
+| `tiempo_para_mi` | 3 | 30 min para mí | 30 | 10 | 1,3,5,6 | — | Sí |
+| `saber_gastos` | 1 | Anotar un gasto del día | 2 | 1 | 1,2,4,6 | `noche` | Sí |
+| `saber_gastos` | 2 | Anotar todos mis gastos del día | 5 | 2 | 1,2,3,4,5 | `noche` | Sí |
+| `saber_gastos` | 3 | Anotar mis gastos todos los días | 5 | 2 | 1,2,3,4,5,6 | `noche` | Sí |
+| `empezar_ahorrar` | 1 | Apartar una cantidad pequeña que yo elija | 3 | 1 | 7 | — | Sí |
+| `empezar_ahorrar` | 2 | Apartar mi cantidad y revisar mi meta | 5 | 3 | 7 | — | Sí |
+| `empezar_ahorrar` | 3 | Revisión semanal de ahorro y gastos pequeños | 10 | 5 | 7 | — | Sí |
+| `evitar_impulsivas` | 1 | Esperar antes de una compra no planeada | 2 | 1 | 1,2,4,6 | — | Sí |
+| `evitar_impulsivas` | 2 | Hacer una lista antes de comprar | 5 | 2 | 1,3,5 | — | Sí |
+| `evitar_impulsivas` | 3 | Revisar compras y suscripciones de la semana | 10 | 5 | 7 | — | Sí |
+| `mantener_contacto` | 1 | Enviar un mensaje a alguien | 5 | 2 | 1,2,4,6 | — | Sí |
+| `mantener_contacto` | 2 | Escribir o llamar con calma a alguien | 10 | 5 | 1,2,4,6 | — | Sí |
+| `mantener_contacto` | 3 | Llamada de 20 min | 20 | 10 | 3,6 | — | Sí |
+| `tiempo_de_calidad` | 1 | 5 min de atención plena con alguien | 5 | 2 | 1,3,5 | — | Sí |
+| `tiempo_de_calidad` | 2 | 15 min de calidad con alguien | 15 | 5 | 1,2,4,6 | — | Sí |
+| `tiempo_de_calidad` | 3 | 30 min de una actividad juntos | 30 | 15 | 1,3,6 | — | Sí |
+| `conocer_gente` | 1 | Iniciar una conversación breve con alguien | 5 | 2 | 2,5 | — | Sí |
+| `conocer_gente` | 2 | Proponer un plan o responder una invitación | 15 | 5 | 6 | — | Sí |
+| `conocer_gente` | 3 | Asistir a una actividad o grupo | 40 | 20 | 6 | — | Sí |
+
+Notas:
+
+- `saber_gastos` nivel 3 mantiene el registro diario; la revisión semanal se ofrece como hábito nuevo en la progresión.
+- `empezar_ahorrar` es semanal en los 3 niveles y progresa en complejidad.
+- `desconectar_pantallas` pasa de 5 → 20 → 40 a 5 → 15 → 30 para no bloquear la progresión con presupuestos bajos.
+- `conocer_gente` deja de ser diario; los niveles 2 y 3 son semanales.
+
+### 5.8 Edge Function `generate-plan`
+
+1. Verifica el JWT y aplica un límite diario (`AI_DAILY_LIMIT`, registrado en `ai_requests`).
+2. Valida las respuestas con Zod.
+3. **Ejecuta el motor de plan** (5.4) y obtiene los hábitos con duración, nivel, días y horario ya definidos.
+4. Envía a la IA, por medio de `AiProvider`, solo claves y parámetros (sin nombre ni correo) y pide JSON con textos: resumen del plan, título y descripción personalizados por hábito.
+5. Valida con Zod. Si falla, reintenta una vez; si vuelve a fallar o el proveedor responde con un error de cuota, usa los textos del catálogo.
+6. **Devuelve un borrador sin guardarlo.** Solo se escribe en `ai_requests`.
+
+**Guardado al confirmar.** La pantalla de revisión trabaja sobre el borrador (cambiar hora, bajar nivel, quitar). Al pulsar «Empezar», la app crea en SQLite `plans`, `habits`, `habit_schedules` y `user_settings`, con UUID del cliente, y los sincroniza (3.4). Si el usuario abandona la revisión, no queda nada guardado.
+
+**Sin conexión.** El formulario se puede llenar sin red (el avance se guarda en local), pero «Crear mi plan» requiere conexión. Sin red se muestra «Necesitas conexión para crear tu plan» con un botón «Reintentar».
+
+**Proveedor.** `AI_PROVIDER` (`gemini`, `claude` u `openai`) elige la implementación. Por defecto se usa Gemini con su nivel gratuito (Google AI Studio). Ese nivel tiene límites de uso y Google puede usar los datos enviados para mejorar sus productos: por eso solo se envían claves del formulario.
+
+### 5.9 Esquema de la respuesta de la IA (Zod)
+
+La IA no decide números, días ni horarios. El código los fusiona después.
+
+```ts
+const Objetivo = z.enum([
+  "mover_mas","dormir_mejor","comer_mejor","tomar_agua",
+  "organizar_dia","procrastinar_menos","aprender_algo",
+  "manejar_estres","desconectar_pantallas","tiempo_para_mi",
+  "saber_gastos","empezar_ahorrar","evitar_impulsivas",
+  "mantener_contacto","tiempo_de_calidad","conocer_gente",
+]);
+
+const TextoHabito = z.object({
+  objetivo: Objetivo,
+  titulo: z.string().min(3).max(60),
+  descripcion: z.string().max(200),
+});
+
+const RespuestaIA = z.object({
+  resumen: z.string().max(300),
+  habitos: z.array(TextoHabito).min(1).max(2),
+});
+```
+
+La validación también comprueba que la IA devuelva exactamente los objetivos pedidos. El plan final (`Plan`) es el resultado de combinar `RespuestaIA` con el motor.
+
+### 5.10 Seguridad y calidad de la IA
+
+- La clave de la API vive solo en los secretos de la Edge Function.
+- No se insertan textos libres del usuario en el prompt; solo claves de opción.
+- El prompt prohíbe consejos médicos, dietas extremas, de inversión, cantidades sensibles y mensajes con culpa.
+- Si una persona elige `manejar_estres` en Salud Mental, la pantalla de revisión puede mostrar una nota informativa para buscar apoyo profesional si el malestar es intenso, sin diagnósticos.
+- El borrador de los prompts de `generate-plan` y `adjust-plan` está en `docs/textos.md`.
+
+## 6. Lógica de negocio
+
+### 6.1 Recompensas (oculta al usuario)
+
+| Regla | Valor |
+| --- | --- |
+| XP por hábito completado | 2 |
+| XP por nivel | **4** (2 hábitos por nivel) |
+| Nivel máximo | 30 |
+| Fase 1 / 2 / 3 | Niveles 0–14 / 15–29 / 30 |
+| Hábitos para la fase 2 / 3 | 30 / 60 por planta |
+| Tope de XP | **1 hábito por planta al día** suma XP |
+| Monedas por hábito completado | 10 |
+| Tope de monedas | **5 hábitos al día** dan monedas (50 monedas máximo) |
+
+- Cada categoría tiene su planta. El XP va a la planta de la categoría del hábito.
+- Nivel = `min(30, floor(xp / 4))`. Fase = 1 si nivel ≤ 14, 2 si nivel ≤ 29, 3 si nivel = 30.
+- En nivel 30 la planta deja de acumular XP. Las monedas siguen.
+- El usuario nunca ve XP ni niveles; solo ve la planta, su cambio de fase y mensajes de celebración. El saldo de monedas sí es visible.
+- No hay penalización: nunca se resta XP ni monedas por no cumplir.
+- Un registro por hábito y fecha (restricción única en `habit_logs`). Deshacer el mismo día revierte lo que ese registro otorgó.
+- Los topes se cuentan por `fecha` del hábito en la zona horaria del usuario. Los hábitos que superan el tope se registran igual y cuentan para estadísticas y progresión; solo no suman XP o monedas.
+- **Mensaje del tope de monedas:** al completar un hábito cuando ya se otorgaron las monedas de 5 hábitos ese día, no aparece la animación de moneda y se muestra un mensaje suave: «¡Hoy ya ganaste todas tus monedas! Este hábito igual cuenta para tu progreso». El tope de XP no se comunica, porque el XP no es visible.
+
+**Ritmo esperado**
+
+| Perfil | Fase 2 | Fase 3 |
+| --- | --- | --- |
+| Típico (un hábito por planta, 5 días por semana, 70 % de cumplimiento ≈ 3.5 por semana) | ~2 meses | ~4 meses |
+| Constante (diario, 100 %) | ~1 mes | ~2 meses |
+
+La fase 2 del perfil típico coincide con la mediana de 66 días para automatizar un hábito (Lally y colaboradores, 2009).
+
+**RPC `complete_habit(habit_id, fecha)`:**
+
+1. Inserta el registro; si existe una fila marcada con `eliminado_en`, la reutiliza (3.4). Si ya existe activa, no hace nada.
+2. Si ningún otro registro de esa planta en esa fecha tiene `xp_otorgado` y el nivel es menor a 30, suma 2 XP a `plant_progress`, recalcula nivel y fase y marca `xp_otorgado`.
+3. Si el usuario tiene menos de 5 registros con `monedas_otorgadas` en esa fecha, suma 10 monedas, registra la transacción y marca `monedas_otorgadas`.
+4. Devuelve si hubo cambio de fase, para disparar la animación.
+
+**RPC `uncomplete_habit(habit_id, fecha)`:** la interfaz solo lo ofrece para hoy. El servidor acepta la misma tolerancia de 7 días que `complete_habit` (3.4), para que un «deshacer» hecho sin conexión cerca de la medianoche no se rechace.
+
+1. Marca el registro con `eliminado_en` (borrado suave, 3.4), quita sus marcas y revierte el XP y las monedas que tenía.
+2. Si revirtió XP y otro registro de la misma planta y fecha no lo tenía, le transfiere el XP. Lo mismo con monedas para el primer registro del día sin ellas.
+
+La app calcula lo mismo en local para respuesta inmediata y reconcilia al sincronizar. El servidor es la fuente de verdad. Las constantes viven en `app_config`, cacheadas en SQLite.
+
+### 6.2 Reprogramación de hábitos fallidos
+
+Reprogramar es **mover la ocurrencia a un día libre, fuera del patrón semanal del hábito**. El día original no cuenta como fallado.
+
+**Detección.** Al abrir la app se buscan ocurrencias programadas de los últimos 7 días (propuesta) que no tengan registro ni excepción en `habit_occurrences`. Aplica a los dos modos.
+
+**Día destino.** Es el primer día, de hoy a 7 días después, que cumple todo esto:
+
+1. No está en `dias_semana` del hábito.
+2. No tiene ya otra ocurrencia movida del mismo hábito.
+3. La suma de duraciones programadas ese día más la de este hábito no supera `presupuesto_min`.
+
+Si ningún día cumple, se ofrece descartarla («La dejamos para la próxima»).
+
+**Hábitos sin día libre.** Si el patrón del hábito ocupa los 7 días, no se reprograma: la ocurrencia se omite en silencio (sin mensaje) y cuenta como programada y no hecha.
+
+**Editar un horario con ocurrencias movidas.** Si el nuevo horario incluye la `fecha_nueva` de una ocurrencia movida pendiente, esa ocurrencia se marca `descartada`: el día ya tiene la ocurrencia normal del hábito.
+
+**Interacción.**
+
+- El usuario puede aceptar, elegir otro día libre o descartar. El mensaje es neutro: «Movimos este hábito a [día]. Puedes cambiarlo».
+- Con `desanimo`, se mueve automáticamente y solo se muestra un aviso suave.
+- Una ocurrencia movida que tampoco se completa no se vuelve a mover: queda `descartada` sin mensaje (propuesta).
+- La ocurrencia movida genera su aviso en la nueva fecha (ventana móvil, 7.1).
+
+**Efecto en estadísticas y progresión.**
+
+| Caso | Cuenta como programado | Cuenta como hecho |
+| --- | --- | --- |
+| Fecha original de una ocurrencia `movida` | No | No |
+| Fecha nueva de una ocurrencia `movida` | Sí | Si tiene registro |
+| Ocurrencia `descartada` | Sí | No |
+
+### 6.3 Progresión (sobrecarga progresiva)
+
+Solo aplica a los hábitos del plan (`objetivo` no nulo). Los hábitos manuales no suben ni bajan de nivel.
+
+**Cuándo se evalúa.** Al abrir la app, si pasaron 7 días o más desde `user_settings.ultima_evaluacion`. Se evalúa cada hábito del plan y se actualiza la fecha.
+
+**Cómo se mide.** Cumplimiento = hechos / programados (con las reglas de ocurrencias de 6.2) en una ventana de los **últimos 14 días**. Los hábitos con 1 o 2 días por semana usan una ventana de **28 días**. Si la ventana tiene menos de 4 ocurrencias programadas (por ejemplo, un hábito recién creado), no se evalúa ese hábito.
+
+| Cumplimiento en la ventana | Acción |
+| --- | --- |
+| ≥ 85 % | Subir un nivel del hábito (siguiente fila del catálogo) o proponer un hábito nuevo, incluso de otra área, sin pasar de `presupuesto_min` ni del límite de hábitos del plan. El usuario acepta o pospone. |
+| 50 % a 84 % | Mantener. |
+| < 50 % | Bajar un nivel, con mensaje de apoyo. En el nivel 1 se pasa a `duracion_reducida_min` (`usa_duracion_reducida`); si ya la usa, se mantiene y solo se muestra el mensaje de apoyo. |
+
+**Si el siguiente nivel no cabe en el presupuesto:** (1) mantener el nivel y proponer un hábito nuevo de nivel 1; (2) si tampoco cabe, sugerir subir el tiempo diario en Perfil con un mensaje sin presión.
+
+Al llegar al nivel 3 con ≥ 85 % se propone un hábito nuevo (por ejemplo, la revisión semanal de gastos después de `saber_gastos`).
+
+**Límite de hábitos del plan.**
+
+- Como máximo **4 hábitos activos del plan**. El formulario crea 1 o 2; la progresión puede proponer hasta completar 4.
+- **Desbloqueo:** a los 90 días desde `plans.creado_en`, si el cumplimiento de los hábitos del plan en los últimos 28 días es ≥ 85 %, se marca `limite_plan_desbloqueado`. Desde entonces solo limita `presupuesto_min`.
+- Los hábitos manuales no tienen límite y no cuentan para estos 4.
+
+La IA (`adjust-plan`) solo redacta textos cuando se agrega un hábito o se cambia de nivel; la decisión es código. Sin conexión, o si la IA falla, se usan los textos del catálogo. Al cambiar de nivel, el título personalizado se reemplaza por el del nuevo nivel. Los umbrales viven en `app_config`.
+
+### 6.4 Tienda y precios
+
+| Orden | Precio (monedas) |
+| --- | --- |
+| 1 | 30 |
+| 2 | 60 |
+| 3 | 100 |
+| 4 | 150 |
+| 5 | 250 |
+
+- Mismos precios para los 3 tipos (sombrero, lentes, maceta): 590 por tipo y 1,770 en total.
+- El usuario típico gana unas 70 monedas por semana: el primer accesorio llega en la primera semana y la colección completa en unos 6 meses.
+- Los precios viven en `app_config` y en `accessories.precio`.
+- Un accesorio comprado se equipa en una sola planta a la vez. Equiparlo en otra planta lo quita de la anterior. Cada planta lleva como máximo un sombrero, unos lentes y una maceta.
+- Los nombres de los 15 accesorios los define el usuario. Mientras tanto se usan los nombres provisionales de `docs/textos.md`.
+
+### 6.5 Modo tradicional
+
+Quien elige «Prefiero crear mis hábitos» no responde el formulario. Se crea `user_settings` con valores por defecto, todos editables en Perfil:
+
+| Ajuste | Valor por defecto |
+| --- | --- |
+| `presupuesto_min` | 20 |
+| `estilo_notificaciones` | `recordatorio_suave` |
+| `estrategias` | vacío |
+| Hora del recordatorio | La que el usuario elige al crear cada hábito |
+| `segundo_aviso` | Apagado |
+
+- Los hábitos manuales (`objetivo` nulo) **no entran en la progresión**: no suben ni bajan de nivel.
+- Sí aplican la reprogramación (6.2), las recompensas, los topes y las estadísticas.
+- **El presupuesto no limita la creación.** Si un hábito nuevo hace que la suma de un día supere `presupuesto_min`, se muestra un aviso suave y `presupuesto_min` sube a esa suma. La reprogramación usa el valor actualizado.
+- Al crear un hábito manual se piden: nombre, categoría (fija después de crearlo), duración, días, hora y si se quiere aviso.
+- Un usuario tradicional no puede hacer el formulario después (queda para v1.1).
+
+### 6.6 Mezcla de modos
+
+- Un usuario guiado puede crear hábitos manuales con las mismas reglas que en 6.5: sin progresión, sin contar para el límite de 4 hábitos del plan y con el aviso de presupuesto.
+- `profiles.modo` indica cómo empezó el usuario; no restringe qué tipo de hábitos puede tener.
+
+## 7. Notificaciones y ubicación
+
+### 7.1 Recordatorios por hora y día
+
+**Ventana móvil.** No se usan disparadores semanales repetitivos, porque no se pueden cancelar para un solo día (segundo aviso) y su texto es fijo (ánimo rotativo, resumen con los hábitos de mañana). En su lugar, `expo-notifications` programa **avisos con fecha concreta para los próximos 7 días** (propuesta), con el texto ya resuelto. Los textos están en `docs/textos.md`.
+
+| Tema | Regla |
+| --- | --- |
+| Cuándo se recalcula | Al abrir la app y al volver a primer plano. Al crear, editar, pausar o eliminar un hábito. Al completar o deshacer, lo que cancela el segundo aviso de ese día. Al cambiar ajustes y al reprogramar. |
+| Tope | iOS permite 64 notificaciones programadas por app. Aunque la demo sea en Android, se usa el mismo tope de 60 para no rehacerlo después. Si sobran, se ordenan por fecha y se recortan los días más lejanos. Los segundos avisos solo se programan para hoy y mañana. |
+| Sin abrir la app | El último aviso de la ventana (día 7) incluye una invitación suave a abrir la app para seguir recibiendo avisos. Opcional: refrescar en segundo plano con `expo-background-task` (no garantizado). |
+| Android | Canal propio. Verificar en la documentación del SDK si hacen falta alarmas exactas (`SCHEDULE_EXACT_ALARM`) para que la hora se respete. |
+
+- Estilos (pregunta 7):
+
+| Clave | Comportamiento |
+| --- | --- |
+| `resumen_nocturno` | Una notificación a las 21:00 con los hábitos de mañana. |
+| `recordatorio_suave` | Una notificación por hábito a su hora. |
+| `recordatorio_y_animo` | Notificación por hábito con mensaje de ánimo rotativo: al programar cada aviso se toma el siguiente mensaje de la lista, sin repetir dos días seguidos. |
+| `minimo` | Solo los hábitos con `habit_schedules.notificar` activado. Con este estilo, los hábitos nuevos se crean con `notificar` apagado y el usuario lo activa con el interruptor «Avisarme» en el detalle del hábito. |
+
+- La P6 ajusta estos estilos según la tabla de precedencia (5.6): la P7 decide cuántas notificaciones llegan.
+- Si el momento es flexible (`varia`): aviso a las 17:00 y segundo aviso a las 20:00 si no hay respuesta.
+- Si la fila del catálogo tiene `momento_fijo`, la hora sale de ese momento.
+- Canal de Android configurado. Los permisos se piden en contexto: en la pantalla de revisión del plan, con una explicación previa, no al abrir la app.
+- El contenido de las notificaciones es amable y sin culpa; nunca menciona fallos.
+- No existe una notificación matutina de reprogramación: la reprogramación se detecta al abrir la app y la ocurrencia movida recibe su aviso normal en la nueva fecha.
+- **Apoyo de las semanas 3 y 4** (`semanas_y_suelta`): un mensaje por semana dentro de la app (en Hoy). Si el estilo no es `minimo`, también una notificación el lunes de esas semanas, a la hora del momento de la P5.
+
+### 7.2 Recordatorios por ubicación (versión básica, última entrega)
+
+Es la entrega 10 y el primer recorte si falta tiempo (2.5).
+
+- `expo-location` con geofencing y `expo-task-manager`. Se ofrece desde el detalle de un hábito (no en el formulario). Los lugares se guardan en `habit_places`.
+- Hasta 3 lugares por hábito, radio de 100–200 m.
+- **Tope de regiones:** 20 activas en total, el límite de iOS, para no rehacerlo después. Si se supera, se priorizan los hábitos programados para hoy y, entre ellos, los creados más recientemente.
+- Al entrar a la región se dispara una notificación local, una vez al día por hábito y solo si el hábito está programado para hoy y no está hecho. La fecha del último aviso por hábito se guarda en SQLite, donde la tarea en segundo plano puede leerla.
+- Requiere development build, permiso de ubicación en segundo plano y los textos de permiso en `app.json`. Sin permiso, el hábito sigue con su recordatorio por hora.
+- La ubicación no se envía a la IA, no se sincroniza fuera de `habit_places` y no se usa para otros fines.
+
+## 8. Estadísticas
+
+| Vista | Métrica | Gráfica |
+| --- | --- | --- |
+| Semanal | Cumplimiento diario (hechos / programados) | Barras por día |
+| Mensual | Cumplimiento por semana y por categoría | Barras |
+| Anual | Cumplimiento por mes | Línea |
+
+- Cálculo desde SQLite para que funcionen sin conexión. Filtros por categoría y hábito.
+- Los hábitos que superan los topes de XP o monedas cuentan igual en las estadísticas.
+- Los hábitos archivados conservan su historial y siguen contando en los periodos pasados.
+- **Rachas por hábito:** número de ocurrencias programadas seguidas que se completaron. Los días no programados no la rompen. Una ocurrencia movida cuenta en su fecha nueva. Una ocurrencia descartada o no hecha la rompe. Se muestran la racha actual y la mejor racha. Al romperse, se destaca el mejor valor histórico con una invitación a retomar, nunca «perdiste tu racha». Con `desanimo`, solo se muestra la mejor racha.
+- Estilo: gráficas sobre tarjeta `bg-claro` con borde `ink`; barras en `accent-oscuro` (#B8493D, 3.7:1 sobre `bg-claro`), pista en `bg-oscuro`, etiquetas en `ink`. Cada gráfica incluye un resumen en texto («Cumpliste 5 de 7 hábitos esta semana») para lectores de pantalla.
+
+## 9. Diseño de pantallas y sistema visual
+
+**Los mockups (Figma) mandan sobre esta sección.** Cuando difieran, se actualiza esta sección para reflejarlos. Si un mockup rompe una regla de contraste de 9.6, se señala, pero gana el mockup. Los mockups cubren las pantallas principales; las secundarias y los estados vacío, de carga y de error se diseñan con las reglas de esta sección.
+
+### 9.1 Mapa de navegación
+
+| Zona | Pantallas |
+| --- | --- |
+| Auth | Bienvenida, registro, inicio de sesión, recuperación |
+| Onboarding | Elección de modo, formulario (7 pasos), generando plan, revisión del plan |
+| Pestañas (5) | Hoy, Hábitos, Estadísticas, Jardín, Perfil |
+| Otras | Crear/editar hábito, recordatorios, tienda, equipar accesorios, ajustes de notificaciones |
+
+La barra inferior tiene exactamente 5 ítems, el máximo recomendado por la guía.
+
+### 9.2 Tokens
+
+| Token | HEX | Uso |
+| --- | --- | --- |
+| `bg` (60%) | #C4D18B | Fondo de pantalla |
+| `bg-claro` | #D6E0A9 | Campos, paneles de plantas, tarjetas de gráficas, opciones no seleccionadas |
+| `bg-oscuro` | #A9B870 | Divisores, pistas de gráficas, botón deshabilitado |
+| `surface` (30%) | #C98B58 | Tarjetas, barra de navegación, encabezados de sección |
+| `surface-claro` | #DBA67D | Tarjeta presionada |
+| `surface-oscuro` | #A86F42 | Bordes de tarjeta, ítem activo, opción seleccionada |
+| `accent` (10%) | #D1665A | CTA, iconos destacados, indicador activo |
+| `accent-oscuro` | #B8493D | CTA presionado, borde de error, barras de gráfica |
+| `accent-claro` | #F0C3BC | Fondo de error |
+| `ink` | #2C1E18 | Todo el texto e iconos neutros |
+| `ink-soft` | #5A4034 | Texto de apoyo (solo sobre `bg`) |
+
+Tipografía (Nunito): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 18/700. Espaciado en múltiplos de 8; márgenes de 16 px; radios 8 (campos y botones), 16 (tarjetas), 999 (chips).
+
+### 9.3 Componentes (React Native)
+
+| Componente | Especificación |
+| --- | --- |
+| `Button` primario | Fondo `accent`, texto `ink` 18/700, borde 2 px `ink`, alto 48 px. Presionado: `accent-oscuro`. Deshabilitado: `bg-oscuro` con texto `ink-soft`. **Uno por pantalla.** |
+| `Button` secundario | Transparente, texto `ink`, borde 2 px `ink`. |
+| `Button` terciario | Texto `ink` subrayado, sin borde, área táctil mínima 44 px. |
+| `Card` | Fondo `surface`, borde 1 px `surface-oscuro`, radio 16, relleno 16–24, sombra suave. Presionada: `surface-claro`. |
+| `Field` | Fondo `bg-claro`, borde 2 px `ink`, radio 8, alto 48. Etiqueta siempre visible sobre el campo. Error: borde `accent-oscuro`, fondo `accent-claro`, icono y mensaje debajo. |
+| `OptionChip` (opciones del formulario) | Alto mínimo 48 px. No seleccionado: fondo `bg-claro`, borde 2 px `ink`. **Seleccionado: fondo `surface`, borde 2 px `ink`, icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
+| `ProgressSteps` | Texto «Paso 3 de 7» + barra de 8 px (pista `bg-oscuro`, relleno `ink`). |
+| `TabBar` | Fondo `surface`, texto e iconos `ink`. Activo: fondo `surface-oscuro`, indicador de 4 px `accent`, texto en negrita. |
+| `Alert` | Error `accent-claro`/`accent-oscuro`; advertencia #F4D9A8/#A86F42; éxito `bg-claro`/#5E6B2B; informativo #E8DCC8/`ink-soft`. Siempre icono + texto. |
+| `PlantPanel` | Panel `bg-claro` con borde 2 px `ink` y radio 16; la planta (PNG transparente) va centrada. |
+
+### 9.4 Pantallas clave
+
+**Bienvenida y elección de modo.** Dos tarjetas `surface`: «Quiero un plan para mí» (guiado) y «Prefiero crear mis hábitos» (tradicional). El único CTA coral es «Continuar», que se habilita al elegir una.
+
+**Formulario (7 pasos).** Una pregunta por pantalla. Arriba: `ProgressSteps`. Cuerpo: título H2, ayuda en texto pequeño (5.1) y opciones como `OptionChip` en lista vertical. Pie fijo: botón secundario «Atrás» y CTA «Siguiente» (en el paso 7, «Crear mi plan»). La pregunta 2 muestra las opciones agrupadas por área con encabezados H3.
+
+**Generando plan.** Estado de carga con animación sobria de una planta que crece y un texto («Estamos preparando tu plan»). Si tarda más de 10 s se muestra «Sigue en proceso» y, si falla, se muestra el plan de catálogo sin mostrar errores técnicos.
+
+**Revisión del plan.** Resumen en texto, una `Card` por hábito (título, duración, días, hora) con acciones «Cambiar hora», «Bajar nivel» y «Quitar». Si aplica la precedencia de 5.6, se muestra el interruptor «Segundo aviso». CTA: «Empezar». En este punto se pide el permiso de notificaciones con un texto previo que explica para qué sirve.
+
+**Hoy.** Fondo `bg`. Encabezado con saludo y saldo de monedas. Lista de hábitos de hoy como `Card`; cada una con botón de check de 48 × 48 px (icono de verificación + etiqueta «Hecho»). Los pendientes que se reprogramaron aparecen con un `Alert` informativo. Sin CTA coral grande: la acción principal es el check; el coral se limita a indicadores y badges para respetar el 10%.
+
+**Hábitos.** Lista agrupada por categoría con chips de filtro. Botón de agregar como CTA único de la pantalla.
+
+**Jardín.** Cinco `PlantPanel` (una por categoría) desde el primer día, con su fase actual y accesorios equipados; sin números de nivel ni barras de XP. Las plantas de áreas sin hábitos se ven en fase 1 con el texto «Crece cuando agregues un hábito de esta área». Botón «Tienda».
+
+**Tienda.** Cuadrícula de 15 accesorios en tarjetas `surface` con precio en monedas (6.4). Los accesorios sin saldo suficiente se muestran con texto «Te faltan N monedas» (no solo atenuados).
+
+**Estadísticas.** Selector segmentado Semana / Mes / Año (activo con icono y texto en negrita), gráfica sobre tarjeta `bg-claro` y resumen en texto.
+
+**Perfil.** Notificaciones (estilo, horas, segundo aviso), presupuesto diario, privacidad y cerrar sesión. «Eliminar cuenta» (con confirmación explícita) queda fuera de la demo y se agrega antes de publicar.
+
+### 9.5 Reglas de distribución 60-30-10
+
+1. Aproximadamente 60%: fondo `bg` y áreas amplias.
+2. Aproximadamente 30%: tarjetas, barra de navegación y encabezados en `surface`.
+3. Aproximadamente 10%: CTA, indicador activo, badges y alertas en `accent`.
+
+Si el coral supera el 10–12% de la pantalla, pierde su capacidad de guiar la mirada.
+
+### 9.6 Accesibilidad y contraste
+
+| Combinación | Ratio | Regla resultante |
+| --- | --- | --- |
+| `ink` sobre `bg` | 9.8:1 | Texto normal sin restricciones. |
+| `ink` sobre `surface` | 5.6:1 | Texto normal permitido. |
+| `ink` sobre `accent` | 4.4:1 | Solo 18 px o más en negrita (botones). |
+| `ink-soft` sobre `bg` | 5.8:1 | Permitido. |
+| `ink-soft` sobre `surface` | 3.3:1 | **No usar**; en tarjetas, texto de apoyo en `ink`. |
+| `accent` sobre `bg` | 2.2:1 | Botón con borde `ink` de 2 px. |
+| `accent` sobre `surface` | 1.3:1 | No poner coral directamente sobre tarjetas; usar fondo `bg-claro` o borde `ink`. |
+| `surface` sobre `bg` | 1.8:1 | Tarjetas con borde y sombra. |
+| `accent-oscuro` sobre `bg-claro` | 3.7:1 | Válido para barras de gráfica (≥ 3:1). |
+| Blanco sobre `accent` | 3.7:1 | No usar. |
+
+Reglas complementarias:
+
+- Áreas táctiles de 44 × 44 px o más; botones de 48 px.
+- Cada elemento interactivo tiene `accessibilityRole`, `accessibilityLabel` y `accessibilityState`.
+- Escalado de texto del sistema permitido hasta 1.3×; los diseños no usan alturas fijas para texto.
+- Movimiento: duraciones de 150–250 ms con ease-out; con `isReduceMotionEnabled` las animaciones de evolución y celebración se sustituyen por un cambio de imagen con fundido corto.
+- Ningún estado depende solo del color.
+- Solo tema claro; `userInterfaceStyle: light` en `app.json`.
+- Prueba con simulación de daltonismo (deuteranopía y protanopía), donde oliva y coral pueden acercarse.
+
+### 9.7 Lista de verificación de UX/UI (antes de entregar)
+
+- Todo el texto cumple 4.5:1 (3:1 si es grande y en negrita).
+- Una sola acción coral por pantalla.
+- Se respeta la proporción 60-30-10.
+- Sin hex sueltos: todo sale de tokens.
+- Foco y estados presionados visibles en todos los elementos interactivos.
+- Estados de carga, vacío y error en cada pantalla.
+- Prueba con lector de pantalla (VoiceOver y TalkBack) en el formulario y en «Hoy».
+- Prueba con texto del sistema al 130%.
+
+### 9.8 Arte de plantas y accesorios
+
+- Ruta: `assets/plants/{categoria}/fase{1-3}.png` y `assets/accessories/{tipo}/{n}.png`.
+- PNG con fondo transparente, lienzo cuadrado uniforme (por ejemplo 1024 × 1024) y contorno oscuro (#2C1E18), para que se distingan sobre el panel `bg-claro`.
+- Los accesorios usan el mismo lienzo para superponerse sin recalcular posiciones; si hace falta, se define un punto de anclaje por tipo.
+- Paleta de las plantas coordinada con la del sistema; evitar coral puro y verdes casi iguales a `bg`.
+
+## 10. Seguridad y privacidad
+
+- RLS en todas las tablas. Las RPC verifican `auth.uid()`.
+- Tokens de sesión en `expo-secure-store`.
+- Variables públicas en `EXPO_PUBLIC_*`. Secretos de IA solo en Supabase.
+- Política de privacidad y eliminación de cuenta dentro de la app (requisito de las tiendas); la eliminación borra los datos en cascada. Ninguna de las dos entra en la demo; se agregan antes de publicar.
+- Auth: confirmación de correo obligatoria y recuperación de contraseña con un enlace que abre la app (deep link).
+- El nivel gratuito de Gemini puede usar los datos enviados para mejorar los productos de Google; por eso al proveedor solo llegan claves del formulario. Antes de publicar, revisar si se cambia a un nivel de pago o a otro proveedor.
+- Las respuestas del formulario incluyen datos sensibles (salud, finanzas): se guardan solo como claves, no hay texto libre, y al proveedor de IA solo se envían claves y parámetros, sin nombre ni correo.
+
+## 11. Calidad, observabilidad y entrega
+
+| Área | Herramienta | Alcance en el MVP |
+| --- | --- | --- |
+| Estática | ESLint + Prettier + `tsc --noEmit` | Antes de cerrar cada entrega. |
+| Pruebas | Jest + React Native Testing Library | Motor de plan (cada combinación de P3, P4, P5, P6, P7, `momento_fijo`, `duracion_reducida_min`, variante sin recursos y el recorte por presupuesto), precedencia P7/P6, validación del formulario (límite de 2, objetivos filtrados por área), nivel y fase con 4 XP por nivel, topes diarios, progresión (incluido el bloqueo por presupuesto), reprogramación, esquemas Zod. Una prueba del flujo del formulario. |
+| Pruebas de base de datos | Casos SQL/RPC | `complete_habit`: idempotencia, tope nivel 30, tope de 1 XP por planta al día, tope de 5 monedas al día. `uncomplete_habit`: reversión y transferencia de XP y monedas. |
+| Accesibilidad | Revisión manual con TalkBack y la lista 9.7 | Entrega 9. |
+| Errores | Sentry | Fuera de la demo; se agrega antes de publicar. |
+| CI | GitHub Actions | Fuera de la demo. Lint, tipos y pruebas se corren a mano antes de cerrar cada entrega. |
+| Entrega | EAS Build | Perfiles `development` (Android, desde la entrega 3) y `preview` (APK de la demo). `production` y EAS Submit, antes de publicar. |
+
+### Definición de terminado (MVP)
+
+- El flujo completo funciona en Android (APK de preview): formulario → plan → hábitos → check-in → planta y monedas → estadísticas.
+- Funciona sin conexión para ver y completar hábitos, y sincroniza al reconectar.
+- Las notificaciones por hora y día llegan en un dispositivo Android físico.
+- Cumple la lista de verificación 9.7.
+- Sin errores críticos abiertos y pruebas de la lógica de negocio en verde.
+
+## 12. Escalabilidad hacia las tiendas
+
+- Categorías propias: `categories` ya admite `user_id`; falta definir qué planta se asigna.
+- Catálogo, accesorios y plantas administrables desde la base de datos.
+- Recompensas después de la fase 3 (por ejemplo, flores o accesorios exclusivos), ya que la planta deja de crecer.
+- Push remotos con `expo-notifications` y tokens en Supabase.
+- Cron de reprogramación y resúmenes en el servidor.
+- iOS: validar en un iPhone (requiere cuenta de Apple Developer para builds instalables).
+- Inicio de sesión con Apple y Google (Apple lo exige si se ofrece otro inicio social).
+- Sentry, GitHub Actions, Lottie, eliminar cuenta y política de privacidad (fuera de la demo).
+- Internacionalización: textos en `i18n/` desde ahora.
+- Modo oscuro: requeriría una segunda paleta con sus propios contrastes (la guía actual no la define).
+- Actualizaciones OTA con EAS Update.
+
+## 13. Preguntas abiertas
+
+**Resueltas en la v5**
+
+- Fase 3 justo en el nivel 30. `semanas_y_suelta` empieza en nivel 1. Horas por defecto 08:00, 13:00, 17:00, 20:30 y resumen a las 21:00. Los hábitos simultáneos descuentan del presupuesto.
+- Proveedor de IA: Gemini con nivel gratuito detrás de `AiProvider` (3.2, 5.8).
+- Cuenta obligatoria con confirmación de correo (10).
+- Progresión: ventana de 14 días (28 para hábitos de 1–2 días por semana), mínimo 4 ocurrencias, límite de 4 hábitos del plan con desbloqueo a los 90 días (6.3).
+- Rachas por hábito (8). Check-in solo hoy (3.4). Sin notificación matutina (7.1).
+- Onboarding sin conexión: se bloquea con mensaje (5.8). Mezcla de modos (6.6). Jardín con las 5 plantas (9.4). Accesorios en una planta a la vez (6.4).
+- Textos: Claude los redacta en `docs/textos.md` para revisión.
+
+**Resueltas antes (v3 y v4)**
+
+- Ritmo de la planta, días por semana del catálogo, precios, `tiempo_de_calidad`, precedencia P6/P7, reprogramación a un día libre, ventana móvil de notificaciones y modo tradicional.
+
+**Siguen abiertas**
+
+1. **Nombres de los 15 accesorios.** Los define el usuario; mientras tanto, nombres provisionales en `docs/textos.md`.
+2. **Catálogo semilla.** Validar los textos de 5.7 antes de la entrega 2.
+3. **Textos.** Revisar y aprobar el borrador de `docs/textos.md`.
+4. **Propuestas por validar.** Ventana de 7 días para notificaciones y reprogramación, tolerancia de 7 días en el servidor y descarte silencioso de una ocurrencia movida que tampoco se completa.
+5. **Pruebas SQL de las RPC (antes de la Entrega 4).** `supabase test db` (pgTAP) necesita Docker Desktop en Windows. Decidir entre instalar Docker o correr las pruebas contra un proyecto de Supabase de desarrollo, separado del de la demo.
