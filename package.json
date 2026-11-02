@@ -5,9 +5,11 @@
   "dependencies": {
     "@expo-google-fonts/lexend-deca": "^0.4.1",
     "@hookform/resolvers": "^6.0.2",
+    "@react-native-community/datetimepicker": "9.2.1",
     "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.21",
     "expo-constants": "~58.0.14",
+    "expo-crypto": "~58.0.7",
     "expo-font": "~58.0.11",
     "expo-image": "~58.0.18",
     "expo-linear-gradient": "~58.0.3",
@@ -58,7 +60,10 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "functions:sync": "node scripts/sync-shared.mjs",
+    "functions:serve": "npm run functions:sync && supabase functions serve",
+    "functions:deploy": "npm run functions:sync && supabase functions deploy generate-plan"
   },
   "jest": {
     "preset": "jest-expo",

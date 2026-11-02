@@ -148,7 +148,7 @@ AiProvider: Gemini (nivel gratuito, por defecto) | Claude | OpenAI
 | Navegación | Expo Router | Deep links y tipado simples. |
 | Backend | Supabase | Auth, Postgres, RLS y funciones en un solo servicio. |
 | Local | expo-sqlite | Funciona en Expo Go y permite estadísticas offline. |
-| Estado | Zustand + TanStack Query | Separa UI de datos remotos. Como la app lee de SQLite, TanStack Query se limita a llamadas que requieren red: `generate-plan`, `adjust-plan` y Auth. |
+| Estado | Zustand + TanStack Query | Separa UI de datos remotos. Como la app lee de SQLite, TanStack Query se limita a llamadas que requieren red: `generate-plan`, `adjust-plan` y Auth. En la Entrega 2 todavía no se instala: `generate-plan` es una sola llamada con estado local en la pantalla. Se agrega si lo justifican `adjust-plan` o la sincronización. |
 | Persistencia antes de SQLite | `zustand/persist` sobre el almacén clave-valor de `expo-sqlite` | En la Entrega 2 todavía no hay esquema local: el avance del formulario se guarda así y `app_config` se lee directo de Supabase. Desde la Entrega 3 pasa a SQLite. |
 | Iconos | `lucide-react-native` | Iconos de línea con trazo de 2 px y tamaño 24, como pide la guía. Verificar compatibilidad con el SDK antes de instalar. |
 | Gráficas | react-native-gifted-charts | Más simple que Victory Native (requiere Skia). |
@@ -187,7 +187,7 @@ supabase/
 assets/ plants/ accessories/ icons/ animations/
 ```
 
-**Código compartido con las Edge Functions (propuesta).** El motor de plan, el catálogo de claves y los esquemas Zod se escriben en TypeScript sin dependencias de React Native, en `src/features/plan/domain` y `src/schemas`. Las Edge Functions los importan por ruta relativa desde `supabase/functions/_shared` mediante un script que los copia antes de `supabase functions deploy`. Hay una sola fuente de verdad: la copia no se edita a mano. Las Edge Functions corren en Deno, así que `supabase/functions/deno.json` define un import map (`"zod": "npm:zod@<misma versión que la app>"`) para que el código copiado funcione sin reescribir sus imports. El código compartido no importa nada de React Native ni de Expo.
+**Código compartido con las Edge Functions.** El motor de plan (`src/features/plan/domain/plan-engine.ts`) y los esquemas Zod (`src/schemas/onboarding.ts` y `src/schemas/plan.ts`) se escriben en TypeScript sin dependencias de React Native ni de Expo, con imports relativos. `scripts/sync-shared.mjs` (`npm run functions:sync`) los copia a `supabase/functions/_shared/generated/` y reescribe los imports relativos con la extensión `.ts`, que Deno exige. Los scripts `functions:serve` y `functions:deploy` hacen la copia antes de servir o publicar. La copia no se edita a mano y no se sube al repositorio (`supabase/.gitignore`). Hay una sola fuente de verdad. Cada función tiene su `deno.json` con el import map (`"zod": "npm:zod@<misma versión que la app>"`), como recomienda Supabase.
 
 ### 3.4 Sincronización (offline completo)
 
@@ -396,14 +396,14 @@ Notas:
 
 ### 5.8 Edge Function `generate-plan`
 
-1. Verifica el JWT y aplica un límite diario (`AI_DAILY_LIMIT`, registrado en `ai_requests`).
+1. Verifica el JWT y aplica un límite diario (`AI_DAILY_LIMIT`, registrado en `ai_requests`). Cuenta las llamadas a la IA de las últimas 24 h (estados `ok`, `error` y `cuota`). Al llegar al límite no se bloquea al usuario: se usa el plan de catálogo (estado `limite`). Sin secretos de IA, el estado es `sin_proveedor`.
 2. Valida las respuestas con Zod.
 3. **Ejecuta el motor de plan** (5.4) y obtiene los hábitos con duración, nivel, días y horario ya definidos.
 4. Envía a la IA, por medio de `AiProvider`, solo claves y parámetros (sin nombre ni correo) y pide JSON con textos: resumen del plan, título y descripción personalizados por hábito.
 5. Valida con Zod. Si falla, reintenta una vez; si vuelve a fallar o el proveedor responde con un error de cuota, usa los textos del catálogo.
 6. **Devuelve un borrador sin guardarlo.** Solo se escribe en `ai_requests`.
 
-**Guardado al confirmar.** La pantalla de revisión trabaja sobre el borrador (cambiar hora, bajar nivel, quitar). Al pulsar «Empezar», la app crea en SQLite `plans`, `habits`, `habit_schedules` y `user_settings`, con UUID del cliente, y los sincroniza (3.4). Si el usuario abandona la revisión, no queda nada guardado.
+**Guardado al confirmar.** La pantalla de revisión trabaja sobre el borrador (cambiar hora, bajar nivel, quitar). Para «Bajar nivel», el borrador trae las versiones de los niveles inferiores de cada hábito (`alternativas`, con textos del catálogo). Al bajar de nivel se conserva la hora elegida. El plan conserva al menos un hábito, así que «Quitar» no aparece en el último. En la demo, «Empezar» guarda directo en Supabase con upserts y UUID del cliente, así que reintentar no duplica filas. Desde la Entrega 3 pasa a SQLite. Al pulsar «Empezar», la app crea en SQLite `plans`, `habits`, `habit_schedules` y `user_settings`, con UUID del cliente, y los sincroniza (3.4). Si el usuario abandona la revisión, no queda nada guardado.
 
 **Sin conexión.** El formulario se puede llenar sin red (el avance se guarda en local), pero «Crear mi plan» requiere conexión. Sin red se muestra «Necesitas conexión para crear tu plan» con un botón «Reintentar».
 

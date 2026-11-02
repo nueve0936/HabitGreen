@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { OptionChip } from '@/components/ui/option-chip';
 import { Screen } from '@/components/ui/screen';
 import type { AppMode } from '@/db/profile-repository';
+import { guardarAjustesTradicionales } from '@/db/settings-repository';
 import { useSession } from '@/features/auth/session-context';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { es } from '@/i18n/es';
 
-// Elección de modo (SDD 9.4). El modo tradicional se guarda aquí y el layout raíz lleva a las
-// pestañas. El guiado pasa primero por el formulario; su modo se guarda al confirmar el plan.
+// Elección de modo (SDD 9.4). El modo tradicional se guarda aquí, con sus ajustes por defecto, y
+// el layout raíz lleva a las pestañas. El guiado pasa primero por el formulario; su modo se guarda
+// al confirmar el plan.
 
 export default function ModoScreen() {
   const t = es.onboarding.modo;
@@ -32,9 +34,12 @@ export default function ModoScreen() {
       router.push({ pathname: '/formulario/[paso]', params: { paso: '1' } });
       return;
     }
+    if (session === null) return;
     setSaving(true);
     setError(false);
     try {
+      // Primero los ajustes por defecto (SDD 6.5); el modo se guarda al final porque cambia de zona.
+      await guardarAjustesTradicionales(session.user.id);
       await chooseMode(mode);
     } catch {
       setError(true);

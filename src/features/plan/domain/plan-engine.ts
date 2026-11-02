@@ -1,21 +1,26 @@
 import {
   areaDeObjetivo,
-  type Acompanamiento,
   type Area,
   type Historial,
   type MomentoConHora,
   type Objetivo,
-  type Obstaculo,
   type Respuestas,
   type Tiempo,
 } from '../../../schemas/onboarding';
+import type {
+  AjustesPlan,
+  BorradorPlan,
+  HabitoPlan,
+  Nivel,
+  RespuestaIa,
+} from '../../../schemas/plan';
 
 // Motor del plan (SDD 5.4–5.6): convierte las respuestas del formulario en hábitos con nivel,
 // duración, días y hora. Es determinista: los números salen de aquí y del catálogo semilla; la IA
 // solo cambia textos después. Se comparte con la Edge Function generate-plan, así que usa imports
 // relativos y no depende de React Native.
 
-export type Nivel = 1 | 2 | 3;
+export type { AjustesPlan, HabitoPlan, Nivel };
 
 /** Una fila de `habit_catalog`. */
 export type FilaCatalogo = {
@@ -37,29 +42,6 @@ export type ConfigPlan = {
   presupuestos: Record<Tiempo, number>;
   /** Hora "HH:MM" de cada momento (`horas_por_momento`). */
   horas: Record<MomentoConHora, string>;
-};
-
-export type HabitoPlan = {
-  objetivo: Objetivo;
-  categoria: Area;
-  nivel: Nivel;
-  variante: FilaCatalogo['variante'];
-  titulo: string;
-  descripcion: string | null;
-  duracion_min: number;
-  usa_duracion_reducida: boolean;
-  dias_semana: number[];
-  /** "HH:MM", o null si el recordatorio es flexible (momento `varia`). */
-  hora: string | null;
-  flexible: boolean;
-  notificar: boolean;
-};
-
-export type AjustesPlan = {
-  presupuesto_min: number;
-  estilo_notificaciones: Acompanamiento;
-  estrategias: Obstaculo[];
-  segundo_aviso: boolean;
 };
 
 export type PlanMotor = {
@@ -103,6 +85,37 @@ export function usaSegundoAviso(r: Respuestas): boolean {
   );
 }
 
+/** Hábito de un objetivo en un nivel concreto, con las reglas de la P5, la P6 y la P7. */
+export function habitoParaNivel(
+  respuestas: Respuestas,
+  catalogo: readonly FilaCatalogo[],
+  config: ConfigPlan,
+  objetivo: Objetivo,
+  nivel: Nivel,
+): HabitoPlan {
+  const reducida = respuestas.obstaculo === 'poco_tiempo';
+  const fila = elegirFilaCatalogo(catalogo, objetivo, nivel, respuestas.obstaculo === 'recursos');
+
+  // El momento fijo del catálogo gana sobre la P5; sin ninguno de los dos, el aviso es flexible.
+  const momento = fila.momento_fijo ?? (respuestas.momento === 'varia' ? null : respuestas.momento);
+
+  return {
+    objetivo,
+    categoria: areaDeObjetivo(objetivo),
+    nivel,
+    variante: fila.variante,
+    titulo: fila.titulo,
+    descripcion: fila.descripcion,
+    duracion_min: reducida ? fila.duracion_reducida_min : fila.duracion_min,
+    usa_duracion_reducida: reducida,
+    dias_semana: [...fila.dias_semana],
+    hora: momento === null ? null : config.horas[momento],
+    flexible: momento === null,
+    // Con el estilo `minimo` solo avisan los hábitos que el usuario marque (SDD 7.1).
+    notificar: respuestas.acompanamiento !== 'minimo',
+  };
+}
+
 export function generarPlan(
   respuestas: Respuestas,
   catalogo: readonly FilaCatalogo[],
@@ -110,38 +123,17 @@ export function generarPlan(
 ): PlanMotor {
   const presupuesto = config.presupuestos[respuestas.tiempo];
   const maxPorHabito = presupuesto / respuestas.objetivos.length;
-  const reducida = respuestas.obstaculo === 'poco_tiempo';
-  const soloSinRecursos = respuestas.obstaculo === 'recursos';
 
   const habitos = respuestas.objetivos.map((objetivo): HabitoPlan => {
     // Se empieza en el nivel inicial y se baja mientras la duración no quepa. El nivel 1 dura
     // 5 minutos o menos, así que siempre cabe (SDD 5.4, regla 2).
     let nivel = nivelInicial(respuestas.historial);
-    let fila = elegirFilaCatalogo(catalogo, objetivo, nivel, soloSinRecursos);
-    while (nivel > 1 && duracion(fila, reducida) > maxPorHabito) {
+    let habito = habitoParaNivel(respuestas, catalogo, config, objetivo, nivel);
+    while (nivel > 1 && habito.duracion_min > maxPorHabito) {
       nivel = (nivel - 1) as Nivel;
-      fila = elegirFilaCatalogo(catalogo, objetivo, nivel, soloSinRecursos);
+      habito = habitoParaNivel(respuestas, catalogo, config, objetivo, nivel);
     }
-
-    // El momento fijo del catálogo gana sobre la P5; sin ninguno de los dos, el aviso es flexible.
-    const momento =
-      fila.momento_fijo ?? (respuestas.momento === 'varia' ? null : respuestas.momento);
-
-    return {
-      objetivo,
-      categoria: areaDeObjetivo(objetivo),
-      nivel,
-      variante: fila.variante,
-      titulo: fila.titulo,
-      descripcion: fila.descripcion,
-      duracion_min: duracion(fila, reducida),
-      usa_duracion_reducida: reducida,
-      dias_semana: [...fila.dias_semana],
-      hora: momento === null ? null : config.horas[momento],
-      flexible: momento === null,
-      // Con el estilo `minimo` solo avisan los hábitos que el usuario marque (SDD 7.1).
-      notificar: respuestas.acompanamiento !== 'minimo',
-    };
+    return habito;
   });
 
   return {
@@ -155,6 +147,42 @@ export function generarPlan(
   };
 }
 
-function duracion(fila: FilaCatalogo, reducida: boolean): number {
-  return reducida ? fila.duracion_reducida_min : fila.duracion_min;
+/** Versiones de los niveles más bajos de cada hábito, para «Bajar nivel» en la revisión. */
+export function alternativasDeNivel(
+  respuestas: Respuestas,
+  catalogo: readonly FilaCatalogo[],
+  config: ConfigPlan,
+  habitos: readonly HabitoPlan[],
+): BorradorPlan['alternativas'] {
+  const alternativas: BorradorPlan['alternativas'] = {};
+  for (const habito of habitos) {
+    const niveles = ([1, 2, 3] as const).filter((n) => n < habito.nivel);
+    alternativas[habito.objetivo] = niveles.map((n) =>
+      habitoParaNivel(respuestas, catalogo, config, habito.objetivo, n),
+    );
+  }
+  return alternativas;
+}
+
+/** Mensaje para la IA (docs/textos.md 8): solo claves y números, nunca datos personales. */
+export function mensajeParaIa(respuestas: Respuestas, habitos: readonly HabitoPlan[]): string {
+  return JSON.stringify({
+    historial: respuestas.historial,
+    obstaculo: respuestas.obstaculo,
+    habitos: habitos.map((h) => ({
+      objetivo: h.objetivo,
+      nivel: h.nivel,
+      titulo_base: h.titulo,
+      duracion_min: h.duracion_min,
+      dias_semana: h.dias_semana,
+    })),
+  });
+}
+
+/** Cambia solo el título y la descripción de cada hábito por los de la IA. */
+export function aplicarTextosIa(habitos: readonly HabitoPlan[], textos: RespuestaIa): HabitoPlan[] {
+  return habitos.map((h) => {
+    const texto = textos.habitos.find((t) => t.objetivo === h.objetivo);
+    return texto ? { ...h, titulo: texto.titulo, descripcion: texto.descripcion } : h;
+  });
 }

@@ -202,10 +202,31 @@ export const es = {
         minimo: 'Lo mínimo, prefiero llevarlo yo',
       },
     },
-    plan: {
+    generando: {
+      preparando: 'Estamos preparando tu plan…',
+      lento: 'Sigue en proceso…',
+      sinConexion: 'Necesitas conexión para crear tu plan.',
+      error: 'No pudimos preparar tu plan. Inténtalo de nuevo.',
+      reintentar: 'Reintentar',
+      ilustracion: 'Planta creciendo',
+    },
+    revision: {
       titulo: 'Tu plan',
-      proximamente:
-        'Tus respuestas quedaron guardadas. En la siguiente parte de la entrega aquí se generará tu plan.',
+      resumenCatalogo:
+        'Empezamos con poco para que sea fácil de sostener. Cuando estos hábitos ya sean parte de tu día, sumamos más.',
+      minutos: '{n} min',
+      todosLosDias: 'Todos los días',
+      dias: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+      flexible: 'Entre {inicio} y {fin}',
+      cambiarHora: 'Cambiar hora',
+      bajarNivel: 'Bajar nivel',
+      quitar: 'Quitar',
+      segundoAviso: 'Segundo aviso',
+      segundoAvisoAyuda: 'Si todavía no lo marcas, te avisamos otra vez 2 horas después.',
+      apoyoProfesional:
+        'Estos hábitos ayudan a sentirte mejor día a día. Si el malestar es intenso o no mejora, hablar con un profesional de la salud puede ayudarte.',
+      empezar: 'Empezar',
+      errorGuardar: 'No pudimos guardar tu plan. Revisa tu conexión e inténtalo de nuevo.',
     },
   },
   tabs: {

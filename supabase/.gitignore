@@ -6,3 +6,7 @@
 .env.keys
 .env.local
 .env.*.local
+
+# Edge Functions: secretos locales y código copiado desde src/ (scripts/sync-shared.mjs)
+functions/.env
+functions/_shared/generated/

@@ -56,6 +56,7 @@ export async function getProfile(userId: string): Promise<Profile> {
   return toProfile(created);
 }
 
+/** Guarda el modo y cierra la bienvenida: es el último paso del onboarding en los dos modos. */
 export async function saveMode(
   userId: string,
   modo: AppMode,
@@ -63,7 +64,7 @@ export async function saveMode(
 ): Promise<Profile> {
   const { data, error } = await supabase
     .from('profiles')
-    .update({ modo, zona_horaria: zonaHoraria })
+    .update({ modo, zona_horaria: zonaHoraria, onboarding_completo: true })
     .eq('id', userId)
     .select(COLUMNS)
     .single<ProfileRow>();

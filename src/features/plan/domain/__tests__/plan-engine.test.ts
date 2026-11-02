@@ -1,8 +1,11 @@
 import type { Respuestas } from '@/schemas/onboarding';
 
 import {
+  alternativasDeNivel,
+  aplicarTextosIa,
   elegirFilaCatalogo,
   generarPlan,
+  mensajeParaIa,
   type ConfigPlan,
   type FilaCatalogo,
 } from '../plan-engine';
@@ -222,5 +225,63 @@ describe('elegirFilaCatalogo', () => {
 
   it('si la base ya es sin recursos, la usa', () => {
     expect(elegirFilaCatalogo(CATALOGO, 'mover_mas', 1, true).variante).toBe('base');
+  });
+});
+
+describe('alternativasDeNivel', () => {
+  it('trae los niveles más bajos de cada hábito para «Bajar nivel»', () => {
+    const r = { ...BASE, historial: 'mantiene' as const, tiempo: '20_40' as const };
+    const { habitos } = generarPlan(r, CATALOGO, CONFIG);
+    const alternativas = alternativasDeNivel(r, CATALOGO, CONFIG, habitos);
+    expect(alternativas.mover_mas?.map((h) => [h.nivel, h.titulo])).toEqual([[1, 'Caminar 5 min']]);
+    expect(alternativas.mover_mas?.[0]?.hora).toBe('08:00');
+  });
+
+  it('un hábito de nivel 1 no tiene alternativas', () => {
+    const { habitos } = plan({});
+    expect(alternativasDeNivel(BASE, CATALOGO, CONFIG, habitos).mover_mas).toEqual([]);
+  });
+});
+
+describe('textos de la IA', () => {
+  it('el mensaje solo lleva claves y números, sin datos personales', () => {
+    const { habitos } = plan({});
+    expect(JSON.parse(mensajeParaIa(BASE, habitos))).toEqual({
+      historial: 'primera_vez',
+      obstaculo: 'motivacion',
+      habitos: [
+        {
+          objetivo: 'mover_mas',
+          nivel: 1,
+          titulo_base: 'Caminar 5 min',
+          duracion_min: 5,
+          dias_semana: [1, 2, 4, 6],
+        },
+        {
+          objetivo: 'tiempo_de_calidad',
+          nivel: 1,
+          titulo_base: '5 min de atención plena con alguien',
+          duracion_min: 5,
+          dias_semana: [1, 3, 5],
+        },
+      ],
+    });
+  });
+
+  it('cambia solo títulos y descripciones; los números siguen siendo del motor', () => {
+    const { habitos } = plan({});
+    const conTextos = aplicarTextosIa(habitos, {
+      resumen: 'Empezamos ligero.',
+      habitos: [
+        { objetivo: 'mover_mas', titulo: 'Caminar 5 min al salir', descripcion: 'Sin prisa.' },
+        { objetivo: 'tiempo_de_calidad', titulo: 'Charlar 5 min', descripcion: 'Con calma.' },
+      ],
+    });
+    expect(conTextos[0]).toEqual({
+      ...habitos[0],
+      titulo: 'Caminar 5 min al salir',
+      descripcion: 'Sin prisa.',
+    });
+    expect(conTextos[1]?.duracion_min).toBe(habitos[1]?.duracion_min);
   });
 });

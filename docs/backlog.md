@@ -20,7 +20,7 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | Auth de Supabase: URLs de redirección (`habitgreen://**`, `exp://**`), Site URL `habitgreen://`, SMTP propio con Gmail (necesario para editar plantillas) y plantilla de recuperación con código. Antes de publicar: SMTP con dominio propio (Resend o similar) | Entrega 1 | listo |
 | Pruebas SQL: Docker Desktop con `npx supabase db start` (ya funciona en tu equipo) | Entrega 4 | listo |
 | Enlace de Figma con permiso de lectura (MCP de Figma conectado) | Entrega 1 (componentes base) | listo |
-| Clave de Google AI Studio (gratuita), guardada como secreto de Supabase | Entrega 2 | en curso (clave creada) |
+| Clave de Google AI Studio (gratuita), guardada como secreto de Supabase (`AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_DAILY_LIMIT`) | Entrega 2 | listo |
 | Cuenta de Expo (EAS) | Entrega 3 | pendiente |
 | Teléfono Android físico con Expo Go | Entrega 1 | listo |
 | Arte: 5 plantas × 3 fases y 15 accesorios en el mismo lienzo cuadrado (PNG transparente) | Entrega 4 (se puede avanzar con placeholders) | pendiente |
@@ -43,13 +43,13 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
 | 2.1 | Esquemas Zod del formulario, claves y textos en `i18n/es.ts` | 5.1–5.3 | hecho |
-| 2.2 | Formulario de 7 pasos con Zustand (sin React Hook Form: son solo opciones, no campos de texto); P2 filtrada por área; límite de 2 con mensaje; avance guardado | 5.1–5.3 | en curso (falta tu prueba en el teléfono) |
+| 2.2 | Formulario de 7 pasos con Zustand (sin React Hook Form: son solo opciones, no campos de texto); P2 filtrada por área; límite de 2 con mensaje; avance guardado | 5.1–5.3 | hecho |
 | 2.3 | Motor de plan (funciones puras) con pruebas de Jest | 5.4–5.6 | hecho |
-| 2.4 | Código compartido con las Edge Functions (script de copia a `supabase/functions/_shared`) | 3.3 | pendiente |
-| 2.5 | `AiProvider` con implementación de Gemini; `generate-plan` que devuelve un borrador; respaldo con textos del catálogo | 5.8–5.10 | pendiente |
-| 2.6 | Pantallas «Generando plan» y «Revisión del plan» (cambiar hora, bajar nivel, quitar, segundo aviso); bloqueo sin conexión | 5.8, 9.4 | pendiente |
-| 2.7 | «Empezar»: guardar plan, hábitos, horarios y `user_settings` (por ahora directo en Supabase; pasa a SQLite en la entrega 3) | 5.8 | pendiente |
-| 2.8 | Modo tradicional: `user_settings` por defecto al elegirlo | 6.5 | pendiente |
+| 2.4 | Código compartido con las Edge Functions (`npm run functions:sync` copia a `supabase/functions/_shared/generated`) | 3.3 | en curso (falta tu prueba en el teléfono) |
+| 2.5 | `AiProvider` con implementación de Gemini; `generate-plan` que devuelve un borrador; respaldo con textos del catálogo | 5.8–5.10 | en curso (falta tu prueba en el teléfono) |
+| 2.6 | Pantallas «Generando plan» y «Revisión del plan» (cambiar hora, bajar nivel, quitar, segundo aviso); bloqueo sin conexión | 5.8, 9.4 | en curso (falta tu prueba en el teléfono) |
+| 2.7 | «Empezar»: guardar plan, hábitos, horarios y `user_settings` (por ahora directo en Supabase; pasa a SQLite en la entrega 3) | 5.8 | en curso (falta tu prueba en el teléfono) |
+| 2.8 | Modo tradicional: `user_settings` por defecto al elegirlo | 6.5 | en curso (falta tu prueba en el teléfono) |
 
 **Criterio de prueba:** respondes el formulario (probando volver y el límite de 2), ves un plan con textos personalizados por la IA y lo confirmas. En Supabase aparecen tus hábitos. Con el modo avión, «Crear mi plan» muestra el mensaje de conexión.
 
