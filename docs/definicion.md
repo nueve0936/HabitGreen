@@ -58,7 +58,7 @@ Público: personas de 22 a 45 años, incluidas quienes les cuesta empezar o sost
 |---|---|
 | App | Expo (SDK actual) + React Native + TypeScript estricto |
 | Navegación | Expo Router |
-| UI | NativeWind (tokens en `tailwind.config.js`), Reanimated, `expo-font` con Nunito |
+| UI | NativeWind 4 (tokens en `src/theme/tokens.js`), Reanimated, Lexend Deca con `@expo-google-fonts/lexend-deca` |
 | Estado | Zustand (UI y formulario), TanStack Query (servidor) |
 | Local / offline | expo-sqlite (datos y cola de sincronización) |
 | Formularios | React Hook Form + Zod |
@@ -265,7 +265,7 @@ Alertas: advertencia `#F4D9A8` / borde `#A86F42`; éxito `#D6E0A9` / borde `#5E6
 - `ink-soft` sobre `surface` da unos 3.3:1 y no cumple: sobre tarjetas terracota el texto de apoyo también va en `ink`.
 - El coral sobre `surface` da unos 1.3:1: un icono o botón coral dentro de una tarjeta necesita fondo `bg-claro` o borde `ink`.
 - No comunicar estados solo con color: siempre icono y texto (una opción seleccionada lleva icono de verificación).
-- Tipografía Nunito (respaldo: sistema). H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 16–18/600. Escalado de texto del sistema permitido hasta 1.3×.
+- Tipografía Lexend Deca, como en los mockups (respaldo: sistema). H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 16–18/600. Escalado de texto del sistema permitido hasta 1.3×.
 - Espaciado en múltiplos de 8 (4, 8, 16, 24, 32, 48, 64). Márgenes de pantalla de 16 px. Radios: 8 campos y botones, 16 tarjetas, 999 chips.
 - Áreas táctiles de 44 × 44 px o más; botones de 48 px de alto.
 - Móvil primero: no hay hover; el estado equivalente es «presionado». Estados de foco para lectores de pantalla y teclado externo con anillo de 3 px en `ink`.
@@ -292,7 +292,7 @@ Alertas: advertencia `#F4D9A8` / borde `#A86F42`; éxito `#D6E0A9` / borde `#5E6
 - Tokens de sesión en `expo-secure-store`.
 - Variables públicas en `EXPO_PUBLIC_*`; secretos solo en Supabase.
 - Eliminación de cuenta dentro de la app y política de privacidad (requisitos de las tiendas): antes de publicar, no en la demo.
-- Auth con confirmación de correo y recuperación de contraseña por deep link.
+- Auth con confirmación de correo y recuperación de contraseña con un código enviado por correo.
 - La zona horaria del perfil se actualiza desde el dispositivo al abrir la app.
 - La ubicación solo se usa para recordatorios y no se comparte.
 - Recopilar lo mínimo; no hay texto libre del usuario en el MVP.

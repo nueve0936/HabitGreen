@@ -14,37 +14,37 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | Necesario | Para | Estado |
 | --- | --- | --- |
 | Proyecto en Supabase | Entrega 1 | listo |
-| Remoto de GitHub conectado al repo local y rama renombrada a `main` | Entrega 1 | pendiente |
-| `.env` local con las claves públicas de Supabase (copiar `.env.example`) | Entrega 1 | pendiente |
-| Supabase CLI instalada y vinculada (`supabase link`) | Entrega 1 | pendiente |
-| Auth de Supabase: URLs de redirección (`habitgreen://`, `exp://`) y SMTP propio (por ejemplo, Resend) | Entrega 1 | pendiente |
-| Decidir cómo correr las pruebas SQL: Docker Desktop o proyecto de Supabase de desarrollo (SDD 13) | Entrega 4 | pendiente |
-| Enlace de Figma con permiso de lectura (o PNG exportados en `docs/mockups/`) | Entrega 1 (componentes base) | pendiente |
-| Clave de Google AI Studio (gratuita) | Entrega 2 | pendiente |
+| Remoto de GitHub conectado al repo local (rama `master`) | Entrega 1 | listo |
+| `.env` local con las claves públicas de Supabase (copiar `.env.example`) | Entrega 1 | listo |
+| Supabase CLI (`npx supabase`, ya en el proyecto) con sesión iniciada y vinculada (`supabase link`) | Entrega 1 | listo |
+| Auth de Supabase: URLs de redirección (`habitgreen://**`, `exp://**`), Site URL `habitgreen://`, SMTP propio con Gmail (necesario para editar plantillas) y plantilla de recuperación con código. Antes de publicar: SMTP con dominio propio (Resend o similar) | Entrega 1 | listo |
+| Pruebas SQL: Docker Desktop con `npx supabase db start` (ya funciona en tu equipo) | Entrega 4 | listo |
+| Enlace de Figma con permiso de lectura (MCP de Figma conectado) | Entrega 1 (componentes base) | listo |
+| Clave de Google AI Studio (gratuita), guardada como secreto de Supabase | Entrega 2 | en curso (clave creada) |
 | Cuenta de Expo (EAS) | Entrega 3 | pendiente |
-| Teléfono Android físico con Expo Go | Entrega 1 | pendiente |
+| Teléfono Android físico con Expo Go | Entrega 1 | listo |
 | Arte: 5 plantas × 3 fases y 15 accesorios en el mismo lienzo cuadrado (PNG transparente) | Entrega 4 (se puede avanzar con placeholders) | pendiente |
 
 ## Entrega 1: Base (días 1–3, ~10 h)
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 1.1 | Expo Router con rutas en `src/app/`, TypeScript estricto, ESLint, Prettier y scripts `lint`, `typecheck`, `test` | 3.3 | pendiente |
-| 1.2 | NativeWind con los tokens, Nunito con `expo-font`, `src/theme` | 9.2 | pendiente |
-| 1.3 | Supabase: migraciones del esquema completo, RLS, semilla de categorías, catálogo, accesorios y `app_config` | 4, 5.7 | pendiente |
-| 1.4 | Auth: registro, confirmación de correo, inicio de sesión, recuperación con deep link, sesión en `expo-secure-store` | 10 | pendiente |
-| 1.5 | Componentes base a partir de los mockups: `Button`, `Card`, `Field`, `OptionChip`, `ProgressSteps`, `Alert`, `TabBar` | 9.3 | pendiente |
-| 1.6 | Navegación: pestañas vacías (Hoy, Hábitos, Estadísticas, Jardín, Perfil) y elección de modo | 9.1, 9.4 | pendiente |
+| 1.1 | Expo Router con rutas en `src/app/`, TypeScript estricto, ESLint, Prettier y scripts `lint`, `typecheck`, `test` | 3.3 | hecho |
+| 1.2 | NativeWind con los tokens, Lexend Deca, `src/theme` | 9.2 | hecho |
+| 1.3 | Supabase: migraciones del esquema completo, RLS, semilla de categorías, catálogo, accesorios y `app_config` | 4, 5.7 | hecho |
+| 1.4 | Auth: registro, confirmación de correo, inicio de sesión, recuperación con código por correo, sesión en `expo-secure-store` | 10 | hecho |
+| 1.5 | Componentes base a partir de los mockups: `Button`, `Card`, `Field`, `OptionChip`, `ProgressSteps`, `Alert`, `TabBar` | 9.3 | hecho |
+| 1.6 | Navegación: pestañas vacías (Hoy, Hábitos, Estadísticas, Jardín, Perfil) y elección de modo | 9.1, 9.4 | hecho |
 
-**Criterio de prueba:** te registras, confirmas el correo, cierras la app, la vuelves a abrir con la sesión iniciada y navegas entre las 5 pestañas. Recuperar la contraseña abre la app desde el correo.
+**Criterio de prueba:** te registras, confirmas el correo, cierras la app, la vuelves a abrir con la sesión iniciada y navegas entre las 5 pestañas. Recuperar la contraseña con el código del correo te deja crear una nueva y entrar con ella.
 
 ## Entrega 2: Formulario y plan (días 4–7, ~12 h)
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 2.1 | Esquemas Zod del formulario, claves y textos en `i18n/es.ts` | 5.1–5.3 | pendiente |
-| 2.2 | Formulario de 7 pasos con React Hook Form y Zustand; P2 filtrada por área; límite de 2 con mensaje; avance guardado | 5.1–5.3 | pendiente |
-| 2.3 | Motor de plan (funciones puras) con pruebas de Jest | 5.4–5.6 | pendiente |
+| 2.1 | Esquemas Zod del formulario, claves y textos en `i18n/es.ts` | 5.1–5.3 | hecho |
+| 2.2 | Formulario de 7 pasos con Zustand (sin React Hook Form: son solo opciones, no campos de texto); P2 filtrada por área; límite de 2 con mensaje; avance guardado | 5.1–5.3 | en curso (falta tu prueba en el teléfono) |
+| 2.3 | Motor de plan (funciones puras) con pruebas de Jest | 5.4–5.6 | hecho |
 | 2.4 | Código compartido con las Edge Functions (script de copia a `supabase/functions/_shared`) | 3.3 | pendiente |
 | 2.5 | `AiProvider` con implementación de Gemini; `generate-plan` que devuelve un borrador; respaldo con textos del catálogo | 5.8–5.10 | pendiente |
 | 2.6 | Pantallas «Generando plan» y «Revisión del plan» (cambiar hora, bajar nivel, quitar, segundo aviso); bloqueo sin conexión | 5.8, 9.4 | pendiente |

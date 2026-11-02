@@ -69,7 +69,7 @@ La meta es una **build de preview en Android (APK)** con el flujo completo. Se d
 
 | # | Entrega | Días (aprox.) | Contenido |
 | --- | --- | --- | --- |
-| 1 | Base | 1–3 | Proyecto Expo + Router + NativeWind con tokens y Nunito. Supabase con esquema, RLS y catálogo semilla. Auth (registro, confirmación de correo, inicio de sesión y recuperación). Componentes base. |
+| 1 | Base | 1–3 | Proyecto Expo + Router + NativeWind con tokens y Lexend Deca. Supabase con esquema, RLS y catálogo semilla. Auth (registro, confirmación de correo, inicio de sesión y recuperación). Componentes base. |
 | 2 | Formulario y plan | 4–7 | Formulario de 7 pasos. Motor de plan. `generate-plan` con `AiProvider` (Gemini). Revisión del plan y «Empezar». |
 | 3 | Hoy y hábitos offline | 8–9 | SQLite, repositorios, cola de sincronización, Hoy, Hábitos, creación manual, check-in. **Punto de control** (2.4). |
 | 4 | Recompensas | 10–11 | `complete_habit` / `uncomplete_habit` con topes, jardín, tienda y accesorios. Animaciones con Reanimated. |
@@ -153,7 +153,7 @@ AiProvider: Gemini (nivel gratuito, por defecto) | Claude | OpenAI
 | Iconos | `lucide-react-native` | Iconos de línea con trazo de 2 px y tamaño 24, como pide la guía. Verificar compatibilidad con el SDK antes de instalar. |
 | Gráficas | react-native-gifted-charts | Más simple que Victory Native (requiere Skia). |
 | UI | NativeWind con tokens de la guía | Un solo origen de colores y espaciados. |
-| Tipografía | Nunito vía `expo-font` | Sans-serif humanista recomendada por la guía; respaldo del sistema. |
+| Tipografía | Lexend Deca vía `@expo-google-fonts/lexend-deca` | La usan los mockups de Figma; respaldo del sistema. |
 | Plan | **Motor determinista + IA solo para textos** | El plan nunca excede el tiempo declarado, aunque la IA falle. |
 | IA | **Interfaz `AiProvider`** con implementaciones para Gemini (por defecto, nivel gratuito), Claude y OpenAI. Se elige con `AI_PROVIDER`. | La IA debe ser gratuita para la demo; cambiar de proveedor no toca el resto del código. |
 | Notificaciones | **P7 decide la cantidad, P6 ajusta** | Evita combinaciones contradictorias. |
@@ -675,9 +675,11 @@ La barra inferior tiene exactamente 5 ítems, el máximo recomendado por la guí
 | `ink` | #2C1E18 | Todo el texto e iconos neutros |
 | `ink-soft` | #5A4034 | Texto de apoyo (solo sobre `bg`) |
 
-Tipografía (Nunito): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 18/700. Espaciado en múltiplos de 8; márgenes de 16 px; radios 8 (campos y botones), 16 (tarjetas), 999 (chips).
+Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 18/700. Espaciado en múltiplos de 8; márgenes de 16 px; radios 8 (campos y botones), 16 (tarjetas), 999 (chips).
 
 ### 9.3 Componentes (React Native)
+
+**Ajustes por los mockups (Entrega 1).** Fondo con degradado de `crema` (#F2F4E6) a `bg`; campos y opciones sobre `campo` (#F8F9F2) con borde 2 px `ink-soft`; botones en forma de píldora (radio 999). Se conserva la accesibilidad: el texto del CTA coral va en `ink` (el mockup usa blanco, 3.7:1) y los títulos y etiquetas van en `ink` (el mockup usa terracota y coral, por debajo de 3:1). La barra de pestañas va sobre `bg` como en el mockup, con 5 pestañas. Login y registro piden solo correo (sin «nombre de usuario» ni botones de Google y Facebook, que quedan para antes de publicar).
 
 | Componente | Especificación |
 | --- | --- |
@@ -694,7 +696,7 @@ Tipografía (Nunito): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 1
 
 ### 9.4 Pantallas clave
 
-**Bienvenida y elección de modo.** Dos tarjetas `surface`: «Quiero un plan para mí» (guiado) y «Prefiero crear mis hábitos» (tradicional). El único CTA coral es «Continuar», que se habilita al elegir una.
+**Bienvenida y elección de modo.** Después de confirmar la cuenta se ve «Empezar» (mockup) y, al pulsarla, la elección de modo con dos opciones: «Quiero un plan para mí» (guiado) y «Prefiero crear mis hábitos» (tradicional). El único CTA coral es «Continuar», que se habilita al elegir una.
 
 **Formulario (7 pasos).** Una pregunta por pantalla. Arriba: `ProgressSteps`. Cuerpo: título H2, ayuda en texto pequeño (5.1) y opciones como `OptionChip` en lista vertical. Pie fijo: botón secundario «Atrás» y CTA «Siguiente» (en el paso 7, «Crear mi plan»). La pregunta 2 muestra las opciones agrupadas por área con encabezados H3.
 
@@ -771,7 +773,7 @@ Reglas complementarias:
 - Tokens de sesión en `expo-secure-store`.
 - Variables públicas en `EXPO_PUBLIC_*`. Secretos de IA solo en Supabase.
 - Política de privacidad y eliminación de cuenta dentro de la app (requisito de las tiendas); la eliminación borra los datos en cascada. Ninguna de las dos entra en la demo; se agregan antes de publicar.
-- Auth: confirmación de correo obligatoria y recuperación de contraseña con un enlace que abre la app (deep link).
+- Auth: confirmación de correo obligatoria. La recuperación de contraseña usa un **código** que llega por correo y se escribe en la app (`verifyOtp` con tipo `recovery`), no un enlace: el enlace depende de que el navegador abra la app y falla en Expo Go o si el correo se lee en otro dispositivo. La plantilla está en `supabase/templates/recuperar-contrasena.html` y se copia a mano en el panel de Supabase.
 - El nivel gratuito de Gemini puede usar los datos enviados para mejorar los productos de Google; por eso al proveedor solo llegan claves del formulario. Antes de publicar, revisar si se cambia a un nivel de pago o a otro proveedor.
 - Las respuestas del formulario incluyen datos sensibles (salud, finanzas): se guardan solo como claves, no hay texto libre, y al proveedor de IA solo se envían claves y parámetros, sin nombre ni correo.
 
