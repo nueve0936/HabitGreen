@@ -218,25 +218,38 @@ export function claveDeFila(tabla: TablaLocal, fila: Record<string, unknown>): s
   return tabla.clave.map((c) => String(fila[c])).join('|');
 }
 
+export type ValorLocal = string | number | null;
+
+/** Un valor de la app (o de Supabase) en el formato de su columna de SQLite. */
+export function valorLocal(tipo: TipoColumna, valor: unknown): ValorLocal {
+  if (valor === undefined || valor === null) return null;
+  switch (tipo) {
+    case 'bool':
+      return valor ? 1 : 0;
+    case 'json':
+      return JSON.stringify(valor);
+    case 'numero':
+      return Number(valor);
+    default:
+      return String(valor);
+  }
+}
+
 /** Convierte una fila de Supabase (o armada por la app) al formato de SQLite. */
-export function aValoresLocales(
-  tabla: TablaLocal,
-  fila: Record<string, unknown>,
-): (string | number | null)[] {
-  return Object.entries(tabla.columnas).map(([columna, tipo]) => {
+export function aValoresLocales(tabla: TablaLocal, fila: Record<string, unknown>): ValorLocal[] {
+  return Object.entries(tabla.columnas).map(([columna, tipo]) => valorLocal(tipo, fila[columna]));
+}
+
+/** Lo contrario de aValoresLocales: una fila de SQLite con booleanos y JSON de vuelta. */
+export function desdeValoresLocales<T>(tabla: TablaLocal, fila: Record<string, unknown>): T {
+  const resultado: Record<string, unknown> = { ...fila };
+  for (const [columna, tipo] of Object.entries(tabla.columnas)) {
     const valor = fila[columna];
-    if (valor === undefined || valor === null) return null;
-    switch (tipo) {
-      case 'bool':
-        return valor ? 1 : 0;
-      case 'json':
-        return JSON.stringify(valor);
-      case 'numero':
-        return Number(valor);
-      default:
-        return String(valor);
-    }
-  });
+    if (valor === undefined || valor === null) continue;
+    if (tipo === 'bool') resultado[columna] = valor === 1 || valor === true;
+    if (tipo === 'json' && typeof valor === 'string') resultado[columna] = JSON.parse(valor);
+  }
+  return resultado as T;
 }
 
 /** INSERT que reemplaza la fila si ya existe con la misma clave primaria. */

@@ -87,6 +87,33 @@ describe('mezcla de filas descargadas', () => {
       filasAplicables('habit_logs', logs, (f) => `${f.habit_id}|${f.fecha}`, pendientes),
     ).toEqual([{ habit_id: 'h1', fecha: '2026-10-31' }]);
   });
+
+  it('un update pendiente también protege su fila', () => {
+    const update: EntradaOutbox = {
+      id: 1,
+      intentos: 0,
+      operacion: 'update',
+      tabla: 'user_settings',
+      clave: 'u1',
+      payload: { presupuesto_min: 30 },
+    };
+    const pendientes = clavesPendientes([update]);
+    expect(
+      filasAplicables('user_settings', [{ user_id: 'u1' }], (f) => f.user_id, pendientes),
+    ).toEqual([]);
+  });
+
+  it('los update no se compactan con los check-ins', () => {
+    const update: EntradaOutbox = {
+      id: 3,
+      intentos: 0,
+      operacion: 'update',
+      tabla: 'habits',
+      clave: 'h1',
+      payload: { activo: false },
+    };
+    expect(idsCompactables([complete(1), update, uncomplete(2)])).toEqual([1, 2]);
+  });
 });
 
 describe('cursor de descarga', () => {

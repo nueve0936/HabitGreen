@@ -1,23 +1,15 @@
+import { textoDias, type TextosDias } from '@/features/habits/domain/formato';
 import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
 
 // Textos de una tarjeta de la revisión del plan. Reciben las plantillas de i18n para que esta
 // lógica se pueda probar sin la app.
 
-export type TextosHorario = {
+export type TextosHorario = TextosDias & {
   minutos: string;
-  todosLosDias: string;
-  /** Abreviaturas de lunes a domingo (ISO 1–7). */
-  dias: readonly string[];
   flexible: string;
 };
 
-export function textoDias(dias: readonly number[], t: TextosHorario): string {
-  if (dias.length === 7) return t.todosLosDias;
-  return [...dias]
-    .sort((a, b) => a - b)
-    .map((d) => t.dias[d - 1])
-    .join(', ');
-}
+export { textoDias };
 
 /** «5 min · Lun, Mar, Jue, Sáb · 20:30» (o la ventana, si el aviso es flexible). */
 export function textoHorario(

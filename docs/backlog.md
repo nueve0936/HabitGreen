@@ -60,8 +60,8 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | 3.1 | Development build de Android con EAS (`eas.json`, `npm run build:dev`, `npm run start:dev`). Para probar en modo avión, el código llega por cable: `adb reverse tcp:8081 tcp:8081` y `npm run start:usb` | 3.2 | hecho |
 | 3.2 | SQLite: esquema local, migraciones y repositorios en `src/db` | 3.4 | hecho |
 | 3.3 | Sincronización: carga inicial, descarga incremental, `outbox` y cuándo sincroniza; zona horaria; RPC mínimas `complete_habit` y `uncomplete_habit` (sin recompensas, se completan en la 4.1) | 3.4 | hecho |
-| 3.4 | Pantalla Hoy: hábitos del día y check-in (solo hoy) con deshacer | 9.4 | pendiente |
-| 3.5 | Pantalla Hábitos: lista por categoría, crear manual (con aviso de presupuesto), editar horario (versionado), pausar y archivar | 4, 6.5, 6.6 | pendiente |
+| 3.4 | Pantalla Hoy: hábitos del día y check-in (solo hoy) con deshacer | 9.4 | hecho |
+| 3.5 | Pantalla Hábitos: lista por categoría, crear manual (con aviso de presupuesto), editar horario (versionado), pausar y archivar | 4, 6.5, 6.6 | hecho |
 
 **Criterio de prueba:** con el modo avión, creas un hábito, lo completas y lo deshaces. Al quitar el modo avión, todo aparece en Supabase. Al iniciar sesión en un teléfono limpio, se descarga todo.
 **Punto de control:** si esto no funciona al final del día 9, se pasa a «solo check-in offline» (SDD 2.5).
@@ -86,8 +86,9 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | 5.2 | Ventana móvil de 7 días con tope de 60 y recálculo en cada evento | 7.1 | pendiente |
 | 5.3 | Estilos de la P7, precedencia P7/P6, segundo aviso, momento flexible y `notificar` («Avisarme») | 5.6, 7.1 | pendiente |
 | 5.4 | Textos: ánimo rotativo, resumen nocturno, apoyo de las semanas 3 y 4 | 7.1, `textos.md` | pendiente |
+| 5.5 | Ajustes en Perfil: tiempo diario (`presupuesto_min`), estilo de avisos, horas por momento y segundo aviso; funciona sin conexión vía la cola (`update` de `user_settings`) | 6.5, 7.1, 9.4 | pendiente |
 
-**Criterio de prueba:** con un hábito programado 2 minutos en el futuro, llega el aviso. Al completarlo antes, el segundo aviso no llega. Cambiar el estilo a `minimo` deja de enviar avisos de hábitos sin «Avisarme».
+**Criterio de prueba:** con un hábito programado 2 minutos en el futuro, llega el aviso. Al completarlo antes, el segundo aviso no llega. Cambiar el estilo a `minimo` deja de enviar avisos de hábitos sin «Avisarme». En Perfil cambias tu tiempo diario y el cambio llega a Supabase.
 
 ## Entrega 6: Reprogramación (día 14, ~4 h)
 

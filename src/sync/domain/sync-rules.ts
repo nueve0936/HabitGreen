@@ -9,6 +9,14 @@ export type OperacionOutbox =
       payload: Record<string, unknown>;
     }
   | {
+      // Cambio parcial de una fila que ya existe: el upsert no sirve porque Postgres revisa los
+      // NOT NULL de la fila completa antes de detectar el conflicto.
+      operacion: 'update';
+      tabla: 'habits' | 'habit_schedules' | 'user_settings';
+      clave: string;
+      payload: Record<string, unknown>;
+    }
+  | {
       operacion: 'complete';
       tabla: 'habit_logs';
       clave: string;

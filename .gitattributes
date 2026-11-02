@@ -1,0 +1,7 @@
+# Saltos de línea LF en todo el repositorio, también en Windows: Prettier los exige y así
+# cambiar de rama no reescribe los archivos con CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ttf binary

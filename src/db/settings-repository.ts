@@ -1,9 +1,11 @@
 import { ajustesTradicionales } from '@/features/plan/domain/plan-rows';
 import { supabase } from '@/lib/supabase';
 
-// Ajustes por defecto del modo tradicional (`user_settings`). Se guardan directo en Supabase
-// porque elegir el modo ya requiere conexión; al llegar a las pestañas, la sincronización los
-// descarga a SQLite junto con `app_config`.
+import { getDb } from './database';
+
+// Ajustes del usuario (`user_settings`). Los por defecto del modo tradicional se guardan directo
+// en Supabase porque elegir el modo ya requiere conexión; al llegar a las pestañas, la
+// sincronización los descarga a SQLite junto con `app_config`, y desde ahí se leen.
 
 async function presupuestoTradicional(): Promise<number> {
   const { data, error } = await supabase
@@ -15,6 +17,29 @@ async function presupuestoTradicional(): Promise<number> {
   const valor = data.valor.tradicional_por_defecto;
   if (typeof valor !== 'number') throw new Error('Falta presupuestos.tradicional_por_defecto');
   return valor;
+}
+
+export type AjustesLocales = {
+  estiloNotificaciones: string | null;
+  /** Saldo del monedero; 0 hasta que lleguen las recompensas (Entrega 4). */
+  saldo: number;
+};
+
+/** Ajustes y saldo desde SQLite, para Hoy y el formulario de hábito (funciona sin conexión). */
+export async function leerAjustesLocales(userId: string): Promise<AjustesLocales> {
+  const db = await getDb();
+  const ajustes = await db.getFirstAsync<{ estilo_notificaciones: string }>(
+    'SELECT estilo_notificaciones FROM user_settings WHERE user_id = ?',
+    [userId],
+  );
+  const monedero = await db.getFirstAsync<{ saldo: number }>(
+    'SELECT saldo FROM wallets WHERE user_id = ?',
+    [userId],
+  );
+  return {
+    estiloNotificaciones: ajustes?.estilo_notificaciones ?? null,
+    saldo: monedero?.saldo ?? 0,
+  };
 }
 
 /** Ajustes por defecto al elegir el modo tradicional (SDD 6.5). */

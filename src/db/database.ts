@@ -2,11 +2,13 @@ import * as SQLite from 'expo-sqlite';
 
 import {
   aValoresLocales,
+  desdeValoresLocales,
   sqlTablasEspejo,
   sqlUpsert,
   SQL_TABLAS_PROPIAS,
   TABLAS,
   tablaLocal,
+  valorLocal,
   type NombreTabla,
   type TablaLocal,
 } from './local-schema';
@@ -58,6 +60,38 @@ export async function guardarFilas(
   const tabla = typeof destino === 'string' ? tablaLocal(destino) : destino;
   const sql = sqlUpsert(tabla);
   for (const fila of filas) await db.runAsync(sql, aValoresLocales(tabla, fila));
+}
+
+/** Cambia algunas columnas de una fila local, buscándola por su clave primaria. */
+export async function actualizarFila(
+  db: SQLite.SQLiteDatabase,
+  nombre: NombreTabla,
+  clave: Record<string, string>,
+  cambios: Record<string, unknown>,
+): Promise<void> {
+  const tabla = tablaLocal(nombre);
+  const columnas = Object.keys(cambios).filter((c) => c in tabla.columnas);
+  const asignaciones = columnas.map((c) => `${c} = ?`).join(', ');
+  const condicion = tabla.clave.map((c) => `${c} = ?`).join(' AND ');
+  await db.runAsync(`UPDATE ${tabla.nombre} SET ${asignaciones} WHERE ${condicion}`, [
+    ...columnas.map((c) => valorLocal(tabla.columnas[c] ?? 'texto', cambios[c])),
+    ...tabla.clave.map((c) => clave[c] ?? ''),
+  ]);
+}
+
+/** Lee filas de una tabla espejo con los booleanos y el JSON ya convertidos. */
+export async function leerFilas<T>(
+  db: SQLite.SQLiteDatabase,
+  nombre: NombreTabla,
+  donde = '1 = 1',
+  parametros: (string | number)[] = [],
+): Promise<T[]> {
+  const tabla = tablaLocal(nombre);
+  const filas = await db.getAllAsync<Record<string, unknown>>(
+    `SELECT * FROM ${tabla.nombre} WHERE ${donde}`,
+    parametros,
+  );
+  return filas.map((f) => desdeValoresLocales<T>(tabla, f));
 }
 
 /** Borra todos los datos locales: al cerrar sesión o si entra otra cuenta en el teléfono. */

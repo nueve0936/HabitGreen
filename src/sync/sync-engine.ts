@@ -157,6 +157,13 @@ async function enviar(entrada: EntradaOutbox) {
   switch (entrada.operacion) {
     case 'upsert':
       return (await supabase.from(entrada.tabla).upsert(entrada.payload)).error;
+    case 'update':
+      return (
+        await supabase
+          .from(entrada.tabla)
+          .update(entrada.payload)
+          .match(claveComoFiltro(tablaLocal(entrada.tabla), entrada.clave))
+      ).error;
     case 'complete':
       return (
         await supabase.rpc('complete_habit', {
@@ -204,15 +211,21 @@ async function subirOutbox(db: SQLiteDatabase): Promise<void> {
   }
 }
 
+/** outbox.clave ("valor1|valor2") como filtro { columna: valor } de la clave primaria. */
+function claveComoFiltro(tabla: TablaLocal, clave: string): Record<string, string> {
+  const valores = clave.split('|');
+  return Object.fromEntries(tabla.clave.map((columna, i) => [columna, valores[i] ?? '']));
+}
+
 /** Después de un rechazo, la fila local vuelve a quedar como está en el servidor. */
 async function refrescarFila(db: SQLiteDatabase, entrada: EntradaOutbox): Promise<void> {
   const tabla = tablaLocal(entrada.tabla);
   const valores = entrada.clave.split('|');
-  let consulta = supabase.from(tabla.nombre).select(columnas(tabla));
-  tabla.clave.forEach((columna, i) => {
-    consulta = consulta.eq(columna, valores[i]);
-  });
-  const { data, error } = await consulta.maybeSingle<Record<string, unknown>>();
+  const { data, error } = await supabase
+    .from(tabla.nombre)
+    .select(columnas(tabla))
+    .match(claveComoFiltro(tabla, entrada.clave))
+    .maybeSingle<Record<string, unknown>>();
   revisar(error);
   if (data) {
     await guardarFilas(db, entrada.tabla, [data]);

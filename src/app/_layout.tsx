@@ -62,6 +62,8 @@ function RootNavigator() {
       <Stack.Screen name="index" />
       <Stack.Protected guard={zone === 'tabs'}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="habit/nuevo" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="habit/[id]" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       <Stack.Protected guard={zone === 'onboarding'}>
         <Stack.Screen name="(onboarding)" />
