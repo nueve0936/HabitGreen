@@ -1,9 +1,12 @@
-import type { Session } from '@supabase/supabase-js';
+import { isAuthRetryableFetchError, type Session } from '@supabase/supabase-js';
 import * as Linking from 'expo-linking';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { getProfile, saveMode, type AppMode, type Profile } from '@/db/profile-repository';
-import { supabase } from '@/lib/supabase';
+import { vaciarBaseLocal } from '@/db/database';
+import { leerSesionGuardada, supabase } from '@/lib/supabase';
+import { deviceTimeZone } from '@/lib/time-zone';
+import { sincronizarAhora } from '@/sync/sync-engine';
 
 import { parseAuthCallbackUrl } from './domain/auth-callback';
 import {
@@ -12,14 +15,6 @@ import {
   type ProfileStatus,
   type SessionContextValue,
 } from './session-context';
-
-function deviceTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  } catch {
-    return 'UTC';
-  }
-}
 
 // Perfil cargado para un usuario concreto. Si cambia el usuario, el estado anterior deja de
 // valer sin tener que limpiarlo a mano.
@@ -38,8 +33,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     let active = true;
     supabase.auth
       .getSession()
-      .then(({ data }) => {
-        if (active) setSession(data.session);
+      .then(async ({ data, error }) => {
+        // Sin red y con el token vencido, Supabase no puede renovarlo y no devuelve sesión, pero
+        // la guardada sigue siendo válida: se usa para abrir la app con los datos locales.
+        const sesion =
+          data.session ?? (isAuthRetryableFetchError(error) ? await leerSesionGuardada() : null);
+        if (active) setSession(sesion);
       })
       .finally(() => {
         if (active) setInitializing(false);
@@ -140,7 +139,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const finishRecovery = useCallback(() => setIsRecovery(false), []);
 
   const signOut = useCallback(async () => {
+    // Antes de salir se intenta subir lo pendiente; después se borran los datos locales para que
+    // la siguiente cuenta empiece limpia.
+    await sincronizarAhora().catch(() => {});
     await supabase.auth.signOut();
+    await vaciarBaseLocal().catch(() => {});
   }, []);
 
   const value = useMemo<SessionContextValue>(

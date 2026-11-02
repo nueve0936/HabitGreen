@@ -1,8 +1,9 @@
 import { ajustesTradicionales } from '@/features/plan/domain/plan-rows';
 import { supabase } from '@/lib/supabase';
 
-// Ajustes del usuario (`user_settings`). Por ahora directo en Supabase; en la Entrega 3 pasa a
-// SQLite. `app_config` se lee del servidor hasta que exista el caché local (SDD 3.2).
+// Ajustes por defecto del modo tradicional (`user_settings`). Se guardan directo en Supabase
+// porque elegir el modo ya requiere conexión; al llegar a las pestañas, la sincronización los
+// descarga a SQLite junto con `app_config`.
 
 async function presupuestoTradicional(): Promise<number> {
   const { data, error } = await supabase

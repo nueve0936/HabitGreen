@@ -106,13 +106,7 @@ export function filasDelPlan(input: {
   };
 }
 
-/** Fecha local "YYYY-MM-DD" (las fechas de hábitos van en la zona del usuario, definición 9). */
-export function fechaLocal(fecha: Date = new Date()): string {
-  const y = fecha.getFullYear();
-  const m = String(fecha.getMonth() + 1).padStart(2, '0');
-  const d = String(fecha.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+export { fechaLocal } from '@/lib/dates';
 
 /** Ajustes por defecto del modo tradicional (SDD 6.5). */
 export function ajustesTradicionales(userId: string, presupuestoPorDefecto: number) {

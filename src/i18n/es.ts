@@ -255,6 +255,19 @@ export const es = {
     modoGuiado: 'Modo: plan guiado',
     modoTradicional: 'Modo: mis propios hábitos',
     cerrarSesion: 'Cerrar sesión',
+    // Panel temporal de la Entrega 3 (parte 1).
+    datosLocales: {
+      titulo: 'Datos en este teléfono',
+      habitos: 'Hábitos: {n}',
+      horarios: 'Horarios: {n}',
+      registros: 'Hábitos marcados: {n}',
+      pendientes: 'Cambios por subir: {n}',
+      ultima: 'Última sincronización: {hora}',
+      nunca: 'Todavía no se ha sincronizado.',
+      sincronizando: 'Sincronizando…',
+      error: 'Error al sincronizar: {mensaje}',
+      sincronizar: 'Sincronizar ahora',
+    },
   },
   sesion: {
     errorPerfil: 'No pudimos cargar tu perfil.',

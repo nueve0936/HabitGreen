@@ -1,7 +1,10 @@
 import { supabase } from '@/lib/supabase';
 
-// Repositorio del perfil. En la Entrega 1 lee y escribe directo en Supabase; en la Entrega 3
-// pasa a SQLite con sincronización, sin que cambien las pantallas que lo usan.
+import { getDb, guardarFilas } from './database';
+
+// Repositorio del perfil. Se lee de Supabase y se guarda una copia en SQLite: si no hay conexión
+// al abrir la app, se usa la copia local para llegar a las pestañas (SDD 3.4). El modo y el
+// onboarding se guardan con conexión, porque crear el plan ya la necesita.
 
 export type AppMode = 'tradicional' | 'guiado';
 
@@ -19,9 +22,10 @@ type ProfileRow = {
   zona_horaria: string;
   modo: AppMode | null;
   onboarding_completo: boolean;
+  updated_at?: string;
 };
 
-const COLUMNS = 'id, nombre, zona_horaria, modo, onboarding_completo';
+const COLUMNS = 'id, nombre, zona_horaria, modo, onboarding_completo, updated_at';
 
 function toProfile(row: ProfileRow): Profile {
   return {
@@ -43,9 +47,34 @@ async function fetchProfile(userId: string): Promise<ProfileRow | null> {
   return data;
 }
 
+async function guardarCopia(row: ProfileRow): Promise<void> {
+  await guardarFilas(await getDb(), 'profiles', [row]);
+}
+
+async function leerCopia(userId: string): Promise<Profile | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<
+    Omit<ProfileRow, 'onboarding_completo'> & { onboarding_completo: number }
+  >('SELECT id, nombre, zona_horaria, modo, onboarding_completo FROM profiles WHERE id = ?', [
+    userId,
+  ]);
+  return row ? toProfile({ ...row, onboarding_completo: row.onboarding_completo === 1 }) : null;
+}
+
 export async function getProfile(userId: string): Promise<Profile> {
-  const row = await fetchProfile(userId);
-  if (row) return toProfile(row);
+  let row: ProfileRow | null;
+  try {
+    row = await fetchProfile(userId);
+  } catch (error) {
+    // Sin conexión (o el servidor no respondió): se usa la copia local si existe.
+    const copia = await leerCopia(userId).catch(() => null);
+    if (copia) return copia;
+    throw error;
+  }
+  if (row) {
+    await guardarCopia(row);
+    return toProfile(row);
+  }
 
   // La cuenta existe pero le falta el perfil (por ejemplo, se borró a mano en pruebas):
   // la función del servidor lo vuelve a crear junto con su monedero y sus plantas.
@@ -53,6 +82,7 @@ export async function getProfile(userId: string): Promise<Profile> {
   if (error) throw error;
   const created = await fetchProfile(userId);
   if (!created) throw new Error('No se pudo crear el perfil');
+  await guardarCopia(created);
   return toProfile(created);
 }
 
@@ -69,5 +99,6 @@ export async function saveMode(
     .select(COLUMNS)
     .single<ProfileRow>();
   if (error) throw error;
+  await guardarCopia(data);
   return toProfile(data);
 }

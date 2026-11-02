@@ -5,8 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { AREAS, type Area, type Respuestas } from '@/schemas/onboarding';
 import { borradorPlanSchema, type BorradorPlan } from '@/schemas/plan';
 
-// Repositorio del plan. Por ahora habla directo con Supabase; en la Entrega 3 el guardado pasa a
-// SQLite con sincronización (backlog 2.7).
+// Repositorio del plan. Habla directo con Supabase: crear el plan exige conexión (definición 6),
+// así que no pasa por la cola de salida. Al llegar a las pestañas, la sincronización lo descarga
+// a SQLite.
 
 export type ResultadoBorrador =
   { ok: true; borrador: BorradorPlan } | { ok: false; motivo: 'sin_conexion' | 'error' };

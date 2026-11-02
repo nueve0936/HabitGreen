@@ -21,7 +21,7 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | Pruebas SQL: Docker Desktop con `npx supabase db start` (ya funciona en tu equipo) | Entrega 4 | listo |
 | Enlace de Figma con permiso de lectura (MCP de Figma conectado) | Entrega 1 (componentes base) | listo |
 | Clave de Google AI Studio (gratuita), guardada como secreto de Supabase (`AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_DAILY_LIMIT`) | Entrega 2 | listo |
-| Cuenta de Expo (EAS) | Entrega 3 | pendiente |
+| Cuenta de Expo (EAS) con sesión iniciada y proyecto vinculado (`@nueve_36/HabitGreen`, `projectId` en `app.json`) | Entrega 3 | listo |
 | Teléfono Android físico con Expo Go | Entrega 1 | listo |
 | Arte: 5 plantas × 3 fases y 15 accesorios en el mismo lienzo cuadrado (PNG transparente) | Entrega 4 (se puede avanzar con placeholders) | pendiente |
 
@@ -45,11 +45,11 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | 2.1 | Esquemas Zod del formulario, claves y textos en `i18n/es.ts` | 5.1–5.3 | hecho |
 | 2.2 | Formulario de 7 pasos con Zustand (sin React Hook Form: son solo opciones, no campos de texto); P2 filtrada por área; límite de 2 con mensaje; avance guardado | 5.1–5.3 | hecho |
 | 2.3 | Motor de plan (funciones puras) con pruebas de Jest | 5.4–5.6 | hecho |
-| 2.4 | Código compartido con las Edge Functions (`npm run functions:sync` copia a `supabase/functions/_shared/generated`) | 3.3 | en curso (falta tu prueba en el teléfono) |
-| 2.5 | `AiProvider` con implementación de Gemini; `generate-plan` que devuelve un borrador; respaldo con textos del catálogo | 5.8–5.10 | en curso (falta tu prueba en el teléfono) |
-| 2.6 | Pantallas «Generando plan» y «Revisión del plan» (cambiar hora, bajar nivel, quitar, segundo aviso); bloqueo sin conexión | 5.8, 9.4 | en curso (falta tu prueba en el teléfono) |
-| 2.7 | «Empezar»: guardar plan, hábitos, horarios y `user_settings` (por ahora directo en Supabase; pasa a SQLite en la entrega 3) | 5.8 | en curso (falta tu prueba en el teléfono) |
-| 2.8 | Modo tradicional: `user_settings` por defecto al elegirlo | 6.5 | en curso (falta tu prueba en el teléfono) |
+| 2.4 | Código compartido con las Edge Functions (`npm run functions:sync` copia a `supabase/functions/_shared/generated`) | 3.3 | hecho |
+| 2.5 | `AiProvider` con implementación de Gemini; `generate-plan` que devuelve un borrador; respaldo con textos del catálogo | 5.8–5.10 | hecho |
+| 2.6 | Pantallas «Generando plan» y «Revisión del plan» (cambiar hora, bajar nivel, quitar, segundo aviso); bloqueo sin conexión | 5.8, 9.4 | hecho |
+| 2.7 | «Empezar»: guardar plan, hábitos, horarios y `user_settings` (directo en Supabase, porque crear el plan exige conexión; la sincronización lo baja a SQLite) | 5.8 | hecho |
+| 2.8 | Modo tradicional: `user_settings` por defecto al elegirlo | 6.5 | hecho |
 
 **Criterio de prueba:** respondes el formulario (probando volver y el límite de 2), ves un plan con textos personalizados por la IA y lo confirmas. En Supabase aparecen tus hábitos. Con el modo avión, «Crear mi plan» muestra el mensaje de conexión.
 
@@ -57,9 +57,9 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 3.1 | Development build de Android con EAS | 3.2 | pendiente |
-| 3.2 | SQLite: esquema local, migraciones y repositorios en `src/db` | 3.4 | pendiente |
-| 3.3 | Sincronización: carga inicial, descarga incremental, `outbox` y cuándo sincroniza; zona horaria | 3.4 | pendiente |
+| 3.1 | Development build de Android con EAS (`eas.json`, `npm run build:dev`, `npm run start:dev`). Para probar en modo avión, el código llega por cable: `adb reverse tcp:8081 tcp:8081` y `npm run start:usb` | 3.2 | hecho |
+| 3.2 | SQLite: esquema local, migraciones y repositorios en `src/db` | 3.4 | hecho |
+| 3.3 | Sincronización: carga inicial, descarga incremental, `outbox` y cuándo sincroniza; zona horaria; RPC mínimas `complete_habit` y `uncomplete_habit` (sin recompensas, se completan en la 4.1) | 3.4 | hecho |
 | 3.4 | Pantalla Hoy: hábitos del día y check-in (solo hoy) con deshacer | 9.4 | pendiente |
 | 3.5 | Pantalla Hábitos: lista por categoría, crear manual (con aviso de presupuesto), editar horario (versionado), pausar y archivar | 4, 6.5, 6.6 | pendiente |
 
