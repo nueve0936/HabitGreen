@@ -12,6 +12,7 @@ import { Screen } from '@/components/ui/screen';
 import { AuthHeader } from '@/features/auth/components/auth-header';
 import { authRedirectUrl } from '@/features/auth/auth-redirect';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
+import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
   registerSchema,
   type RegisterInput,
@@ -26,16 +27,40 @@ export default function RegistroScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<RegisterInput, unknown, RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
+  // Un solo aviso bajo los campos (mockups «Registrar #1.x»): campos vacíos, contraseñas distintas,
+  // datos inválidos o sin conexión. Tras intentar crear la cuenta, cada campo muestra una X o una
+  // marca de verificación; con error del servidor se marcan todos.
+  const v = t.validacion;
+  const aviso =
+    serverError ??
+    avisoDeFormulario(
+      [errors.email?.message, errors.password?.message, errors.confirmPassword?.message],
+      [v.correoRequerido, v.contrasenaRequerida],
+      v.registroVacios,
+    );
+  const errorServidor = serverError !== null;
+  const estado = (error: unknown) => ({
+    invalido: Boolean(error) || errorServidor,
+    valido: isSubmitted && !error && !errorServidor,
+  });
+
+  // Al corregir un campo, el error del servidor deja de aplicar.
+  const escribir = (onChange: (texto: string) => void, texto: string) => {
+    setServerError(null);
+    onChange(texto);
+  };
+
   // handleSubmit espera un evento web; en React Native se llama sin argumentos.
   const onSubmit = () => void submit();
   const submit = handleSubmit(async ({ email, password }) => {
-    setServerError(null);
+    // El aviso anterior se queda mientras se espera la respuesta: quitarlo y volver a ponerlo
+    // movía el botón y se veía como un parpadeo.
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -51,6 +76,7 @@ export default function RegistroScreen() {
       setServerError(t.errores.usuarioExiste);
       return;
     }
+    setServerError(null);
     if (!data.session) {
       router.replace({ pathname: '/revisa-tu-correo', params: { correo: email } });
     }
@@ -69,9 +95,9 @@ export default function RegistroScreen() {
               label={t.correo}
               placeholder={t.correoPlaceholder}
               value={value}
-              onChangeText={onChange}
+              onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}
-              error={errors.email?.message}
+              {...estado(errors.email)}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
@@ -87,9 +113,9 @@ export default function RegistroScreen() {
               label={t.contrasena}
               password
               value={value}
-              onChangeText={onChange}
+              onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}
-              error={errors.password?.message}
+              {...estado(errors.password)}
               autoComplete="new-password"
               textContentType="newPassword"
             />
@@ -103,9 +129,9 @@ export default function RegistroScreen() {
               label={t.confirmarContrasena}
               password
               value={value}
-              onChangeText={onChange}
+              onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}
-              error={errors.confirmPassword?.message}
+              {...estado(errors.confirmPassword)}
               autoComplete="new-password"
               textContentType="newPassword"
               returnKeyType="done"
@@ -114,7 +140,7 @@ export default function RegistroScreen() {
           )}
         />
 
-        {serverError ? <Alert variant="error" message={serverError} /> : null}
+        {aviso ? <Alert variant="error" message={aviso} /> : null}
 
         <Button
           label={t.registro.boton}

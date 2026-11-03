@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { es } from '@/i18n/es';
 import { colors } from '@/theme';
 
-import { AppText } from './app-text';
+import { StableBoldText } from './stable-bold-text';
 
 // Barra inferior con las 5 pestañas del SDD y el estilo del mockup (fondo oliva, iconos de
 // línea). La pestaña activa se marca con indicador coral, icono más oscuro y texto en negrita:
@@ -70,15 +70,16 @@ export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
               color={focused ? colors['accent-oscuro'] : colors.ink}
               strokeWidth={focused ? 2.5 : 2}
             />
-            <AppText
+            <StableBoldText
               variant="small"
-              weight={focused ? 'bold' : 'regular'}
+              bold={focused}
+              weight="regular"
               numberOfLines={1}
               maxFontSizeMultiplier={1.15}
               className="text-[12px] leading-4"
             >
               {label}
-            </AppText>
+            </StableBoldText>
           </Pressable>
         );
       })}

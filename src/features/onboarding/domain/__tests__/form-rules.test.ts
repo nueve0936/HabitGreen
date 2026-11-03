@@ -11,15 +11,12 @@ import {
 
 describe('alternarSeleccion', () => {
   it('agrega y quita valores', () => {
-    expect(alternarSeleccion(['a'], 'b', 2)).toEqual({ lista: ['a', 'b'], limiteAlcanzado: false });
-    expect(alternarSeleccion(['a', 'b'], 'a', 2)).toEqual({ lista: ['b'], limiteAlcanzado: false });
+    expect(alternarSeleccion(['a'], 'b', 2)).toEqual(['a', 'b']);
+    expect(alternarSeleccion(['a', 'b'], 'a', 2)).toEqual(['b']);
   });
 
-  it('no agrega un tercero y avisa del límite', () => {
-    expect(alternarSeleccion(['a', 'b'], 'c', 2)).toEqual({
-      lista: ['a', 'b'],
-      limiteAlcanzado: true,
-    });
+  it('con el máximo elegido, el nuevo reemplaza al primero que se eligió', () => {
+    expect(alternarSeleccion(['a', 'b'], 'c', 2)).toEqual(['b', 'c']);
   });
 });
 
@@ -29,26 +26,25 @@ describe('alternarArea', () => {
       areas: ['salud_fisica', 'social'],
       objetivos: ['mover_mas', 'tiempo_de_calidad'],
     };
-    const resultado = alternarArea(borrador, 'salud_fisica');
-    expect(resultado.lista).toEqual(['social']);
-    expect(resultado.objetivos).toEqual(['tiempo_de_calidad']);
+    expect(alternarArea(borrador, 'salud_fisica')).toEqual({
+      areas: ['social'],
+      objetivos: ['tiempo_de_calidad'],
+    });
   });
 
-  it('con 2 áreas, una tercera no cambia nada', () => {
+  it('con 2 áreas, una tercera reemplaza a la primera y descarta sus objetivos', () => {
     const borrador: Borrador = { areas: ['trabajo', 'social'], objetivos: ['aprender_algo'] };
-    const resultado = alternarArea(borrador, 'finanzas');
-    expect(resultado).toEqual({
-      lista: ['trabajo', 'social'],
-      objetivos: ['aprender_algo'],
-      limiteAlcanzado: true,
+    expect(alternarArea(borrador, 'finanzas')).toEqual({
+      areas: ['social', 'finanzas'],
+      objetivos: [],
     });
   });
 });
 
 describe('alternarObjetivo', () => {
-  it('limita a 2 objetivos', () => {
+  it('un tercer objetivo reemplaza al primero elegido', () => {
     const borrador: Borrador = { areas: ['salud_fisica'], objetivos: ['mover_mas', 'tomar_agua'] };
-    expect(alternarObjetivo(borrador, 'dormir_mejor').limiteAlcanzado).toBe(true);
+    expect(alternarObjetivo(borrador, 'dormir_mejor')).toEqual(['tomar_agua', 'dormir_mejor']);
   });
 });
 

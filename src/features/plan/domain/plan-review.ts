@@ -1,3 +1,4 @@
+import { ajustePresupuesto, minutosPorDia } from '@/features/habits/domain/presupuesto';
 import type { Objetivo, Respuestas } from '@/schemas/onboarding';
 import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
 
@@ -59,6 +60,76 @@ export function puedeQuitar(b: BorradorPlan): boolean {
 export function quitarHabito(b: BorradorPlan, objetivo: Objetivo): BorradorPlan {
   if (!puedeQuitar(b)) return b;
   return { ...b, habitos: b.habitos.filter((h) => h.objetivo !== objetivo) };
+}
+
+/** Hábitos del plan inicial: el formulario crea 1 o 2 y en la revisión se puede llegar a 3. */
+export const MAX_HABITOS_PLAN_INICIAL = 3;
+export const SUGERENCIAS_POR_PAGINA = 4;
+
+export function puedeAgregar(b: BorradorPlan): boolean {
+  return b.habitos.length < MAX_HABITOS_PLAN_INICIAL;
+}
+
+/** Sugerencias de objetivos que todavía no están en el plan. */
+export function sugerenciasDisponibles(b: BorradorPlan): HabitoPlan[] {
+  const enPlan = new Set(b.habitos.map((h) => h.objetivo));
+  return b.sugerencias.filter((s) => !enPlan.has(s.objetivo));
+}
+
+/** Página de sugerencias; al acabarse la lista vuelve al principio. */
+export function paginaDeSugerencias<T>(
+  lista: readonly T[],
+  pagina: number,
+  porPagina = SUGERENCIAS_POR_PAGINA,
+): T[] {
+  if (lista.length <= porPagina) return [...lista];
+  const paginas = Math.ceil(lista.length / porPagina);
+  const inicio = (pagina % paginas) * porPagina;
+  return lista.slice(inicio, inicio + porPagina);
+}
+
+/**
+ * Si algún día suma más minutos que el presupuesto, este sube a esa suma (SDD 6.5, decisión del
+ * usuario también para el plan).
+ */
+function conPresupuesto(b: BorradorPlan): BorradorPlan {
+  const { nuevoPresupuesto } = ajustePresupuesto(
+    b.ajustes.presupuesto_min,
+    minutosPorDia(b.habitos),
+  );
+  return nuevoPresupuesto === b.ajustes.presupuesto_min
+    ? b
+    : { ...b, ajustes: { ...b.ajustes, presupuesto_min: nuevoPresupuesto } };
+}
+
+export function agregarHabito(b: BorradorPlan, habito: HabitoPlan): BorradorPlan {
+  if (!puedeAgregar(b) || b.habitos.some((h) => h.objetivo === habito.objetivo)) return b;
+  return conPresupuesto({ ...b, habitos: [...b.habitos, habito] });
+}
+
+export type CambiosHabitoPlan = {
+  titulo: string;
+  dias_semana: number[];
+  /** Hora elegida; null deja la que tenía (o el aviso flexible). */
+  hora: string | null;
+  notificar: boolean;
+};
+
+/** «Editar hábito» de la revisión: nombre, días, hora del recordatorio y si avisa. */
+export function editarHabitoPlan(
+  b: BorradorPlan,
+  objetivo: Objetivo,
+  cambios: CambiosHabitoPlan,
+): BorradorPlan {
+  return conPresupuesto(
+    reemplazar(b, objetivo, (h) => ({
+      ...h,
+      titulo: cambios.titulo,
+      dias_semana: [...cambios.dias_semana].sort((x, y) => x - y),
+      notificar: cambios.notificar,
+      ...(cambios.hora === null ? {} : { hora: cambios.hora, flexible: false }),
+    })),
+  );
 }
 
 export function cambiarSegundoAviso(b: BorradorPlan, activo: boolean): BorradorPlan {

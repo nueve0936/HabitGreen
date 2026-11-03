@@ -4,9 +4,10 @@ import { Pressable, View } from 'react-native';
 import { colors } from '@/theme';
 
 import { AppText } from './app-text';
+import { StableBoldText } from './stable-bold-text';
 
-// Opción del formulario (SDD 9.3, forma de los mockups). La opción elegida se distingue por
-// fondo, borde, texto en negrita e icono de verificación: nunca solo por color.
+// Opción del formulario (mockup «Encuesta inicial #1.1»): la elegida lleva borde naranja
+// (`surface`), texto en negrita e icono de verificación, para no depender solo del color.
 
 export type OptionChipProps = {
   label: string;
@@ -33,24 +34,23 @@ export function OptionChip({
       accessibilityState={{ checked: selected, selected, disabled }}
       onPress={onPress}
       disabled={disabled}
-      className={`min-h-12 flex-row items-center gap-3 rounded-card border-2 px-4 py-3 ${
-        selected ? 'border-ink bg-surface' : 'border-bg-oscuro bg-campo active:bg-bg-claro'
+      className={`min-h-12 flex-row items-center gap-3 rounded-card border-2 bg-campo px-4 py-3 ${
+        selected ? 'border-surface' : 'border-transparent active:bg-bg-claro'
       }`}
     >
       <View className="flex-1 items-center">
-        <AppText variant="h3" weight={selected ? 'bold' : 'medium'} className="text-center">
+        <StableBoldText variant="h3" bold={selected} className="text-center">
           {label}
-        </AppText>
+        </StableBoldText>
         {description ? (
-          // Sobre surface el texto de apoyo va en ink (SDD 9.6).
-          <AppText variant="small" tone={selected ? 'ink' : 'ink-soft'} className="text-center">
+          <AppText variant="small" tone="ink-soft" className="text-center">
             {description}
           </AppText>
         ) : null}
       </View>
       <View
-        className={`h-7 w-7 items-center justify-center rounded-chip border-2 border-ink ${
-          selected ? 'bg-campo' : 'bg-transparent'
+        className={`h-7 w-7 items-center justify-center rounded-chip border-2 ${
+          selected ? 'border-surface bg-surface' : 'border-bg-oscuro bg-transparent'
         }`}
       >
         {selected ? <Check size={18} color={colors.ink} strokeWidth={3} /> : null}

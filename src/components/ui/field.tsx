@@ -1,4 +1,4 @@
-import { CircleAlert, Eye, EyeOff } from 'lucide-react-native';
+import { Check, CircleAlert, Eye, EyeOff, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, TextInput, type TextInputProps, View } from 'react-native';
 
@@ -7,29 +7,46 @@ import { colors } from '@/theme';
 
 import { AppText } from './app-text';
 
-// Campo de texto del SDD 9.3: etiqueta siempre visible, alto 48 y error con icono + mensaje
-// (nunca solo color). Con `password` agrega el botón para mostrar u ocultar la contraseña.
+// Campo de texto del SDD 9.3 con los estados de los mockups de login y registro:
+// - enfocado: borde naranja (`surface`);
+// - con error: borde rojo y una X dentro del campo; si hay `error`, además el mensaje debajo;
+// - `valido`: una marca de verificación dentro del campo.
+// Los estados nunca dependen solo del color. Con `password` agrega el botón para mostrar u
+// ocultar la contraseña.
 
 export type FieldProps = Omit<TextInputProps, 'style' | 'secureTextEntry'> & {
   label: string;
+  /** Mensaje de error debajo del campo. */
   error?: string;
+  /** Marca el campo con error sin mensaje propio (el mensaje va en un aviso de la pantalla). */
+  invalido?: boolean;
+  /** Muestra la marca de verificación (por ejemplo, tras intentar enviar el formulario). */
+  valido?: boolean;
   password?: boolean;
 };
 
-export function Field({ label, error, password = false, ...inputProps }: FieldProps) {
+export function Field({
+  label,
+  error,
+  invalido = false,
+  valido = false,
+  password = false,
+  onFocus,
+  onBlur,
+  ...inputProps
+}: FieldProps) {
   const [hidden, setHidden] = useState(password);
-  const hasError = Boolean(error);
+  const [enfocado, setEnfocado] = useState(false);
+  const hasError = Boolean(error) || invalido;
+
+  const borde = hasError ? 'border-accent-oscuro' : enfocado ? 'border-surface' : 'border-ink-soft';
 
   return (
     <View className="gap-1">
       <AppText variant="small" weight="semibold">
         {label}
       </AppText>
-      <View
-        className={`h-12 flex-row items-center rounded-field border-2 px-3 ${
-          hasError ? 'border-accent-oscuro bg-accent-claro' : 'border-ink-soft bg-campo'
-        }`}
-      >
+      <View className={`h-12 flex-row items-center rounded-field border-2 bg-campo px-3 ${borde}`}>
         <TextInput
           accessibilityLabel={label}
           accessibilityHint={error}
@@ -38,6 +55,14 @@ export function Field({ label, error, password = false, ...inputProps }: FieldPr
           secureTextEntry={hidden}
           maxFontSizeMultiplier={1.3}
           className="h-full flex-1 font-sans text-body text-ink"
+          onFocus={(e) => {
+            setEnfocado(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setEnfocado(false);
+            onBlur?.(e);
+          }}
           {...inputProps}
         />
         {password ? (
@@ -55,8 +80,18 @@ export function Field({ label, error, password = false, ...inputProps }: FieldPr
             )}
           </Pressable>
         ) : null}
+        {hasError ? (
+          <X size={22} color={colors['accent-oscuro']} strokeWidth={2.5} accessible={false} />
+        ) : valido ? (
+          <Check
+            size={22}
+            color={colors['alerta-exito-borde']}
+            strokeWidth={2.5}
+            accessible={false}
+          />
+        ) : null}
       </View>
-      {hasError ? (
+      {error ? (
         <View className="flex-row items-center gap-1" accessibilityLiveRegion="polite">
           <CircleAlert size={16} color={colors['accent-oscuro']} />
           <AppText variant="small" className="flex-1">

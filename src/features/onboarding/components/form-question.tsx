@@ -10,17 +10,15 @@ import { SingleChoiceQuestion } from './single-choice-question';
 
 export type FormQuestionProps = {
   paso: Paso;
-  /** Recibe true cuando se intentó elegir un tercer elemento en los pasos 1 y 2. */
-  onLimite: (alcanzado: boolean) => void;
 };
 
-export function FormQuestion({ paso, onLimite }: FormQuestionProps) {
+export function FormQuestion({ paso }: FormQuestionProps) {
   const t = es.onboarding.formulario;
   switch (paso) {
     case 1:
-      return <AreasQuestion onLimite={onLimite} />;
+      return <AreasQuestion />;
     case 2:
-      return <ObjetivosQuestion onLimite={onLimite} />;
+      return <ObjetivosQuestion />;
     case 3:
       return <SingleChoiceQuestion campo="historial" claves={HISTORIALES} textos={t.historial} />;
     case 4:

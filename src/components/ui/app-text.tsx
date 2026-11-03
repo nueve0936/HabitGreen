@@ -5,7 +5,7 @@ import { Text, type TextProps } from 'react-native';
 
 export type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'button';
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
-export type TextTone = 'ink' | 'ink-soft';
+export type TextTone = 'ink' | 'ink-soft' | 'surface-oscuro' | 'peligro' | 'confirmar' | 'blanco';
 
 const VARIANT_CLASS: Record<TextVariant, string> = {
   h1: 'text-h1',
@@ -36,6 +36,12 @@ const TONE_CLASS: Record<TextTone, string> = {
   ink: 'text-ink',
   // ink-soft solo sobre el fondo bg o crema, nunca sobre tarjetas surface (SDD 9.6).
   'ink-soft': 'text-ink-soft',
+  // Enlaces de color de los mockups del plan («Editar», «Quitar», «Agregar») sobre fondo claro, y
+  // texto blanco solo sobre los botones peligro y confirmar.
+  'surface-oscuro': 'text-surface-oscuro',
+  peligro: 'text-peligro',
+  confirmar: 'text-confirmar',
+  blanco: 'text-blanco',
 };
 
 export type AppTextProps = TextProps & {

@@ -24,7 +24,7 @@ export function authErrorMessage(error: unknown): string {
   if (code && code in MESSAGES_BY_CODE) return MESSAGES_BY_CODE[code];
   if (status === 429) return es.auth.errores.demasiadosIntentos;
   // supabase-js marca así los fallos de red (sin respuesta del servidor).
-  if (name === 'AuthRetryableFetchError' || status === 0) return es.comun.sinConexion;
+  if (name === 'AuthRetryableFetchError' || status === 0) return es.auth.errores.sinConexion;
   // Error no previsto: en desarrollo se muestra el detalle en la terminal de `expo start`.
   if (__DEV__ && process.env.NODE_ENV !== 'test') {
     console.warn('[auth] Error no reconocido de Supabase:', error);

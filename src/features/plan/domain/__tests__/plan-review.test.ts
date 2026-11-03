@@ -9,6 +9,11 @@ import {
   puedeBajarNivel,
   puedeQuitar,
   quitarHabito,
+  agregarHabito,
+  editarHabitoPlan,
+  paginaDeSugerencias,
+  puedeAgregar,
+  sugerenciasDisponibles,
 } from '../plan-review';
 import { BORRADOR, RESPUESTAS } from '../__fixtures__/plan';
 
@@ -80,4 +85,64 @@ it('convierte entre la hora "HH:MM" y la fecha del selector', () => {
   const fecha = fechaDesdeHora('07:05', new Date(2026, 10, 1, 15, 30));
   expect([fecha.getHours(), fecha.getMinutes(), fecha.getDate()]).toEqual([7, 5, 1]);
   expect(horaDesdeFecha(fecha)).toBe('07:05');
+});
+
+describe('agregar y editar hábitos en la revisión', () => {
+  it('las sugerencias omiten los objetivos que ya están en el plan', () => {
+    expect(sugerenciasDisponibles(BORRADOR).map((h) => h.objetivo)).toEqual([
+      'dormir_mejor',
+      'tomar_agua',
+    ]);
+  });
+
+  it('pagina de 4 en 4 y vuelve al principio', () => {
+    const lista = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    expect(paginaDeSugerencias(lista, 0)).toEqual([1, 2, 3, 4]);
+    expect(paginaDeSugerencias(lista, 2)).toEqual([9]);
+    expect(paginaDeSugerencias(lista, 3)).toEqual([1, 2, 3, 4]);
+    expect(paginaDeSugerencias([1, 2], 5)).toEqual([1, 2]);
+  });
+
+  it('agrega hasta 3 hábitos y no repite objetivos', () => {
+    const [dormir, , agua] = BORRADOR.sugerencias;
+    const con3 = agregarHabito(BORRADOR, dormir!);
+    expect(con3.habitos).toHaveLength(3);
+    expect(puedeAgregar(con3)).toBe(false);
+    expect(agregarHabito(con3, agua!)).toBe(con3);
+    expect(agregarHabito(BORRADOR, BORRADOR.habitos[0]!)).toBe(BORRADOR);
+  });
+
+  it('si se pasa del tiempo diario, este sube a la suma del día más cargado', () => {
+    const justo = { ...BORRADOR, ajustes: { ...BORRADOR.ajustes, presupuesto_min: 20 } };
+    // Lunes: 15 + 5 + 2 = 22 min.
+    expect(agregarHabito(justo, BORRADOR.sugerencias[0]!).ajustes.presupuesto_min).toBe(22);
+  });
+
+  it('editar cambia nombre, días, hora y aviso; sin hora conserva la anterior', () => {
+    const editado = editarHabitoPlan(BORRADOR, 'mover_mas', {
+      titulo: 'Caminar al parque',
+      dias_semana: [6, 1],
+      hora: '19:30',
+      notificar: false,
+    });
+    expect(editado.habitos[0]).toMatchObject({
+      titulo: 'Caminar al parque',
+      dias_semana: [1, 6],
+      hora: '19:30',
+      flexible: false,
+      notificar: false,
+    });
+    const flexible = {
+      ...BORRADOR,
+      habitos: [{ ...BORRADOR.habitos[0]!, hora: null, flexible: true }],
+    };
+    expect(
+      editarHabitoPlan(flexible, 'mover_mas', {
+        titulo: 'Caminar',
+        dias_semana: [1],
+        hora: null,
+        notificar: true,
+      }).habitos[0],
+    ).toMatchObject({ hora: null, flexible: true });
+  });
 });

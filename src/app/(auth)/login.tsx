@@ -11,6 +11,7 @@ import { Field } from '@/components/ui/field';
 import { Screen } from '@/components/ui/screen';
 import { AuthHeader } from '@/features/auth/components/auth-header';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
+import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
   loginSchema,
   type LoginInput,
@@ -31,13 +32,31 @@ export default function LoginScreen() {
     defaultValues: { email: '', password: '' },
   });
 
+  // Un solo aviso bajo los campos (mockups «Login #1.x»): campos vacíos, datos inválidos,
+  // credenciales incorrectas o sin conexión. Con error del servidor se marcan los dos campos.
+  const aviso =
+    serverError ??
+    avisoDeFormulario(
+      [errors.email?.message, errors.password?.message],
+      [t.validacion.correoRequerido, t.validacion.contrasenaRequerida],
+      t.validacion.loginVacios,
+    );
+  const errorServidor = serverError !== null;
+
+  // Al corregir un campo, el error del servidor deja de aplicar.
+  const escribir = (onChange: (texto: string) => void, texto: string) => {
+    setServerError(null);
+    onChange(texto);
+  };
+
   // handleSubmit espera un evento web; en React Native se llama sin argumentos.
   const onSubmit = () => void submit();
   const submit = handleSubmit(async ({ email, password }) => {
-    setServerError(null);
+    // El aviso anterior se queda mientras se espera la respuesta: quitarlo y volver a ponerlo
+    // movía el botón y se veía como un parpadeo.
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     // Si todo sale bien, la sesión cambia y el layout raíz lleva a la pantalla que toca.
-    if (error) setServerError(authErrorMessage(error));
+    setServerError(error ? authErrorMessage(error) : null);
   });
 
   return (
@@ -53,9 +72,9 @@ export default function LoginScreen() {
               label={t.correo}
               placeholder={t.correoPlaceholder}
               value={value}
-              onChangeText={onChange}
+              onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}
-              error={errors.email?.message}
+              invalido={Boolean(errors.email) || errorServidor}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
@@ -73,9 +92,9 @@ export default function LoginScreen() {
                 label={t.contrasena}
                 password
                 value={value}
-                onChangeText={onChange}
+                onChangeText={(texto) => escribir(onChange, texto)}
                 onBlur={onBlur}
-                error={errors.password?.message}
+                invalido={Boolean(errors.password) || errorServidor}
                 autoComplete="current-password"
                 textContentType="password"
                 returnKeyType="done"
@@ -93,7 +112,7 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {serverError ? <Alert variant="error" message={serverError} /> : null}
+        {aviso ? <Alert variant="error" message={aviso} /> : null}
 
         <Button label={t.login.boton} loading={isSubmitting} onPress={onSubmit} className="mt-4" />
 

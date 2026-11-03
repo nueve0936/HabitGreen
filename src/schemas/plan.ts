@@ -48,6 +48,11 @@ export const borradorPlanSchema = z.object({
   habitos: z.array(habitoPlanSchema).min(1),
   ajustes: ajustesPlanSchema,
   alternativas: z.partialRecord(objetivoSchema, z.array(habitoPlanSchema)),
+  /**
+   * Hábitos de nivel 1 de los objetivos no elegidos, para «Agregar otro hábito» en la revisión:
+   * primero los de las áreas elegidas. Textos del catálogo.
+   */
+  sugerencias: z.array(habitoPlanSchema).default([]),
   /** Horas de los dos avisos de un hábito flexible (`app_config.horas_por_momento`). */
   ventana_flexible: z.object({ inicio: horaSchema, fin: horaSchema }),
 });

@@ -27,40 +27,26 @@ export type Borrador = {
 
 export const BORRADOR_VACIO: Borrador = { areas: [], objetivos: [] };
 
-export type ResultadoSeleccion<T> = { lista: T[]; limiteAlcanzado: boolean };
-
 /**
- * Marca o desmarca un valor en una pregunta de «hasta N». Si ya hay N elegidos, no agrega el
- * nuevo y avisa con `limiteAlcanzado` para mostrar el mensaje (no se bloquea en silencio).
+ * Marca o desmarca un valor en una pregunta de «hasta N». Si ya hay N elegidos, el nuevo entra y
+ * sale el primero que se eligió (decisión del usuario: sin advertencia, la selección se recorre).
  */
-export function alternarSeleccion<T>(
-  lista: readonly T[],
-  valor: T,
-  max: number,
-): ResultadoSeleccion<T> {
-  if (lista.includes(valor)) {
-    return { lista: lista.filter((v) => v !== valor), limiteAlcanzado: false };
-  }
-  if (lista.length >= max) return { lista: [...lista], limiteAlcanzado: true };
-  return { lista: [...lista, valor], limiteAlcanzado: false };
+export function alternarSeleccion<T>(lista: readonly T[], valor: T, max: number): T[] {
+  if (lista.includes(valor)) return lista.filter((v) => v !== valor);
+  return [...lista, valor].slice(-max);
 }
 
 /** Elige o quita un área y descarta los objetivos que ya no pertenecen a las áreas elegidas. */
 export function alternarArea(
   borrador: Borrador,
   area: Area,
-): ResultadoSeleccion<Area> & {
-  objetivos: Objetivo[];
-} {
-  const resultado = alternarSeleccion(borrador.areas, area, MAX_AREAS);
-  const objetivos = borrador.objetivos.filter((o) => resultado.lista.includes(areaDeObjetivo(o)));
-  return { ...resultado, objetivos };
+): { areas: Area[]; objetivos: Objetivo[] } {
+  const areas = alternarSeleccion(borrador.areas, area, MAX_AREAS);
+  const objetivos = borrador.objetivos.filter((o) => areas.includes(areaDeObjetivo(o)));
+  return { areas, objetivos };
 }
 
-export function alternarObjetivo(
-  borrador: Borrador,
-  objetivo: Objetivo,
-): ResultadoSeleccion<Objetivo> {
+export function alternarObjetivo(borrador: Borrador, objetivo: Objetivo): Objetivo[] {
   return alternarSeleccion(borrador.objetivos, objetivo, MAX_OBJETIVOS);
 }
 

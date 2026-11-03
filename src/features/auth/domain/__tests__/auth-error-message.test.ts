@@ -18,7 +18,7 @@ describe('authErrorMessage', () => {
 
   it('reconoce los fallos de red', () => {
     expect(authErrorMessage({ name: 'AuthRetryableFetchError', status: 0 })).toBe(
-      es.comun.sinConexion,
+      es.auth.errores.sinConexion,
     );
   });
 

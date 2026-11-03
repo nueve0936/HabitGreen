@@ -50,7 +50,10 @@ export default function ModoScreen() {
   return (
     <Screen scroll contentClassName="gap-6 pt-2">
       <View className="-ml-4">
-        <BackButton />
+        {/* Si la app se abrió directo aquí, no hay historial: la flecha lleva a Empezar. */}
+        <BackButton
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/empezar'))}
+        />
       </View>
 
       <View className="gap-2">

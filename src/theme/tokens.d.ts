@@ -18,6 +18,9 @@ export declare const colors: {
   'alerta-exito-borde': string;
   'alerta-info': string;
   'alerta-info-borde': string;
+  peligro: string;
+  confirmar: string;
+  blanco: string;
 };
 
 export declare const fonts: {

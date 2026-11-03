@@ -164,6 +164,29 @@ export function alternativasDeNivel(
   return alternativas;
 }
 
+/**
+ * Sugerencias para «Agregar otro hábito»: el nivel 1 de cada objetivo que el usuario no eligió,
+ * con las mismas reglas de la P5, la P6 y la P7. Primero las de las áreas elegidas.
+ */
+export function sugerenciasDeHabitos(
+  respuestas: Respuestas,
+  catalogo: readonly FilaCatalogo[],
+  config: ConfigPlan,
+): HabitoPlan[] {
+  const objetivos = [...new Set(catalogo.map((f) => f.objetivo))].filter(
+    (o) => !respuestas.objetivos.includes(o),
+  );
+  const deSusAreas = (o: Objetivo) => respuestas.areas.includes(areaDeObjetivo(o));
+  const ordenados = [...objetivos.filter(deSusAreas), ...objetivos.filter((o) => !deSusAreas(o))];
+  return ordenados.flatMap((objetivo) => {
+    try {
+      return [habitoParaNivel(respuestas, catalogo, config, objetivo, 1)];
+    } catch {
+      return [];
+    }
+  });
+}
+
 /** Mensaje para la IA (docs/textos.md 8): solo claves y números, nunca datos personales. */
 export function mensajeParaIa(respuestas: Respuestas, habitos: readonly HabitoPlan[]): string {
   return JSON.stringify({

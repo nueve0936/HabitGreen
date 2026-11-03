@@ -2,7 +2,7 @@ import { randomUUID } from 'expo-crypto';
 import { create } from 'zustand';
 
 import type { Objetivo } from '@/schemas/onboarding';
-import type { BorradorPlan } from '@/schemas/plan';
+import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
 
 import * as revision from './domain/plan-review';
 import type { IdsPlan } from './domain/plan-rows';
@@ -16,8 +16,8 @@ type PlanReviewState = {
   borrador: BorradorPlan | null;
   ids: IdsPlan | null;
   cargar: (borrador: BorradorPlan) => void;
-  cambiarHora: (objetivo: Objetivo, hora: string) => void;
-  bajarNivel: (objetivo: Objetivo) => void;
+  agregar: (habito: HabitoPlan) => void;
+  editar: (objetivo: Objetivo, cambios: revision.CambiosHabitoPlan) => void;
   quitar: (objetivo: Objetivo) => void;
   cambiarSegundoAviso: (activo: boolean) => void;
   limpiar: () => void;
@@ -39,8 +39,26 @@ export const usePlanReviewStore = create<PlanReviewState>()((set) => {
     borrador: null,
     ids: null,
     cargar: (borrador) => set({ borrador, ids: nuevosIds(borrador) }),
-    cambiarHora: (objetivo, hora) => editar((b) => revision.cambiarHora(b, objetivo, hora)),
-    bajarNivel: (objetivo) => editar((b) => revision.bajarNivel(b, objetivo)),
+    // Un hábito agregado recibe sus UUID en ese momento, igual que los del borrador original.
+    agregar: (habito) =>
+      set((s) =>
+        s.borrador === null || s.ids === null
+          ? s
+          : {
+              borrador: revision.agregarHabito(s.borrador, habito),
+              ids: {
+                ...s.ids,
+                habitos: {
+                  ...s.ids.habitos,
+                  [habito.objetivo]: s.ids.habitos[habito.objetivo] ?? {
+                    habitId: randomUUID(),
+                    scheduleId: randomUUID(),
+                  },
+                },
+              },
+            },
+      ),
+    editar: (objetivo, cambios) => editar((b) => revision.editarHabitoPlan(b, objetivo, cambios)),
     quitar: (objetivo) => editar((b) => revision.quitarHabito(b, objetivo)),
     cambiarSegundoAviso: (activo) => editar((b) => revision.cambiarSegundoAviso(b, activo)),
     limpiar: () => set({ borrador: null, ids: null }),

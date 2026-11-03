@@ -1,10 +1,10 @@
 import { Check } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { colors } from '@/theme';
 
-import { AppText } from './app-text';
+import { StableBoldText } from './stable-bold-text';
 
 // Chip compacto (radio 999, SDD 9.3) para filtros y días de la semana. Elegido: fondo surface,
 // texto en negrita e icono de verificación, para no depender solo del color.
@@ -36,10 +36,13 @@ export function FilterChip({
         selected ? 'border-ink bg-surface' : 'border-bg-oscuro bg-campo active:bg-bg-claro'
       }`}
     >
-      {selected ? <Check size={16} color={colors.ink} strokeWidth={3} /> : icon}
-      <AppText variant="small" weight={selected ? 'bold' : 'medium'}>
+      {/* Espacio fijo para el icono: el chip no crece al elegirse ni empuja a los de al lado. */}
+      <View className="h-[18px] w-[18px] items-center justify-center">
+        {selected ? <Check size={16} color={colors.ink} strokeWidth={3} /> : icon}
+      </View>
+      <StableBoldText variant="small" bold={selected}>
         {label}
-      </AppText>
+      </StableBoldText>
     </Pressable>
   );
 }

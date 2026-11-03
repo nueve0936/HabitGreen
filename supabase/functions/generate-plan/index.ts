@@ -7,12 +7,13 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
 import { AiCuotaError, crearProveedor } from '../_shared/ai-provider.ts';
-import { respuestasSchema, type Respuestas } from '../_shared/generated/onboarding.ts';
+import { respuestasSchema } from '../_shared/generated/onboarding.ts';
 import {
   aplicarTextosIa,
   alternativasDeNivel,
   generarPlan,
   mensajeParaIa,
+  sugerenciasDeHabitos,
   type ConfigPlan,
   type FilaCatalogo,
 } from '../_shared/generated/plan-engine.ts';
@@ -83,13 +84,14 @@ const configSchema = z.object({
 
 type Config = { motor: ConfigPlan; ventanaFlexible: BorradorPlan['ventana_flexible'] };
 
-async function leerCatalogo(db: SupabaseClient, r: Respuestas): Promise<FilaCatalogo[]> {
+// El catálogo completo (unas 50 filas): los objetivos elegidos para el plan y el nivel 1 de los
+// demás para las sugerencias de «Agregar otro hábito».
+async function leerCatalogo(db: SupabaseClient): Promise<FilaCatalogo[]> {
   const { data, error } = await db
     .from('habit_catalog')
     .select(
       'objetivo, categoria, nivel, variante, titulo, descripcion, duracion_min, duracion_reducida_min, dias_semana, momento_fijo, sin_recursos',
-    )
-    .in('objetivo', r.objetivos);
+    );
   if (error) throw error;
   // Las claves del catálogo las valida el motor al buscar cada fila.
   return z.array(filaCatalogoSchema).parse(data) as FilaCatalogo[];
@@ -151,7 +153,7 @@ Deno.serve(async (req) => {
 
   try {
     // 3. Motor del plan con el catálogo y la configuración de la base de datos.
-    const catalogo = await leerCatalogo(db, r);
+    const catalogo = await leerCatalogo(db);
     const config = await leerConfig(db);
     const plan = generarPlan(r, catalogo, config.motor);
 
@@ -207,6 +209,7 @@ Deno.serve(async (req) => {
       habitos,
       ajustes: plan.ajustes,
       alternativas: alternativasDeNivel(r, catalogo, config.motor, plan.habitos),
+      sugerencias: sugerenciasDeHabitos(r, catalogo, config.motor),
       ventana_flexible: config.ventanaFlexible,
     });
     return responder(borrador);

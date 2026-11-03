@@ -17,9 +17,9 @@ type OnboardingState = {
   userId: string | null;
   borrador: Borrador;
   prepararPara: (userId: string) => void;
-  /** Devuelve true si se intentó elegir un tercer elemento. */
-  alternarArea: (area: Area) => boolean;
-  alternarObjetivo: (objetivo: Objetivo) => boolean;
+  /** Con 2 ya elegidos, el nuevo reemplaza al primero que se eligió. */
+  alternarArea: (area: Area) => void;
+  alternarObjetivo: (objetivo: Objetivo) => void;
   responder: <K extends PreguntaUnica>(pregunta: K, valor: NonNullable<Borrador[K]>) => void;
   reiniciar: () => void;
 };
@@ -44,16 +44,12 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       alternarArea: (area) => {
         const { borrador } = get();
-        const resultado = alternarArea(borrador, area);
-        set({ borrador: { ...borrador, areas: resultado.lista, objetivos: resultado.objetivos } });
-        return resultado.limiteAlcanzado;
+        set({ borrador: { ...borrador, ...alternarArea(borrador, area) } });
       },
 
       alternarObjetivo: (objetivo) => {
         const { borrador } = get();
-        const resultado = alternarObjetivo(borrador, objetivo);
-        set({ borrador: { ...borrador, objetivos: resultado.lista } });
-        return resultado.limiteAlcanzado;
+        set({ borrador: { ...borrador, objetivos: alternarObjetivo(borrador, objetivo) } });
       },
 
       responder: (pregunta, valor) => set({ borrador: { ...get().borrador, [pregunta]: valor } }),

@@ -1,69 +1,68 @@
-import { View } from 'react-native';
+import { CircleCheck } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
 
-import { AppText } from '@/components/ui/app-text';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { AppText, type TextTone } from '@/components/ui/app-text';
 import { es } from '@/i18n/es';
 import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
+import { cardShadow, colors } from '@/theme';
 
 import { textoHorario } from '../domain/plan-format';
 
-// Tarjeta de un hábito en la revisión del plan (SDD 9.4): título, duración, días y hora, con las
-// acciones «Cambiar hora», «Bajar nivel» y «Quitar». Sobre `surface` todo el texto va en ink.
+// Tarjeta de un hábito del plan (mockups «Tu plan está listo» y «Sugerencias de hábitos»): fondo
+// claro, verificación verde, título, duración con días y hora, la etiqueta de su categoría y los
+// enlaces de acción («Editar» y «Quitar», o «Agregar»). Los enlaces dicen su acción con texto.
+
+export type AccionTarjeta = {
+  label: string;
+  tone: Extract<TextTone, 'surface-oscuro' | 'peligro' | 'confirmar'>;
+  accessibilityLabel: string;
+  onPress: () => void;
+};
 
 export type PlanHabitCardProps = {
   habito: HabitoPlan;
   ventana: BorradorPlan['ventana_flexible'];
-  puedeBajar: boolean;
-  puedeQuitar: boolean;
-  onCambiarHora: () => void;
-  onBajarNivel: () => void;
-  onQuitar: () => void;
+  acciones: AccionTarjeta[];
 };
 
-export function PlanHabitCard({
-  habito,
-  ventana,
-  puedeBajar,
-  puedeQuitar,
-  onCambiarHora,
-  onBajarNivel,
-  onQuitar,
-}: PlanHabitCardProps) {
+export function PlanHabitCard({ habito, ventana, acciones }: PlanHabitCardProps) {
   const t = es.onboarding.revision;
 
   return (
-    <Card className="gap-2">
-      <AppText variant="h3">{habito.titulo}</AppText>
-      {habito.descripcion ? <AppText>{habito.descripcion}</AppText> : null}
-      <AppText variant="small" weight="semibold">
+    <View style={cardShadow} className="gap-2 rounded-card bg-campo px-4 pb-1 pt-4">
+      <View className="flex-row items-start gap-2">
+        <CircleCheck size={24} color={colors.campo} fill={colors.confirmar} strokeWidth={2.5} />
+        <AppText weight="bold" className="flex-1">
+          {habito.titulo}
+        </AppText>
+      </View>
+      {habito.descripcion ? <AppText variant="small">{habito.descripcion}</AppText> : null}
+      <AppText variant="small" tone="ink-soft">
         {textoHorario(habito, ventana, t)}
       </AppText>
 
-      <View className="-mx-2 flex-row flex-wrap">
-        <Button
-          variant="tertiary"
-          label={t.cambiarHora}
-          accessibilityLabel={`${t.cambiarHora}: ${habito.titulo}`}
-          onPress={onCambiarHora}
-        />
-        {puedeBajar ? (
-          <Button
-            variant="tertiary"
-            label={t.bajarNivel}
-            accessibilityLabel={`${t.bajarNivel}: ${habito.titulo}`}
-            onPress={onBajarNivel}
-          />
-        ) : null}
-        {puedeQuitar ? (
-          <Button
-            variant="tertiary"
-            label={t.quitar}
-            accessibilityLabel={`${t.quitar}: ${habito.titulo}`}
-            onPress={onQuitar}
-          />
-        ) : null}
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="rounded-field bg-surface-claro px-3 py-1">
+          <AppText variant="small" weight="semibold">
+            {es.onboarding.formulario.areas[habito.categoria]}
+          </AppText>
+        </View>
+        <View className="flex-row">
+          {acciones.map((accion) => (
+            <Pressable
+              key={accion.label}
+              accessibilityRole="button"
+              accessibilityLabel={accion.accessibilityLabel}
+              onPress={accion.onPress}
+              className="min-h-11 justify-center px-2 active:opacity-60"
+            >
+              <AppText variant="small" weight="bold" tone={accion.tone}>
+                {accion.label}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
       </View>
-    </Card>
+    </View>
   );
 }

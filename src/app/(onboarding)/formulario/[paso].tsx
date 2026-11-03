@@ -1,8 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
@@ -36,7 +34,6 @@ export default function FormularioPasoScreen() {
   const t = es.onboarding.formulario;
   const paso = leerPaso(useLocalSearchParams<{ paso: string }>().paso);
   const borrador = useOnboardingStore((s) => s.borrador);
-  const [limite, setLimite] = useState(false);
 
   const pregunta = t.preguntas[CAMPO_POR_PASO[paso]];
   const esUltimo = paso === TOTAL_PASOS;
@@ -69,9 +66,7 @@ export default function FormularioPasoScreen() {
         </AppText>
       </View>
 
-      <FormQuestion paso={paso} onLimite={setLimite} />
-
-      {limite ? <Alert variant="advertencia" message={t.limite} /> : null}
+      <FormQuestion paso={paso} />
 
       <Button
         label={esUltimo ? t.crearPlan : t.continuar}

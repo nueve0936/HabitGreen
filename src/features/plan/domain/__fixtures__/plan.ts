@@ -55,5 +55,15 @@ export const BORRADOR: BorradorPlan = {
     mover_mas: [habito({ nivel: 1, titulo: 'Caminar 5 min', duracion_min: 5 })],
     tiempo_de_calidad: [],
   },
+  sugerencias: [
+    habito({
+      objetivo: 'dormir_mejor',
+      nivel: 1,
+      titulo: 'Acostarme a la misma hora',
+      duracion_min: 2,
+    }),
+    habito({ objetivo: 'tiempo_de_calidad', categoria: 'social', nivel: 1, duracion_min: 5 }),
+    habito({ objetivo: 'tomar_agua', nivel: 1, titulo: 'Un vaso de agua', duracion_min: 1 }),
+  ],
   ventana_flexible: { inicio: '17:00', fin: '20:00' },
 };

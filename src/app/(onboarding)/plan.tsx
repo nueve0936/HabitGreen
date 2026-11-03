@@ -11,6 +11,7 @@ import { generarBorrador } from '@/db/plan-repository';
 import { respuestasCompletas } from '@/features/onboarding/domain/form-rules';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { GrowingPlant } from '@/features/plan/components/growing-plant';
+import { PreparingSteps } from '@/features/plan/components/preparing-steps';
 import { usePlanReviewStore } from '@/features/plan/plan-review-store';
 import { es } from '@/i18n/es';
 
@@ -19,6 +20,10 @@ import { es } from '@/i18n/es';
 // plan de catálogo, así que aquí solo llegan errores de red o del servidor.
 
 const SEGUNDOS_LENTO = 10;
+// Cada paso de la lista se marca cada 1.2 s; el último espera la respuesta del servidor.
+const MS_POR_PASO = 1200;
+// Pausa breve con todos los pasos marcados antes de pasar a la revisión.
+const MS_FINAL = 500;
 
 type Estado = 'cargando' | 'sin_conexion' | 'error';
 
@@ -29,6 +34,8 @@ export default function GenerandoPlanScreen() {
   const [estado, setEstado] = useState<Estado>('cargando');
   const [lento, setLento] = useState(false);
   const [intento, setIntento] = useState(0);
+  const [pasosListos, setPasosListos] = useState(0);
+  const totalPasos = t.pasos.length;
 
   const completas = respuestasCompletas(borrador) !== null;
 
@@ -39,13 +46,20 @@ export default function GenerandoPlanScreen() {
     const avisoLento = setTimeout(() => {
       if (activo) setLento(true);
     }, SEGUNDOS_LENTO * 1000);
+    const avance = setInterval(() => {
+      if (activo) setPasosListos((n) => Math.min(n + 1, totalPasos - 1));
+    }, MS_POR_PASO);
+    let salida: ReturnType<typeof setTimeout> | undefined;
 
     generarBorrador(respuestas)
       .then((resultado) => {
         if (!activo) return;
         if (resultado.ok) {
-          cargarRevision(resultado.borrador);
-          router.replace('/revision');
+          setPasosListos(totalPasos);
+          salida = setTimeout(() => {
+            cargarRevision(resultado.borrador);
+            router.replace('/revision');
+          }, MS_FINAL);
         } else {
           setEstado(resultado.motivo);
         }
@@ -53,13 +67,18 @@ export default function GenerandoPlanScreen() {
       .catch(() => {
         if (activo) setEstado('error');
       })
-      .finally(() => clearTimeout(avisoLento));
+      .finally(() => {
+        clearTimeout(avisoLento);
+        clearInterval(avance);
+      });
 
     return () => {
       activo = false;
       clearTimeout(avisoLento);
+      clearInterval(avance);
+      clearTimeout(salida);
     };
-  }, [borrador, intento, cargarRevision]);
+  }, [borrador, intento, cargarRevision, totalPasos]);
 
   if (!completas) {
     return <Redirect href={{ pathname: '/formulario/[paso]', params: { paso: '1' } }} />;
@@ -68,6 +87,7 @@ export default function GenerandoPlanScreen() {
   const reintentar = () => {
     setEstado('cargando');
     setLento(false);
+    setPasosListos(0);
     setIntento((n) => n + 1);
   };
 
@@ -84,17 +104,24 @@ export default function GenerandoPlanScreen() {
   }
 
   return (
-    <Screen contentClassName="items-center justify-center gap-6">
-      <GrowingPlant label={t.ilustracion} />
-      <View accessibilityLiveRegion="polite" className="items-center gap-2">
-        <AppText variant="h3" className="text-center">
-          {t.preparando}
-        </AppText>
-        {lento ? (
-          <AppText tone="ink-soft" className="text-center">
-            {t.lento}
+    <Screen contentClassName="gap-6 pt-2">
+      <View className="-ml-4">
+        <BackButton />
+      </View>
+      <View className="flex-1 items-center justify-center gap-6">
+        <GrowingPlant label={t.ilustracion} />
+        <View accessibilityLiveRegion="polite" className="items-center gap-2">
+          <AppText variant="h2" tone="surface-oscuro" className="text-center">
+            {t.preparando}
           </AppText>
-        ) : null}
+          <AppText className="text-center">{t.descripcion}</AppText>
+          {lento ? (
+            <AppText tone="ink-soft" className="text-center">
+              {t.lento}
+            </AppText>
+          ) : null}
+        </View>
+        <PreparingSteps listos={pasosListos} />
       </View>
     </Screen>
   );

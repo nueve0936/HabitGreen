@@ -6,14 +6,10 @@ import { AREAS } from '@/schemas/onboarding';
 
 import { useOnboardingStore } from '../onboarding-store';
 
-// Pregunta 1: hasta 2 áreas. Al quitar un área se descartan sus objetivos de la pregunta 2.
+// Pregunta 1: hasta 2 áreas; una tercera reemplaza a la primera elegida. Al quitar un área se
+// descartan sus objetivos de la pregunta 2.
 
-export type AreasQuestionProps = {
-  /** Recibe true cuando se intentó elegir una tercera área. */
-  onLimite: (alcanzado: boolean) => void;
-};
-
-export function AreasQuestion({ onLimite }: AreasQuestionProps) {
+export function AreasQuestion() {
   const t = es.onboarding.formulario;
   const elegidas = useOnboardingStore((s) => s.borrador.areas);
   const alternarArea = useOnboardingStore((s) => s.alternarArea);
@@ -26,7 +22,7 @@ export function AreasQuestion({ onLimite }: AreasQuestionProps) {
           kind="checkbox"
           label={t.areas[area]}
           selected={elegidas.includes(area)}
-          onPress={() => onLimite(alternarArea(area))}
+          onPress={() => alternarArea(area)}
         />
       ))}
     </View>

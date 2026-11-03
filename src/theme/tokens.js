@@ -24,6 +24,11 @@ const colors = {
   'alerta-exito-borde': '#5E6B2B',
   'alerta-info': '#E8DCC8',
   'alerta-info-borde': '#5A4034',
+  // Rojo y verde de los diálogos de confirmación y de los enlaces «Quitar» y «Agregar» de los
+  // mockups del plan (fuera de la paleta 60-30-10). Llevan texto blanco: contraste de más de 5:1.
+  peligro: '#C62828',
+  confirmar: '#2E7D32',
+  blanco: '#FFFFFF',
 };
 
 // Lexend Deca, según los mockups de Figma. Cada peso es una familia distinta en React Native.
