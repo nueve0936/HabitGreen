@@ -10,11 +10,12 @@ import {
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ProfileErrorView } from '@/features/auth/components/profile-error-view';
 import { SessionProvider } from '@/features/auth/session-provider';
+import type { AppZone } from '@/features/auth/domain/session-route';
 import { useAppZone } from '@/features/auth/use-app-zone';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -41,17 +42,25 @@ export default function RootLayout() {
   );
 }
 
+type ZonaVisible = Exclude<AppZone, 'loading'>;
+
 function RootNavigator() {
-  const zone = useAppZone();
+  const zonaActual = useAppZone();
+  // Última zona ya resuelta. Al iniciar sesión hay un momento de «loading» mientras se carga el
+  // perfil: en vez de dejar la pantalla en blanco (se veía como un parpadeo), se sigue mostrando
+  // la zona anterior hasta que la nueva esté lista.
+  const [ultimaZona, setUltimaZona] = useState<ZonaVisible | null>(null);
+  if (zonaActual !== 'loading' && zonaActual !== ultimaZona) setUltimaZona(zonaActual);
+  const zone = zonaActual === 'loading' ? ultimaZona : zonaActual;
 
   useEffect(() => {
-    if (zone !== 'loading') {
+    if (zone !== null) {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [zone]);
 
-  // Mientras se lee la sesión guardada sigue visible la pantalla de carga nativa.
-  if (zone === 'loading') return null;
+  // Al abrir la app, mientras se lee la sesión guardada sigue visible la pantalla de carga nativa.
+  if (zone === null) return null;
   if (zone === 'profile-error') return <ProfileErrorView />;
 
   // Cada zona solo deja entrar a sus pantallas. Al cambiar la sesión, Expo Router lleva al
@@ -64,6 +73,8 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="habit/nuevo" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="habit/[id]" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="tienda" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="planta/[categoria]" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       <Stack.Protected guard={zone === 'onboarding'}>
         <Stack.Screen name="(onboarding)" />

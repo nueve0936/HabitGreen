@@ -204,7 +204,7 @@ assets/ plants/ accessories/ icons/ animations/
 | Zona horaria | Al abrir la app, si la zona del dispositivo es distinta de `profiles.zona_horaria`, se actualiza el perfil antes de sincronizar. Así un check-in de «hoy» nunca llega al servidor como fecha futura. |
 | Rechazos | Si el servidor rechaza una operación (fecha fuera de rango, hábito eliminado), se descarta, se registra en el log de la app (Sentry antes de publicar) y se refresca el estado local. |
 | Cuándo sincroniza | Al abrir la app, al volver a primer plano, al recuperar conexión y después de cada operación si hay red. |
-| Implementación (Entrega 3) | Esquema local en `src/db/local-schema.ts`: una sola descripción por tabla crea la tabla, convierte las filas (booleanos 0/1, arreglos y `jsonb` como JSON) y arma la descarga. Si cambia la versión del esquema local, las tablas espejo se recrean y se descargan completas; la `outbox` se conserva. La red se detecta con `expo-network`. Hábitos, horarios y ocurrencias se suben por upsert con RLS; los cambios parciales (pausar, archivar, editar, cerrar un horario, subir el presupuesto) con la operación `update`, porque el upsert exige la fila completa; los check-ins, por las RPC. El plan y los ajustes del modo tradicional se guardan directo en Supabase (ya exigen conexión) y bajan con la sincronización. El perfil guarda una copia local para abrir la app sin conexión. Si al abrir sin red el token ya venció, se usa la sesión guardada en el teléfono y Supabase la renueva al volver la conexión; la sincronización no envía nada mientras no haya un token válido. Al cerrar sesión se intenta subir lo pendiente y se vacía la base local. |
+| Implementación (Entrega 3) | Esquema local en `src/db/local-schema.ts`: una sola descripción por tabla crea la tabla, convierte las filas (booleanos 0/1, arreglos y `jsonb` como JSON) y arma la descarga. Si cambia la versión del esquema local, las tablas espejo se recrean y se descargan completas; la `outbox` se conserva. La red se detecta con `expo-network`. Hábitos, horarios y ocurrencias se suben por upsert con RLS; los cambios parciales (pausar, archivar, editar, cerrar un horario, subir el presupuesto, equipar accesorios) con la operación `update`, porque el upsert exige la fila completa; los check-ins, por las RPC. El plan y los ajustes del modo tradicional se guardan directo en Supabase (ya exigen conexión) y bajan con la sincronización. El perfil guarda una copia local para abrir la app sin conexión. Si al abrir sin red el token ya venció, se usa la sesión guardada en el teléfono y Supabase la renueva al volver la conexión; la sincronización no envía nada mientras no haya un token válido. Al cerrar sesión se intenta subir lo pendiente y se vacía la base local. |
 | RPC de check-in en la Entrega 3 | `complete_habit(p_log_id, p_habit_id, p_fecha)` y `uncomplete_habit(p_habit_id, p_fecha)` en versión mínima: validan dueño, hábito no archivado (solo al completar) y la ventana de 7 días; son idempotentes y no dan recompensas. La Entrega 4 agrega los topes sin cambiar los parámetros. |
 
 ## 4. Modelo de datos (Postgres)
@@ -267,7 +267,7 @@ La pantalla muestra las opciones agrupadas por área con encabezados H3.
 - Pregunta 1: 1 a 2 valores. Pregunta 2: 1 a 2 valores, todos pertenecientes a las áreas elegidas.
 - Si el usuario cambia las áreas en la pregunta 1, se eliminan los objetivos que ya no corresponden.
 - Preguntas 3 a 7: una opción obligatoria.
-- Al intentar elegir un tercer elemento, no se bloquea en silencio: se muestra el mensaje «Elige hasta 2 para empezar con poca carga. Podrás agregar más después».
+- Al elegir un tercer elemento, este entra y se quita el primero que se eligió, sin mensaje de advertencia (decisión del usuario en la revisión de diseño). Si se reemplaza un área, se descartan sus objetivos.
 - El avance se guarda en Zustand y se persiste en local (`zustand/persist` sobre `expo-sqlite`, 3.2) para retomarlo si se cierra la app.
 
 ### 5.4 Parámetros derivados (motor de plan, funciones puras)
@@ -493,6 +493,8 @@ La fase 2 del perfil típico coincide con la mediana de 66 días para automatiza
 
 La app calcula lo mismo en local para respuesta inmediata y reconcilia al sincronizar. El servidor es la fuente de verdad. Las constantes viven en `app_config`, cacheadas en SQLite.
 
+**Implementación (Entrega 4).** Las dos RPC devuelven jsonb (`{xp, monedas, fase_anterior, fase}`) y bloquean el monedero del usuario al empezar, para que dos check-ins simultáneos no cuenten doble los topes. Son idempotentes: completar algo ya completado o deshacer algo ya deshecho no otorga ni quita nada. **Al deshacer, el saldo nunca baja de 0**: si las monedas ya se gastaron, se quita solo lo que hay (decisión del usuario). En el teléfono, `src/features/rewards/domain/recompensas.ts` replica el cálculo; la sincronización sube la cola antes de descargar, así que los valores del servidor reemplazan a los locales.
+
 ### 6.2 Reprogramación de hábitos fallidos
 
 Reprogramar es **mover la ocurrencia a un día libre, fuera del patrón semanal del hábito**. El día original no cuenta como fallado.
@@ -567,6 +569,8 @@ La IA (`adjust-plan`) solo redacta textos cuando se agrega un hábito o se cambi
 - Los precios viven en `app_config` y en `accessories.precio`.
 - Un accesorio comprado se equipa en una sola planta a la vez. Equiparlo en otra planta lo quita de la anterior. Cada planta lleva como máximo un sombrero, unos lentes y una maceta.
 - Los nombres de los 15 accesorios los define el usuario. Mientras tanto se usan los nombres provisionales de `docs/textos.md`.
+- **Comprar necesita conexión** (RPC `comprar_accesorio`, que revisa el saldo real; comprar algo que ya es tuyo no cobra otra vez). Sin red: «Necesitas conexión para comprar». **Equipar y quitar funcionan sin conexión** con la operación `update` de la cola sobre `user_accessories`.
+- Arte provisional (Entrega 4): una imagen genérica para plantas y otra para accesorios en las rutas de 9.8; se reemplazan con el mismo nombre de archivo. Mientras tanto, el panel nombra lo que lleva cada planta.
 
 ### 6.5 Modo tradicional
 
@@ -691,8 +695,9 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 | `Button` secundario | Transparente, texto `ink`, borde 2 px `ink`. |
 | `Button` terciario | Texto `ink` subrayado, sin borde, área táctil mínima 44 px. |
 | `Card` | Fondo `surface`, borde 1 px `surface-oscuro`, radio 16, relleno 16–24, sombra suave. Presionada: `surface-claro`. |
-| `Field` | Fondo `bg-claro`, borde 2 px `ink`, radio 8, alto 48. Etiqueta siempre visible sobre el campo. Error: borde `accent-oscuro`, fondo `accent-claro`, icono y mensaje debajo. |
-| `OptionChip` (opciones del formulario) | Alto mínimo 48 px. No seleccionado: fondo `bg-claro`, borde 2 px `ink`. **Seleccionado: fondo `surface`, borde 2 px `ink`, icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
+| `Field` | Fondo `campo`, borde 2 px `ink-soft`, radio 8, alto 48. Etiqueta siempre visible sobre el campo. **Enfocado: borde `surface` (#C98B58).** Error: borde `accent-oscuro` y una X dentro del campo; el mensaje va debajo o, en login y registro, en un solo aviso bajo los campos. Válido (registro, tras intentar enviar): marca de verificación dentro del campo. |
+| `OptionChip` (opciones del formulario) | Alto mínimo 48 px, fondo `campo`. No seleccionado: sin borde visible. **Seleccionado (mockup «Encuesta inicial #1.1»): borde 2 px `surface` (#C98B58), icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
+| Avisos de login y registro | Un solo `Alert` de error bajo los campos al pulsar el botón (mockups «Login/Registrar #1.1–1.3»): campos vacíos («Por favor, ingresa tu correo y contraseña» / «Por favor, llena cada uno de los campos»), contraseñas distintas, credenciales incorrectas («Tu correo o contraseña son incorrectos») y sin conexión («No hay conexión a internet. Inténtalo más tarde»). Con error del servidor se marcan todos los campos. |
 | `ProgressSteps` | Texto «Paso 3 de 7» + barra de 8 px (pista `bg-oscuro`, relleno `ink`). |
 | `TabBar` | Fondo `surface`, texto e iconos `ink`. Activo: fondo `surface-oscuro`, indicador de 4 px `accent`, texto en negrita. |
 | `Alert` | Error `accent-claro`/`accent-oscuro`; advertencia #F4D9A8/#A86F42; éxito `bg-claro`/#5E6B2B; informativo #E8DCC8/`ink-soft`. Siempre icono + texto. |
@@ -704,9 +709,11 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 
 **Formulario (7 pasos).** Una pregunta por pantalla. Arriba: `ProgressSteps`. Cuerpo: título H2, ayuda en texto pequeño (5.1) y opciones como `OptionChip` en lista vertical. Pie fijo: botón secundario «Atrás» y CTA «Siguiente» (en el paso 7, «Crear mi plan»). La pregunta 2 muestra las opciones agrupadas por área con encabezados H3.
 
-**Generando plan.** Estado de carga con animación sobria de una planta que crece y un texto («Estamos preparando tu plan»). Si tarda más de 10 s se muestra «Sigue en proceso» y, si falla, se muestra el plan de catálogo sin mostrar errores técnicos.
+**Generando plan** (mockup «Encuesta Inicial: Preparando»). Planta que crece, «Estamos preparando algo único…», «Armamos tu plan con base en tus respuestas. Solo tomará unos segundos.» y tres pasos («Revisando tus metas», «Eligiendo micro-pasos pequeños», «Ajustando a tu ritmo») que pasan de reloj a verificación cada 1.2 s; el último espera la respuesta. Si tarda más de 10 s se muestra «Sigue en proceso» y, si falla, se muestra el plan de catálogo sin mostrar errores técnicos.
 
-**Revisión del plan.** Resumen en texto, una `Card` por hábito (título, duración, días, hora) con acciones «Cambiar hora», «Bajar nivel» y «Quitar». Si aplica la precedencia de 5.6, se muestra el interruptor «Segundo aviso». CTA: «Empezar». En este punto se pide el permiso de notificaciones con un texto previo que explica para qué sirve.
+**Revisión del plan** (mockups «Tu plan está listo», «Editar hábito», «Quitar» y «Sugerencias de hábitos»). Título «Tu plan está listo» y una tarjeta clara por hábito (verificación verde, título, duración, días y hora, etiqueta de categoría) con los enlaces «Editar» y «Quitar». «Editar» abre una hoja inferior con nombre, frecuencia (todos los días o días específicos) y hora del recordatorio (reloj de Android, sujeto a cambio) o «Sin recordatorio». «Quitar» pide confirmación en un diálogo. «+ Agregar otro hábito» abre las sugerencias: 4 hábitos de nivel 1 de objetivos no elegidos (los de las áreas elegidas primero, devueltos por `generate-plan` en `sugerencias`) y «Sugerir otros hábitos» muestra los 4 siguientes; al agregar se confirma en un diálogo. **El plan inicial admite hasta 3 hábitos**; si un día supera `presupuesto_min`, este sube a la suma (como en 6.5). «Bajar nivel» ya no se ofrece aquí. Si aplica la precedencia de 5.6, se muestra el interruptor «Segundo aviso». Nota al pie «Si un día no puedes, tu meta se ajusta sin perder progreso» y CTA «Confirmar plan». En este punto se pide el permiso de notificaciones con un texto previo que explica para qué sirve.
+
+**Colores fuera de la paleta (mockups del plan).** Los diálogos de confirmación y los enlaces «Quitar» y «Agregar» usan `peligro` (#C62828) y `confirmar` (#2E7D32); los botones de esos colores llevan texto blanco (contraste mayor a 5:1). Las píldoras elegidas de «Editar hábito» van rellenas de `surface` con texto `ink` (el mockup usa blanco, que no contrasta). Las opciones que se ponen en negritas al elegirse reservan el ancho del texto en negritas para no moverse (`StableBoldText`).
 
 **Hoy.** Fondo `bg`. Encabezado con saludo y saldo de monedas. Lista de hábitos de hoy como `Card`; cada una con botón de check de 48 × 48 px (icono de verificación + etiqueta «Hecho»). Los pendientes que se reprogramaron aparecen con un `Alert` informativo. Sin CTA coral grande: la acción principal es el check; el coral se limita a indicadores y badges para respetar el 10%.
 

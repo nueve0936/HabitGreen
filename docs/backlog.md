@@ -70,11 +70,11 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 4.1 | RPC `complete_habit` y `uncomplete_habit` con topes y tolerancia de 7 días; pruebas SQL | 6.1 | pendiente |
-| 4.2 | Cálculo local optimista de XP y monedas, y reconciliación al sincronizar | 3.4, 6.1 | pendiente |
-| 4.3 | Check-in con animación de moneda (Reanimated) y mensaje del tope de monedas; celebración de cambio de fase | 6.1 | pendiente |
-| 4.4 | Jardín con las 5 plantas y accesorios equipados (placeholders si el arte no ha llegado) | 9.4, 9.8 | pendiente |
-| 4.5 | Tienda: comprar, saldo, «Te faltan N monedas»; equipar en una sola planta | 6.4 | pendiente |
+| 4.1 | RPC `complete_habit` y `uncomplete_habit` con topes y tolerancia de 7 días; pruebas SQL | 6.1 | en curso (falta tu prueba en el teléfono) |
+| 4.2 | Cálculo local optimista de XP y monedas, y reconciliación al sincronizar | 3.4, 6.1 | en curso (falta tu prueba en el teléfono) |
+| 4.3 | Check-in con animación de moneda (Reanimated) y mensaje del tope de monedas; celebración de cambio de fase | 6.1 | en curso (falta tu prueba en el teléfono) |
+| 4.4 | Jardín con las 5 plantas y accesorios equipados (placeholders si el arte no ha llegado) | 9.4, 9.8 | en curso (falta tu prueba en el teléfono) |
+| 4.5 | Tienda: comprar, saldo, «Te faltan N monedas»; equipar en una sola planta | 6.4 | en curso (falta tu prueba en el teléfono) |
 
 **Criterio de prueba:** completas 6 hábitos en un día y el sexto muestra el mensaje del tope. Compras un accesorio, lo equipas en una planta y luego en otra, y desaparece de la primera.
 
