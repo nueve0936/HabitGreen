@@ -100,7 +100,7 @@ export default function RevisionPlanScreen() {
             acciones={[
               {
                 label: t.editar,
-                tone: 'surface-oscuro',
+                tone: 'texto-naranja',
                 accessibilityLabel: `${t.editar}: ${habito.titulo}`,
                 onPress: () => setEditando(habito),
               },

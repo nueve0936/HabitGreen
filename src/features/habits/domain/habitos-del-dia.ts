@@ -57,6 +57,20 @@ export function horarioVigente(horarios: readonly Horario[], fecha: string): Hor
     .sort((a, b) => b.vigente_desde.localeCompare(a.vigente_desde))[0];
 }
 
+/**
+ * Horario para mostrar y editar un hábito: el vigente en la fecha; si todavía no empieza, el
+ * próximo; si ya terminó, el último.
+ */
+export function horarioDeReferencia(
+  horarios: readonly Horario[],
+  fecha: string,
+): Horario | undefined {
+  const vigente = horarioVigente(horarios, fecha);
+  if (vigente) return vigente;
+  const ordenados = [...horarios].sort((a, b) => a.vigente_desde.localeCompare(b.vigente_desde));
+  return ordenados.find((h) => h.vigente_desde > fecha) ?? ordenados.at(-1);
+}
+
 export function habitosDelDia(
   fecha: string,
   habitos: readonly Habito[],

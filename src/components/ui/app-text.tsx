@@ -5,7 +5,7 @@ import { Text, type TextProps } from 'react-native';
 
 export type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'button';
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
-export type TextTone = 'ink' | 'ink-soft' | 'surface-oscuro' | 'peligro' | 'confirmar' | 'blanco';
+export type TextTone = 'ink' | 'ink-soft' | 'texto-naranja' | 'peligro' | 'confirmar' | 'blanco';
 
 const VARIANT_CLASS: Record<TextVariant, string> = {
   h1: 'text-h1',
@@ -38,7 +38,7 @@ const TONE_CLASS: Record<TextTone, string> = {
   'ink-soft': 'text-ink-soft',
   // Enlaces de color de los mockups del plan («Editar», «Quitar», «Agregar») sobre fondo claro, y
   // texto blanco solo sobre los botones peligro y confirmar.
-  'surface-oscuro': 'text-surface-oscuro',
+  'texto-naranja': 'text-texto-naranja',
   peligro: 'text-peligro',
   confirmar: 'text-confirmar',
   blanco: 'text-blanco',
@@ -56,7 +56,7 @@ export function AppText({
   weight,
   tone = 'ink',
   className = '',
-  maxFontSizeMultiplier = 1.3,
+  maxFontSizeMultiplier = 2,
   ...props
 }: AppTextProps) {
   const isHeading = variant === 'h1' || variant === 'h2' || variant === 'h3';

@@ -75,7 +75,7 @@ export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
               bold={focused}
               weight="regular"
               numberOfLines={1}
-              maxFontSizeMultiplier={1.15}
+              maxFontSizeMultiplier={1.3}
               className="text-[12px] leading-4"
             >
               {label}

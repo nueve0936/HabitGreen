@@ -588,7 +588,7 @@ Quien elige «Prefiero crear mis hábitos» no responde el formulario. Se crea `
 - Sí aplican la reprogramación (6.2), las recompensas, los topes y las estadísticas.
 - **El presupuesto no limita la creación.** Si un hábito nuevo hace que la suma de un día supere `presupuesto_min`, se muestra un aviso suave y `presupuesto_min` sube a esa suma. La reprogramación usa el valor actualizado. **Nunca baja solo**, aunque se pausen, eliminen o acorten hábitos: es un ajuste del usuario, que lo baja en Perfil, y la progresión (6.3) lo usa para decidir si caben niveles o hábitos nuevos.
 - Al crear un hábito manual se piden: nombre, categoría (fija después de crearlo), duración, días, hora y si se quiere aviso.
-- **Límites del formulario (Entrega 3):** nombre de 3 a 60 caracteres, descripción opcional de hasta 140, duración de 1 a 120 min y al menos un día. La frecuencia admite «Todos los días» y «Días específicos de la semana», que es lo que guarda `dias_semana`; las frecuencias por mes, por año y «cada cierto tiempo» del mockup quedan para después de la demo. «Avisarme» empieza apagado con el estilo `minimo`.
+- **Asistente de crear y editar (revisión de diseño):** tres pasos (mockups «Crear hábito #1–#3»): 1) nombre (3 a 60 caracteres) y descripción opcional (hasta 140); 2) categoría (fija al editar); 3) días de la semana (al menos uno) y una lista con **Recordatorios** (hora con el reloj de Android, o «Ninguno»), **Duración** (5 a 60 min en opciones rápidas, hasta 120), **Fecha de inicio** y **Fecha de fin** (selector de mes y día; el año es la próxima vez que ocurre la fecha). Inicio y fin se guardan en `vigente_desde` y `vigente_hasta` del horario: al crear, el inicio es hoy o después; al editar, el fin cambia en el mismo horario y el inicio solo si el hábito todavía no empieza. **Sin recordatorio** = horario sin hora y `notificar` falso (migración `20261104000001`). Al crear se vuelve a la pestaña Hábitos. «Recordatorio» empieza en 08:00, o en «Ninguno» con el estilo `minimo`. Las frecuencias por mes, por año y «cada cierto tiempo» quedan para después de la demo.
 - El aviso de presupuesto también se aplica al editar la duración o los días de un hábito.
 - Un usuario tradicional no puede hacer el formulario después (queda para v1.1).
 
@@ -654,7 +654,9 @@ Es la entrega 10 y el primer recorte si falta tiempo (2.5).
 
 ## 9. Diseño de pantallas y sistema visual
 
-**Los mockups (Figma) mandan sobre esta sección.** Cuando difieran, se actualiza esta sección para reflejarlos. Si un mockup rompe una regla de contraste de 9.6, se señala, pero gana el mockup. Los mockups cubren las pantallas principales; las secundarias y los estados vacío, de carga y de error se diseñan con las reglas de esta sección.
+**Antes de diseñar o implementar cualquier pantalla o componente se consulta [`docs/Guía de UX UI.md`](Guía%20de%20UX%20UI.md).** Es la fuente de verdad de las reglas visuales: paleta y tokens, contrastes medidos, tipografía, espaciado, componentes y reglas de Android (Material). Esta sección 9 describe qué lleva cada pantalla. Si una regla visual de esta sección difiere de la guía, gana la guía y se corrige aquí.
+
+**Los mockups (Figma) mandan en composición y estilo.** Cuando difieran, se actualiza esta sección para reflejarlos. Si un mockup rompe una regla de accesibilidad de la guía (contraste, zona táctil de 48 dp, estados solo por color), se aplica el ajuste mínimo y se anota aquí; la lista de desviaciones está en la sección 9 de la guía. Los mockups cubren las pantallas principales; las secundarias y los estados vacío, de carga y de error se diseñan con las reglas de la guía.
 
 ### 9.1 Mapa de navegación
 
@@ -693,7 +695,7 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 | --- | --- |
 | `Button` primario | Fondo `accent`, texto `ink` 18/700, borde 2 px `ink`, alto 48 px. Presionado: `accent-oscuro`. Deshabilitado: `bg-oscuro` con texto `ink-soft`. **Uno por pantalla.** |
 | `Button` secundario | Transparente, texto `ink`, borde 2 px `ink`. |
-| `Button` terciario | Texto `ink` subrayado, sin borde, área táctil mínima 44 px. |
+| `Button` terciario | Texto `ink` subrayado, sin borde, área táctil mínima 48 dp. |
 | `Card` | Fondo `surface`, borde 1 px `surface-oscuro`, radio 16, relleno 16–24, sombra suave. Presionada: `surface-claro`. |
 | `Field` | Fondo `campo`, borde 2 px `ink-soft`, radio 8, alto 48. Etiqueta siempre visible sobre el campo. **Enfocado: borde `surface` (#C98B58).** Error: borde `accent-oscuro` y una X dentro del campo; el mensaje va debajo o, en login y registro, en un solo aviso bajo los campos. Válido (registro, tras intentar enviar): marca de verificación dentro del campo. |
 | `OptionChip` (opciones del formulario) | Alto mínimo 48 px, fondo `campo`. No seleccionado: sin borde visible. **Seleccionado (mockup «Encuesta inicial #1.1»): borde 2 px `surface` (#C98B58), icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
@@ -715,9 +717,9 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 
 **Colores fuera de la paleta (mockups del plan).** Los diálogos de confirmación y los enlaces «Quitar» y «Agregar» usan `peligro` (#C62828) y `confirmar` (#2E7D32); los botones de esos colores llevan texto blanco (contraste mayor a 5:1). Las píldoras elegidas de «Editar hábito» van rellenas de `surface` con texto `ink` (el mockup usa blanco, que no contrasta). Las opciones que se ponen en negritas al elegirse reservan el ancho del texto en negritas para no moverse (`StableBoldText`).
 
-**Hoy.** Fondo `bg`. Encabezado con saludo y saldo de monedas. Lista de hábitos de hoy como `Card`; cada una con botón de check de 48 × 48 px (icono de verificación + etiqueta «Hecho»). Los pendientes que se reprogramaron aparecen con un `Alert` informativo. Sin CTA coral grande: la acción principal es el check; el coral se limita a indicadores y badges para respetar el 10%.
+**Hoy** (mockup «Pantalla Dashboard»). Título «Hoy» y saldo de monedas arriba; ilustración (provisional: `assets/illustrations/hoy.png`) con «Tu árbol crece con cada micro-paso»; «Pendientes de hoy» con una barra de avance y «N de M hechos»; tarjetas claras con casilla cuadrada. Al marcar: casilla rellena de `surface` con ✓, borde naranja, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los pendientes que se reprogramaron aparecen con un `Alert` informativo (Entrega 6).
 
-**Hábitos.** Lista agrupada por categoría con chips de filtro. Botón de agregar como CTA único de la pantalla.
+**Hábitos** (mockups «Hábitos #1–#2»). Título y botón «+» coral (CTA único). Una sección por categoría con hábitos (icono y nombre), sin filtros por ahora. Cada tarjeta tiene la misma casilla que en Hoy, activa solo si el hábito toca hoy (si no, «No toca hoy»), y el menú ⋮ con Editar, Pausar o Reanudar y Eliminar.
 
 **Ajustes por los mockups (Entrega 3).** Hoy sigue el mockup «Inicio»: saludo, monedas arriba a la derecha, la frase «Tu árbol crece con cada micro-paso» y «Pendientes de hoy»; sin hábitos muestra «Tu jardín está listo para empezar» con el CTA «Crear mi primer hábito». En Hábitos se mantiene la agrupación por categoría (decisión del usuario) en lugar de «pendientes / diarios» del mockup, para que el check-in viva solo en Hoy; de él se toman el «+» y el menú ⋮ (Editar, Pausar o Reanudar, Eliminar), que se abre como hoja inferior. Crear hábito sigue el orden del mockup (nombre, descripción, categoría con iconos, frecuencia) y agrega duración, hora y «Avisarme» (6.5). La barra conserva las 5 pestañas.
 
@@ -754,9 +756,10 @@ Si el coral supera el 10–12% de la pantalla, pierde su capacidad de guiar la m
 
 Reglas complementarias:
 
-- Áreas táctiles de 44 × 44 px o más; botones de 48 px.
+- Áreas táctiles de 48 × 48 dp o más (guía de accesibilidad de Android); botones de 48 dp. Si el elemento visible es más chico (los cuadros de días), se amplía la zona táctil con `hitSlop`.
 - Cada elemento interactivo tiene `accessibilityRole`, `accessibilityLabel` y `accessibilityState`.
-- Escalado de texto del sistema permitido hasta 1.3×; los diseños no usan alturas fijas para texto.
+- Escalado de texto del sistema permitido hasta 2× (Android llega a 200 %); solo las etiquetas de la barra de pestañas se limitan a 1.3×. Los diseños no usan alturas fijas para texto.
+- **Revisión contra las guías de Android (Entregas 1 a 3).** Texto con al menos 4.5:1 y bordes de controles con al menos 3:1: el texto naranja usa `texto-naranja` (#724B2D) en lugar de `surface-oscuro`; los bordes de selección usan `surface-oscuro` y los de casillas y días sin elegir, `ink-soft`; la ✓ de la casilla va en `ink`; el texto de ejemplo de los campos va en #46484E al 80 % (al 50 % daba 2.45:1); el texto del botón coral sube a 19 px en negritas (texto grande: 3:1). En Android la pantalla se ajusta al teclado (`KeyboardAvoidingView` con `height`) y el botón «atrás» del sistema regresa al paso anterior del asistente. Observaciones sin cambio: márgenes de 32 dp (los mockups; Material sugiere 16), botón «+» arriba (Material sugiere un botón flotante abajo), solo orientación vertical (las tabletas quedan para antes de publicar).
 - Movimiento: duraciones de 150–250 ms con ease-out; con `isReduceMotionEnabled` las animaciones de evolución y celebración se sustituyen por un cambio de imagen con fundido corto.
 - Ningún estado depende solo del color.
 - Solo tema claro; `userInterfaceStyle: light` en `app.json`.
@@ -764,14 +767,7 @@ Reglas complementarias:
 
 ### 9.7 Lista de verificación de UX/UI (antes de entregar)
 
-- Todo el texto cumple 4.5:1 (3:1 si es grande y en negrita).
-- Una sola acción coral por pantalla.
-- Se respeta la proporción 60-30-10.
-- Sin hex sueltos: todo sale de tokens.
-- Foco y estados presionados visibles en todos los elementos interactivos.
-- Estados de carga, vacío y error en cada pantalla.
-- Prueba con lector de pantalla (VoiceOver y TalkBack) en el formulario y en «Hoy».
-- Prueba con texto del sistema al 130%.
+Se usa la lista de la sección 10 de [`docs/Guía de UX UI.md`](Guía%20de%20UX%20UI.md): contrastes calculados, zonas táctiles de 48 dp, estados que no dependen solo del color, un solo CTA coral, letra del sistema al 200%, TalkBack, teclado, botón «atrás» del sistema, estados de carga, vacío y error, y prueba de daltonismo. Antes de publicar se agrega la prueba con VoiceOver en iOS.
 
 ### 9.8 Arte de plantas y accesorios
 

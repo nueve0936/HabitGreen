@@ -26,7 +26,7 @@ export function ChoicePill({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ checked: selected, selected }}
       onPress={onPress}
-      className={`min-h-11 items-center justify-center rounded-chip border-2 border-surface px-4 py-2 ${
+      className={`min-h-12 items-center justify-center rounded-chip border-2 border-surface-oscuro px-4 py-2 ${
         selected ? 'bg-surface' : 'bg-campo active:bg-bg-claro'
       }`}
     >

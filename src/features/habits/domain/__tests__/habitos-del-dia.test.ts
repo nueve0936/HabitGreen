@@ -1,5 +1,6 @@
 import {
   habitosDelDia,
+  horarioDeReferencia,
   horarioVigente,
   type Habito,
   type Horario,
@@ -114,5 +115,19 @@ describe('hábitos del día (Hoy)', () => {
     expect(
       habitosDelDia(LUNES, hs, horarios, ninguna, sinRegistros).map((h) => h.habito.id),
     ).toEqual(['c', 'a', 'b']);
+  });
+});
+
+describe('horario de referencia (mostrar y editar)', () => {
+  it('usa el vigente, o el próximo si no empieza, o el último si terminó', () => {
+    const pasado = horario('a', {
+      id: 'p',
+      vigente_desde: '2026-09-01',
+      vigente_hasta: '2026-09-30',
+    });
+    const futuro = horario('a', { id: 'f', vigente_desde: '2026-11-20' });
+    expect(horarioDeReferencia([pasado, futuro], LUNES)?.id).toBe('f');
+    expect(horarioDeReferencia([pasado], LUNES)?.id).toBe('p');
+    expect(horarioDeReferencia([pasado, horario('a', { id: 'v' })], '2026-10-15')?.id).toBe('v');
   });
 });

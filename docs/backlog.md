@@ -63,6 +63,8 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | 3.4 | Pantalla Hoy: hábitos del día y check-in (solo hoy) con deshacer | 9.4 | hecho |
 | 3.5 | Pantalla Hábitos: lista por categoría, crear manual (con aviso de presupuesto), editar horario (versionado), pausar y archivar | 4, 6.5, 6.6 | hecho |
 
+**Revisión de diseño:** Hoy, Hábitos y el asistente de 3 pasos se rehicieron según los mockups (SDD 6.5 y 9.4): check-in también desde Hábitos, fechas de inicio y fin y hábitos sin recordatorio.
+
 **Criterio de prueba:** con el modo avión, creas un hábito, lo completas y lo deshaces. Al quitar el modo avión, todo aparece en Supabase. Al iniciar sesión en un teléfono limpio, se descarga todo.
 **Punto de control:** si esto no funciona al final del día 9, se pasa a «solo check-in offline» (SDD 2.5).
 

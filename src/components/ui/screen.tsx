@@ -38,7 +38,9 @@ export function Screen({
     <LinearGradient colors={gradientBackground} style={{ flex: 1 }}>
       <SafeAreaView edges={edges} style={{ flex: 1 }}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          // En Android con edge-to-edge la ventana no se encoge sola con el teclado: 'height' deja
+          // visible el campo activo (guía de Android «Layout basics»).
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
           {content}

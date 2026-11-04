@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { colors } from '@/theme';
@@ -17,6 +18,8 @@ export type OptionChipProps = {
   /** checkbox para preguntas de varias respuestas; radio para una sola. */
   kind?: 'radio' | 'checkbox';
   disabled?: boolean;
+  /** Icono a la izquierda (categorías del asistente de hábito). */
+  icon?: ReactNode;
 };
 
 export function OptionChip({
@@ -26,6 +29,7 @@ export function OptionChip({
   onPress,
   kind = 'radio',
   disabled = false,
+  icon,
 }: OptionChipProps) {
   return (
     <Pressable
@@ -35,10 +39,11 @@ export function OptionChip({
       onPress={onPress}
       disabled={disabled}
       className={`min-h-12 flex-row items-center gap-3 rounded-card border-2 bg-campo px-4 py-3 ${
-        selected ? 'border-surface' : 'border-transparent active:bg-bg-claro'
+        selected ? 'border-surface-oscuro' : 'border-transparent active:bg-bg-claro'
       }`}
     >
-      <View className="flex-1 items-center">
+      {icon}
+      <View className={`flex-1 ${icon ? 'items-start' : 'items-center'}`}>
         <StableBoldText variant="h3" bold={selected} className="text-center">
           {label}
         </StableBoldText>
@@ -50,7 +55,7 @@ export function OptionChip({
       </View>
       <View
         className={`h-7 w-7 items-center justify-center rounded-chip border-2 ${
-          selected ? 'border-surface bg-surface' : 'border-bg-oscuro bg-transparent'
+          selected ? 'border-surface-oscuro bg-surface' : 'border-ink-soft bg-transparent'
         }`}
       >
         {selected ? <Check size={18} color={colors.ink} strokeWidth={3} /> : null}

@@ -1,16 +1,19 @@
-import { Pause, Pencil, Play, Trash2, type LucideIcon } from 'lucide-react-native';
-import { Modal, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChevronRight, Pause, Pencil, Play, Trash2, type LucideIcon } from 'lucide-react-native';
+import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
 
-import { AppText } from '@/components/ui/app-text';
+import { AppText, type TextTone } from '@/components/ui/app-text';
 import { es } from '@/i18n/es';
 import { colors } from '@/theme';
 
-// Menú ⋮ de un hábito (mockup «Hábitos: menú de tres puntos»): Editar, Pausar o Reanudar y
-// Eliminar. Es una hoja inferior: más fácil de alcanzar con el pulgar y de leer con TalkBack.
+// Menú ⋮ de un hábito (mockups «Hábitos #2» y «#3.1 Reanudar hábito»): un globo verde pegado a los
+// tres puntos con Editar, Pausar o Reanudar y Eliminar. Se abre hacia abajo y, si no cabe, hacia
+// arriba. Tocar fuera lo cierra.
+
+/** Posición del botón ⋮ en la ventana (medida con measureInWindow). */
+export type Ancla = { x: number; y: number; ancho: number; alto: number };
 
 export type HabitMenuProps = {
-  titulo: string | null;
+  ancla: Ancla | null;
   activo: boolean;
   onCerrar: () => void;
   onEditar: () => void;
@@ -18,30 +21,40 @@ export type HabitMenuProps = {
   onEliminar: () => void;
 };
 
+const ANCHO = 168;
+const ALTO_ESTIMADO = 3 * 48 + 16;
+const MARGEN = 8;
+
 function Opcion({
   icono: Icono,
   label,
+  tono = 'ink',
   onPress,
 }: {
   icono: LucideIcon;
   label: string;
+  tono?: Extract<TextTone, 'ink' | 'peligro'>;
   onPress: () => void;
 }) {
+  const color = tono === 'peligro' ? colors.peligro : colors.ink;
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="menuitem"
       accessibilityLabel={label}
       onPress={onPress}
-      className="min-h-12 flex-row items-center gap-3 rounded-field px-2 active:bg-bg-claro"
+      className="min-h-12 flex-row items-center gap-2 rounded-field px-2 active:bg-bg-claro"
     >
-      <Icono size={22} color={colors.ink} />
-      <AppText weight="semibold">{label}</AppText>
+      <Icono size={18} color={color} />
+      <AppText variant="small" weight="semibold" tone={tono} className="flex-1">
+        {label}
+      </AppText>
+      <ChevronRight size={16} color={color} />
     </Pressable>
   );
 }
 
 export function HabitMenu({
-  titulo,
+  ancla,
   activo,
   onCerrar,
   onEditar,
@@ -49,30 +62,37 @@ export function HabitMenu({
   onEliminar,
 }: HabitMenuProps) {
   const t = es.habitos.menu;
-  const insets = useSafeAreaInsets();
+  const ventana = useWindowDimensions();
+  if (ancla === null) return null;
+
+  const derecha = Math.max(MARGEN, ventana.width - (ancla.x + ancla.ancho));
+  const cabeAbajo = ancla.y + ancla.alto + ALTO_ESTIMADO + MARGEN < ventana.height;
+  const vertical = cabeAbajo
+    ? { top: ancla.y + ancla.alto + 4 }
+    : { bottom: ventana.height - ancla.y + 4 };
 
   return (
-    <Modal visible={titulo !== null} transparent animationType="fade" onRequestClose={onCerrar}>
+    <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={onCerrar}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t.cerrar}
         onPress={onCerrar}
-        className="flex-1 bg-ink/40"
+        className="absolute inset-0"
       />
       <View
-        style={{ paddingBottom: insets.bottom + 16 }}
-        className="gap-1 rounded-t-card border-t-2 border-ink bg-campo px-4 pt-4"
+        accessibilityRole="menu"
+        style={{ position: 'absolute', right: derecha, width: ANCHO, ...vertical }}
+        className="rounded-card border-2 border-bg-oscuro bg-bg p-2"
       >
-        <AppText variant="h3" className="mb-2 px-2">
-          {titulo ?? ''}
-        </AppText>
         <Opcion icono={Pencil} label={t.editar} onPress={onEditar} />
+        <View className="mx-2 h-px bg-bg-oscuro" />
         <Opcion
           icono={activo ? Pause : Play}
           label={activo ? t.pausar : t.reanudar}
           onPress={onCambiarActivo}
         />
-        <Opcion icono={Trash2} label={t.eliminar} onPress={onEliminar} />
+        <View className="mx-2 h-px bg-bg-oscuro" />
+        <Opcion icono={Trash2} label={t.eliminar} tono="peligro" onPress={onEliminar} />
       </View>
     </Modal>
   );

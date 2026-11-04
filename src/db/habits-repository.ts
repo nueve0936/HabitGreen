@@ -4,6 +4,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   estaVisible,
   habitosDelDia,
+  horarioDeReferencia,
   horarioVigente,
   type Habito,
   type HabitoDelDia,
@@ -29,9 +30,14 @@ import { encolar } from './outbox';
 
 export type HabitoConHorario = {
   habito: Habito;
-  /** Horario vigente hoy (puede faltar si el hábito todavía no tiene uno descargado). */
+  /** Horario de hoy, o el próximo si el hábito todavía no empieza (o el último si ya terminó). */
   horario: Horario | undefined;
   categoria: Area;
+  /** Fecha de inicio del hábito: el primer día de su primer horario. */
+  inicio: string | null;
+  /** Toca hoy (para la casilla de la pantalla Hábitos) y si ya está hecho. */
+  programadoHoy: boolean;
+  hecho: boolean;
 };
 
 export type HoyLocal = {
@@ -60,20 +66,45 @@ async function idCategoria(db: SQLiteDatabase, area: Area): Promise<string> {
   return fila.id;
 }
 
-/** Hábitos sin archivar, con su horario vigente hoy y la clave de su categoría. */
+function primerDia(horarios: readonly Horario[]): string | null {
+  return horarios.reduce<string | null>(
+    (min, h) => (min === null || h.vigente_desde < min ? h.vigente_desde : min),
+    null,
+  );
+}
+
+/** Hábitos sin archivar, con su horario, su categoría y si tocan hoy. */
 export async function leerHabitos(): Promise<HabitoConHorario[]> {
   const db = await getDb();
   const hoy = fechaLocal();
-  const [habitos, horarios, categorias] = await Promise.all([
+  const [habitos, horarios, ocurrencias, registros, categorias] = await Promise.all([
     leerFilas<Habito>(db, 'habits', 'archivado_en IS NULL ORDER BY created_at'),
     leerFilas<Horario>(db, 'habit_schedules'),
+    leerFilas<Ocurrencia>(db, 'habit_occurrences', 'fecha_original = ? OR fecha_nueva = ?', [
+      hoy,
+      hoy,
+    ]),
+    leerFilas<Registro>(db, 'habit_logs', 'fecha = ?', [hoy]),
     categoriasPorId(db),
   ]);
+  const deHoy = new Map(
+    habitosDelDia(hoy, habitos, horarios, ocurrencias, registros).map((i) => [i.habito.id, i]),
+  );
   return habitos.flatMap((habito) => {
     const categoria = categorias.get(habito.category_id);
     if (categoria === undefined) return [];
     const propios = horarios.filter((h) => h.habit_id === habito.id);
-    return [{ habito, categoria, horario: horarioVigente(propios, hoy) }];
+    const item = deHoy.get(habito.id);
+    return [
+      {
+        habito,
+        categoria,
+        horario: horarioDeReferencia(propios, hoy),
+        inicio: primerDia(propios),
+        programadoHoy: item !== undefined,
+        hecho: item?.hecho ?? false,
+      },
+    ];
   });
 }
 
@@ -197,10 +228,10 @@ export async function crearHabito(
       user_id: userId,
       dias_semana: valores.dias_semana,
       hora: valores.hora,
-      flexible: valores.hora === null,
-      notificar: valores.avisarme,
-      vigente_desde: fechaLocal(),
-      vigente_hasta: null,
+      flexible: false,
+      notificar: valores.notificar,
+      vigente_desde: valores.fecha_inicio,
+      vigente_hasta: valores.fecha_fin,
     };
     await guardarFilas(db, 'habits', [{ ...habito, created_at: ahora, updated_at: ahora }]);
     await guardarFilas(db, 'habit_schedules', [{ ...horario, updated_at: ahora }]);
@@ -242,11 +273,20 @@ export async function editarHabito(
     operaciones.push({ operacion: 'update', tabla: 'habits', clave: id, payload: cambiosHabito });
 
     const horarios = await leerFilas<Horario>(db, 'habit_schedules', 'habit_id = ?', [id]);
-    const actual = horarioVigente(horarios, fechaLocal());
+    const hoyLocal = fechaLocal();
+    const actual = horarioDeReferencia(horarios, hoyLocal);
     if (actual) {
       const version = nuevaVersionHorario(
         actual,
-        { dias_semana: valores.dias_semana, hora: valores.hora, notificar: valores.avisarme },
+        {
+          dias_semana: valores.dias_semana,
+          hora: valores.hora,
+          notificar: valores.notificar,
+          // La fecha de inicio solo cambia si el hábito todavía no empieza (un solo horario).
+          vigente_desde:
+            (primerDia(horarios) ?? hoyLocal) >= hoyLocal ? valores.fecha_inicio : undefined,
+          vigente_hasta: valores.fecha_fin,
+        },
         fechaLocal(),
         randomUUID(),
       );

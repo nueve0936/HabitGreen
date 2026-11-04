@@ -24,7 +24,7 @@ module.exports = {
         h3: ['20px', '28px'],
         body: ['16px', '24px'],
         small: ['14px', '20px'],
-        button: ['18px', '24px'],
+        button: ['19px', '24px'],
       },
       borderRadius: {
         field: '8px',

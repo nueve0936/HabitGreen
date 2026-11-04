@@ -1,12 +1,12 @@
 import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
-import { FilterChip } from '@/components/ui/filter-chip';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Screen } from '@/components/ui/screen';
 import { avisarCambioLocal } from '@/db/db-version-store';
 import {
@@ -16,33 +16,36 @@ import {
   type HabitoConHorario,
 } from '@/db/habits-repository';
 import { useLocalQuery } from '@/db/use-local-query';
+import { useSession } from '@/features/auth/session-context';
 import { ICONO_CATEGORIA } from '@/features/habits/categoria-icono';
-import { HabitListCard } from '@/features/habits/components/habit-list-card';
-import { HabitMenu } from '@/features/habits/components/habit-menu';
-import { confirmarArchivar } from '@/features/habits/confirmar-archivar';
-import { es } from '@/i18n/es';
-import { AREAS, type Area } from '@/schemas/onboarding';
+import { HabitCheckCard } from '@/features/habits/components/habit-check-card';
+import { HabitMenu, type Ancla } from '@/features/habits/components/habit-menu';
+import { useCheckIn } from '@/features/habits/use-check-in';
+import { PhaseCelebration } from '@/features/rewards/components/phase-celebration';
+import { es, formatear } from '@/i18n/es';
+import { AREAS } from '@/schemas/onboarding';
 import { colors } from '@/theme';
 
-// Hábitos (SDD 9.4): lista agrupada por categoría con chips de filtro y el botón «+» como único
-// CTA coral. El check-in vive solo en Hoy; aquí se crean, editan, pausan y eliminan.
+// Hábitos (SDD 9.4 y mockup «Hábitos #1»): una sección por categoría que tenga hábitos, con
+// casilla para marcar los que tocan hoy y el menú ⋮ (editar, pausar o reanudar, eliminar). El
+// botón «+» es el único CTA coral. Sin filtros por ahora (decisión del usuario).
 
 export default function HabitosScreen() {
   const t = es.habitos;
   const areas = es.onboarding.formulario.areas;
+  const { session } = useSession();
+  const userId = session?.user.id ?? '';
   const habitos = useLocalQuery('habitos', leerHabitos);
-  const [filtro, setFiltro] = useState<Area | null>(null);
-  const [menu, setMenu] = useState<HabitoConHorario | null>(null);
+  const checkIn = useCheckIn(userId);
+  const [menu, setMenu] = useState<{ item: HabitoConHorario; ancla: Ancla } | null>(null);
+  const [eliminando, setEliminando] = useState<HabitoConHorario | null>(null);
   const [errorGuardar, setErrorGuardar] = useState(false);
 
   const lista = habitos.data ?? [];
-  const conHabitos = AREAS.filter((a) => lista.some((h) => h.categoria === a));
-  // Si se filtró una categoría que se quedó sin hábitos, se vuelve a «Todas».
-  const filtroActivo = filtro !== null && conHabitos.includes(filtro) ? filtro : null;
-  const secciones = (filtroActivo ? [filtroActivo] : conHabitos).map((area) => ({
+  const secciones = AREAS.map((area) => ({
     area,
     items: lista.filter((h) => h.categoria === area),
-  }));
+  })).filter((s) => s.items.length > 0);
 
   const guardar = async (accion: () => Promise<void>) => {
     setErrorGuardar(false);
@@ -63,13 +66,14 @@ export default function HabitosScreen() {
           accessibilityRole="button"
           accessibilityLabel={t.agregar}
           onPress={() => router.push('/habit/nuevo')}
-          className="h-12 w-12 items-center justify-center rounded-chip border-2 border-ink bg-accent active:bg-accent-oscuro"
+          className="h-12 w-12 items-center justify-center rounded-field border-2 border-ink bg-accent active:bg-accent-oscuro"
         >
           <Plus size={26} color={colors.ink} strokeWidth={2.5} />
         </Pressable>
       </View>
 
-      {errorGuardar ? <Alert variant="error" message={t.errorGuardar} /> : null}
+      {errorGuardar || checkIn.error ? <Alert variant="error" message={t.errorGuardar} /> : null}
+      {checkIn.topeMonedas ? <Alert variant="exito" message={es.recompensas.topeMonedas} /> : null}
 
       {habitos.cargando && !habitos.data ? (
         <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
@@ -83,70 +87,72 @@ export default function HabitosScreen() {
           {t.vacio}
         </AppText>
       ) : (
-        <>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="-mx-8"
-            contentContainerClassName="gap-2 px-8"
-          >
-            <FilterChip
-              label={t.todas}
-              selected={filtroActivo === null}
-              onPress={() => setFiltro(null)}
-            />
-            {conHabitos.map((area) => (
-              <FilterChip
-                key={area}
-                label={areas[area]}
-                selected={filtroActivo === area}
-                onPress={() => setFiltro(area)}
-              />
-            ))}
-          </ScrollView>
-
-          {secciones.map(({ area, items }) => {
-            const Icono = ICONO_CATEGORIA[area];
-            return (
-              <View key={area} className="gap-3">
-                <View className="flex-row items-center gap-2" accessibilityRole="header">
-                  <Icono size={22} color={colors.ink} />
-                  <AppText variant="h3">{areas[area]}</AppText>
-                </View>
-                {items.map((item) => (
-                  <HabitListCard
-                    key={item.habito.id}
-                    item={item}
-                    onPress={() => editar(item.habito.id)}
-                    onOpciones={() => setMenu(item)}
-                  />
-                ))}
+        secciones.map(({ area, items }) => {
+          const Icono = ICONO_CATEGORIA[area];
+          return (
+            <View key={area} className="gap-3">
+              <View className="flex-row items-center gap-2" accessibilityRole="header">
+                <Icono size={24} color={colors.ink} />
+                <AppText variant="h3">{areas[area]}</AppText>
               </View>
-            );
-          })}
-        </>
+              {items.map((item) => (
+                <HabitCheckCard
+                  key={item.habito.id}
+                  titulo={item.habito.titulo}
+                  hora={item.horario?.notificar ? item.horario.hora : null}
+                  duracionMin={item.habito.duracion_min}
+                  hecho={item.hecho}
+                  marcable={item.programadoHoy}
+                  enPausa={!item.habito.activo}
+                  ocupado={checkIn.ocupado === item.habito.id}
+                  onAlternar={() =>
+                    checkIn.alternar({ ...item.habito, categoria: item.categoria }, item.hecho)
+                  }
+                  onPress={() => editar(item.habito.id)}
+                  onOpciones={(ancla) => setMenu({ item, ancla })}
+                  menuAbierto={menu?.item.habito.id === item.habito.id}
+                />
+              ))}
+            </View>
+          );
+        })
       )}
 
       <HabitMenu
-        titulo={menu?.habito.titulo ?? null}
-        activo={menu?.habito.activo ?? true}
+        ancla={menu?.ancla ?? null}
+        activo={menu?.item.habito.activo ?? true}
         onCerrar={() => setMenu(null)}
         onEditar={() => {
-          const id = menu?.habito.id;
+          const id = menu?.item.habito.id;
           setMenu(null);
           if (id) editar(id);
         }}
         onCambiarActivo={() => {
-          const habito = menu?.habito;
+          const habito = menu?.item.habito;
           setMenu(null);
           if (habito) void guardar(() => cambiarActivo(habito.id, !habito.activo));
         }}
         onEliminar={() => {
-          const id = menu?.habito.id;
+          setEliminando(menu?.item ?? null);
           setMenu(null);
-          if (id) confirmarArchivar(() => void guardar(() => archivarHabito(id)));
         }}
       />
+
+      <ConfirmDialog
+        visible={eliminando !== null}
+        tipo="peligro"
+        mensaje={formatear(t.eliminar.pregunta, { titulo: eliminando?.habito.titulo ?? '' })}
+        cancelar={t.eliminar.cancelar}
+        confirmar={t.eliminar.confirmar}
+        onCancelar={() => setEliminando(null)}
+        onConfirmar={() => {
+          const id = eliminando?.habito.id;
+          setEliminando(null);
+          if (id) void guardar(() => archivarHabito(id));
+        }}
+      />
+
+      <PhaseCelebration celebracion={checkIn.celebracion} onCerrar={checkIn.cerrarCelebracion} />
     </Screen>
   );
 }

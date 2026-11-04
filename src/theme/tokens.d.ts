@@ -21,6 +21,8 @@ export declare const colors: {
   peligro: string;
   confirmar: string;
   blanco: string;
+  placeholder: string;
+  'texto-naranja': string;
 };
 
 export declare const fonts: {

@@ -24,7 +24,7 @@ const CONTAINER_CLASS: Record<ButtonVariant, string> = {
     'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-accent px-6 active:bg-accent-oscuro',
   secondary:
     'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-transparent px-6 active:bg-bg-claro',
-  tertiary: 'min-h-11 flex-row items-center justify-center px-2 active:opacity-70',
+  tertiary: 'min-h-12 flex-row items-center justify-center px-2 active:opacity-70',
 };
 
 const DISABLED_CLASS: Record<ButtonVariant, string> = {
@@ -32,7 +32,7 @@ const DISABLED_CLASS: Record<ButtonVariant, string> = {
     'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-bg-oscuro px-6',
   secondary:
     'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink-soft bg-transparent px-6',
-  tertiary: 'min-h-11 flex-row items-center justify-center px-2',
+  tertiary: 'min-h-12 flex-row items-center justify-center px-2',
 };
 
 export function Button({

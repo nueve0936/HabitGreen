@@ -8,11 +8,13 @@ const valido: HabitoFormInput = {
   nombre: '  Caminar 10 minutos ',
   descripcion: '',
   categoria: 'salud_fisica',
-  frecuencia: 'semana',
   dias: [5, 1, 3, 1],
-  duracion: '10',
+  duracion: 10,
   hora: '08:00',
-  avisarme: true,
+  notificar: true,
+  flexible: false,
+  fecha_inicio: '2026-11-03',
+  fecha_fin: null,
 };
 
 function errores(cambios: Partial<HabitoFormInput>): string[] {
@@ -20,7 +22,7 @@ function errores(cambios: Partial<HabitoFormInput>): string[] {
   return r.success ? [] : r.error.issues.map((i) => i.message);
 }
 
-describe('formulario de hábito', () => {
+describe('asistente de hábito', () => {
   it('limpia y convierte los valores', () => {
     expect(habitoFormSchema.parse(valido)).toEqual({
       nombre: 'Caminar 10 minutos',
@@ -29,21 +31,14 @@ describe('formulario de hábito', () => {
       dias_semana: [1, 3, 5],
       duracion: 10,
       hora: '08:00',
-      avisarme: true,
+      notificar: true,
+      fecha_inicio: '2026-11-03',
+      fecha_fin: null,
     });
   });
 
-  it('«Todos los días» ignora los días marcados', () => {
-    expect(
-      habitoFormSchema.parse({ ...valido, frecuencia: 'todos', dias: [] }).dias_semana,
-    ).toEqual([1, 2, 3, 4, 5, 6, 7]);
-  });
-
-  it('pide elegir una categoría', () => {
+  it('pide categoría y al menos un día', () => {
     expect(errores({ categoria: null })).toEqual([e.categoria]);
-  });
-
-  it('pide al menos un día con días específicos', () => {
     expect(errores({ dias: [] })).toEqual([e.dias]);
   });
 
@@ -52,12 +47,18 @@ describe('formulario de hábito', () => {
     expect(errores({ nombre: 'a'.repeat(61) })).toEqual([e.nombreLargo]);
   });
 
-  it.each(['0', '121', 'diez', '', '1.5'])('rechaza la duración %j', (duracion) => {
+  it.each([0, 121, 1.5])('rechaza la duración %j', (duracion) => {
     expect(errores({ duracion })).toEqual([e.duracion]);
   });
 
-  it('valida la hora y admite nula (aviso flexible)', () => {
-    expect(errores({ hora: '24:00' })).toEqual([e.hora]);
-    expect(errores({ hora: null })).toEqual([]);
+  it('sin recordatorio no necesita hora; con aviso sí, salvo el flexible del plan', () => {
+    expect(errores({ hora: null, notificar: false })).toEqual([]);
+    expect(errores({ hora: null, notificar: true })).toEqual([e.hora]);
+    expect(errores({ hora: null, notificar: true, flexible: true })).toEqual([]);
+  });
+
+  it('la fecha de fin no puede ser anterior a la de inicio', () => {
+    expect(errores({ fecha_fin: '2026-11-02' })).toEqual([e.fechaFin]);
+    expect(errores({ fecha_fin: '2026-11-03' })).toEqual([]);
   });
 });

@@ -31,7 +31,7 @@ export default function JardinScreen() {
         <View
           accessible
           accessibilityLabel={formatear(es.hoy.monedas, { n: saldo })}
-          className="min-h-11 flex-row items-center gap-1"
+          className="min-h-12 flex-row items-center gap-1"
         >
           <Coins size={22} color={colors['accent-oscuro']} />
           <AppText weight="bold">{saldo}</AppText>

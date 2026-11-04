@@ -14,7 +14,7 @@ import { textoHorario } from '../domain/plan-format';
 
 export type AccionTarjeta = {
   label: string;
-  tone: Extract<TextTone, 'surface-oscuro' | 'peligro' | 'confirmar'>;
+  tone: Extract<TextTone, 'texto-naranja' | 'peligro' | 'confirmar'>;
   accessibilityLabel: string;
   onPress: () => void;
 };
@@ -54,7 +54,7 @@ export function PlanHabitCard({ habito, ventana, acciones }: PlanHabitCardProps)
               accessibilityRole="button"
               accessibilityLabel={accion.accessibilityLabel}
               onPress={accion.onPress}
-              className="min-h-11 justify-center px-2 active:opacity-60"
+              className="min-h-12 justify-center px-2 active:opacity-60"
             >
               <AppText variant="small" weight="bold" tone={accion.tone}>
                 {accion.label}

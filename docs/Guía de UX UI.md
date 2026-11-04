@@ -1,155 +1,195 @@
 # Guía de UX/UI
 
-Sistema visual basado en la regla 60-30-10. Paleta cálida, natural y cercana.
+Sistema visual de Habit Green: paleta cálida y natural con la regla 60-30-10, aplicada a React Native y a las guías de diseño de Android (Material).
+
+## 0. Cómo se usa esta guía
+
+- **Se consulta antes de diseñar o implementar cualquier pantalla o componente**, y su lista de verificación (sección 10) se revisa antes de dar una entrega por terminada.
+- **Reglas visuales aquí; pantallas en el SDD.** Colores, contraste, tipografía, tamaños, componentes y reglas de Android viven en esta guía. Qué lleva cada pantalla está en el SDD 9.
+- **Mockups contra accesibilidad.** Los mockups de Figma mandan en composición y estilo. Si un mockup rompe una regla de accesibilidad de esta guía, se ajusta lo mínimo y se anota en el SDD 9. Ya pasó con el texto blanco sobre naranja y con el borde de selección `#C98B58`.
+- **Colores solo por tokens.** Los valores viven en `src/theme/tokens.js`; nunca se escriben códigos hex sueltos en los componentes.
 
 ## 1. Paleta de colores
 
-| Rol | Proporción | Color | HEX | Uso principal |
+| Rol | Proporción | Token | HEX | Uso principal |
 | --- | --- | --- | --- | --- |
-| Dominante | 60% | Verde oliva claro | #C4D18B | Fondos de pantalla y lienzos generales |
-| Secundario | 30% | Terracota | #C98B58 | Tarjetas, barras laterales, navegación, texto secundario |
-| Acento | 10% | Coral | #D1665A | Botones CTA, iconos destacados, alertas |
-| Texto | n/a | Marrón oscuro | #2C1E18 | Títulos, párrafos, iconos neutros |
+| Dominante | 60% | `bg` | #C4D18B | Fondo de pantalla (degradado desde `crema`) |
+| Secundario | 30% | `surface` | #C98B58 | Rellenos de selección, casilla marcada, barras de progreso, píldoras elegidas |
+| Acento | 10% | `accent` | #D1665A | CTA, botón «+», indicador de pestaña activa |
+| Texto | n/a | `ink` | #2C1E18 | Títulos, párrafos e iconos neutros |
 
-### Tokens recomendados
-
-- `--color-bg: #C4D18B`
-- `--color-surface: #C98B58`
-- `--color-accent: #D1665A`
-- `--color-text: #2C1E18`
-
-### Tonos derivados (para estados y profundidad)
+### Derivados
 
 | Token | HEX | Uso |
 | --- | --- | --- |
-| bg-claro | #D6E0A9 | Zonas elevadas sobre el fondo, hover suave |
-| bg-oscuro | #A9B870 | Divisores, bordes sobre el fondo |
-| surface-claro | #DBA67D | Hover de tarjetas |
-| surface-oscuro | #A86F42 | Bordes de tarjetas, estado pressed |
-| accent-oscuro | #B8493D | Hover y pressed del botón CTA |
-| accent-claro | #F0C3BC | Fondos de mensajes de alerta |
-| texto-secundario | #5A4034 | Texto de apoyo sobre fondo oliva |
+| `crema` | #F2F4E6 | Parte superior del degradado de fondo |
+| `campo` | #F8F9F2 | Tarjetas claras, campos, opciones y diálogos |
+| `bg-claro` | #D6E0A9 | Estado presionado sobre `campo`, panel de plantas, ⋮ con el menú abierto |
+| `bg-oscuro` | #A9B870 | Divisores, botón deshabilitado, borde del globo de menú |
+| `surface-claro` | #DBA67D | Etiqueta de categoría |
+| `surface-oscuro` | #A86F42 | **Bordes** de selección, de la casilla marcada y de la tarjeta hecha o en pausa (no se usa como texto) |
+| `accent-oscuro` | #B8493D | CTA presionado, borde de error, icono de la moneda |
+| `accent-claro` | #F0C3BC | Fondo de los avisos de error |
+| `ink-soft` | #5A4034 | Texto de apoyo, bordes de campos, casillas y días sin elegir |
+| `texto-naranja` | #724B2D | Texto naranja: saldo, «N de M hechos», «Editar», fila destacada, títulos naranjas de los mockups |
+| `placeholder` | #46484E al 80% | Texto de ejemplo dentro de los campos |
+| `peligro` | #C62828 | «Quitar» y «Eliminar», y el botón de los diálogos de borrar |
+| `confirmar` | #2E7D32 | «Agregar», ✓ verde del plan, y el botón de los diálogos de agregar |
+| `blanco` | #FFFFFF | Solo como texto sobre `peligro` y `confirmar` |
 
-## 2. Accesibilidad y contraste (WCAG 2.1)
-
-Ratios calculados con el texto #2C1E18:
-
-| Combinación | Ratio | Resultado |
-| --- | --- | --- |
-| Texto sobre #C4D18B | 9.8:1 | Cumple AAA |
-| Texto sobre #C98B58 | 5.6:1 | Cumple AA |
-| Texto sobre #D1665A | 4.4:1 | Casi AA: solo para texto grande o en negrita (18 px+) |
-| Blanco sobre #D1665A | 3.7:1 | No usar para texto normal |
-| #D1665A sobre #C4D18B | 2.2:1 | No alcanza 3:1 como componente de interfaz |
-| #C98B58 sobre #C4D18B | 1.8:1 | Las tarjetas necesitan borde o sombra |
-
-### Reglas derivadas
-
-1. Todo texto va en #2C1E18. Nunca usar blanco sobre estos colores.
-2. Los botones CTA llevan texto #2C1E18 en peso 600–700 y tamaño mínimo 16 px (idealmente 18 px).
-3. Un botón coral sobre fondo oliva debe tener un borde de 2 px en #2C1E18 o #B8493D para ser identificable.
-4. Las tarjetas terracota sobre fondo oliva llevan borde de 1 px en #A86F42 y sombra suave.
-5. Nunca comunicar un estado solo por color: acompañar con icono y texto.
-6. Anillo de foco visible: 3 px en #2C1E18 con 2 px de separación.
-
-## 3. Tipografía
-
-| Nivel | Tamaño | Peso | Interlineado |
-| --- | --- | --- | --- |
-| H1 | 32 px | 700 | 1.2 |
-| H2 | 24 px | 700 | 1.25 |
-| H3 | 20 px | 600 | 1.3 |
-| Cuerpo | 16 px | 400 | 1.5 |
-| Texto pequeño | 14 px | 400 | 1.4 |
-| Botón | 16–18 px | 600 | 1 |
-
-- Familia sugerida: una sans-serif humanista (por ejemplo Nunito, Poppins o DM Sans) para reforzar la calidez de la paleta.
-- Máximo 65–75 caracteres por línea.
-- Pila de respaldo: `system-ui, -apple-system, 'Segoe UI', sans-serif`.
-
-## 4. Espaciado, rejilla y formas
-
-- Unidad base de 8 px. Escala: 4, 8, 16, 24, 32, 48, 64.
-- Rejilla de 12 columnas en escritorio, 8 en tableta y 4 en móvil, con márgenes de 16 px en móvil y 24 px en escritorio.
-- Radios: 8 px en campos y botones, 16 px en tarjetas, 999 px en chips.
-- Sombra base: `0 2px 8px rgba(44, 30, 24, 0.18)`.
-
-## 5. Componentes
-
-### Botones
-
-| Tipo | Fondo | Texto | Borde | Uso |
-| --- | --- | --- | --- | --- |
-| Primario (CTA) | #D1665A | #2C1E18 | 2 px #2C1E18 | Una acción principal por pantalla |
-| Secundario | transparente | #2C1E18 | 2 px #2C1E18 | Acciones alternas |
-| Terciario | transparente | #2C1E18 subrayado | ninguno | Enlaces y acciones menores |
-| Deshabilitado | #A9B870 | #5A4034 | ninguno | Acción no disponible |
-
-Estados del primario: hover #B8493D, pressed #A63C31, foco con anillo de 3 px. Altura mínima: 48 px. Área táctil mínima: 44 × 44 px.
-
-### Tarjetas
-
-- Fondo #C98B58, texto #2C1E18, borde 1 px #A86F42, radio 16 px, relleno 16–24 px.
-- Hover: fondo #DBA67D y elevación ligera.
-- Máximo un CTA coral por tarjeta.
-
-### Campos de formulario
-
-- Fondo #D6E0A9, borde 2 px #2C1E18, radio 8 px, altura 48 px.
-- Etiqueta siempre visible sobre el campo, nunca solo como placeholder.
-- Error: borde #B8493D, fondo #F0C3BC, icono y mensaje de texto debajo.
-
-### Navegación
-
-- Barra lateral o inferior en terracota #C98B58 con texto #2C1E18.
-- Elemento activo: fondo #A86F42 con indicador de 4 px en #D1665A y texto en negrita.
-- Máximo 5 elementos en la barra inferior móvil.
-
-### Alertas y retroalimentación
+### Alertas
 
 | Tipo | Fondo | Borde | Icono |
 | --- | --- | --- | --- |
-| Error | #F0C3BC | #B8493D | Círculo con exclamación |
-| Advertencia | #F4D9A8 | #A86F42 | Triángulo |
-| Éxito | #D6E0A9 | #5E6B2B | Marca de verificación |
-| Informativo | #E8DCC8 | #5A4034 | Letra i |
+| Error | `accent-claro` | `accent-oscuro` | Círculo con exclamación |
+| Advertencia | #F4D9A8 | `surface-oscuro` | Triángulo |
+| Éxito | `bg-claro` | #5E6B2B | Marca de verificación |
+| Informativo | #E8DCC8 | `ink-soft` | Letra i |
 
-### Iconografía
+## 2. Accesibilidad y contraste (WCAG 2.1 y Android)
 
-- Estilo de línea, trazo de 2 px, cuadrícula de 24 px.
-- Iconos neutros en #2C1E18. Solo los iconos destacados usan coral.
+Mínimos según las guías de accesibilidad de Android y WCAG 2.1 AA:
 
-## 6. Distribución 60-30-10 en pantalla
+- **Texto:** al menos **4.5:1**.
+- **Texto grande:** desde 18.66 px en negritas o 24 px normal, al menos **3:1**.
+- **Elementos no textuales** (iconos, bordes de controles, casillas): al menos **3:1**.
 
-1. 60%: fondo de pantalla y áreas amplias en oliva #C4D18B.
-2. 30%: tarjetas, navegación, encabezados de sección en terracota #C98B58.
-3. 10%: CTA, indicador de elemento activo, badges y alertas en coral #D1665A.
+### Combinaciones medidas
 
-Si el coral aparece en más de un 10–12% de la pantalla, pierde su capacidad de guiar la mirada.
+| Combinación | Ratio | Uso |
+| --- | --- | --- |
+| `ink` sobre `bg` / `crema` / `campo` | 9.8 / 14.4 / 15.2 | Texto normal sin restricciones |
+| `ink` sobre `surface` | 5.6 | Texto normal y la ✓ de la casilla marcada |
+| `ink` sobre `accent` | 4.4 | Solo texto grande en negritas: botón de 19 px |
+| `ink-soft` sobre `bg` / `campo` | 5.8 / 8.9 | Texto de apoyo y bordes de controles |
+| `texto-naranja` sobre `bg` / `crema` / `campo` | 4.7 / 6.8 / 7.2 | Texto naranja |
+| `placeholder` sobre `campo` | 5.0 | Texto de ejemplo |
+| `peligro` / `confirmar` sobre `campo` | 5.3 / 4.8 | Enlaces de texto rojos y verdes |
+| Blanco sobre `peligro` / `confirmar` | 5.6 / 5.1 | Botones de los diálogos |
+| `accent-oscuro` sobre `crema` | 4.6 | Icono de la moneda |
+| `surface-oscuro` sobre `campo` | 4.0 | Bordes de selección (3:1 cumple) |
 
-## 7. Principios de UX
+### Combinaciones prohibidas
 
-- Una acción principal por pantalla: un solo botón coral visible.
-- Jerarquía clara: título, contenido, acción, en ese orden de lectura.
-- Retroalimentación inmediata: toda acción responde en menos de 100 ms con un cambio visual.
-- Consistencia: mismos componentes, mismos colores para los mismos significados.
-- Prevención de errores: confirmar acciones destructivas y validar en línea.
-- Diseño móvil primero y áreas táctiles amplias.
-- Movimiento sobrio: transiciones de 150–250 ms con curva ease-out, respetando `prefers-reduced-motion`.
+| Combinación | Ratio | Motivo |
+| --- | --- | --- |
+| `surface-oscuro` como texto sobre `bg` | 2.6 | Por debajo de 4.5: usar `texto-naranja` |
+| Blanco sobre `accent` | 3.6 | Texto normal ilegible: el CTA lleva texto `ink` |
+| `#46484E` al 50% como placeholder | 2.5 | Por debajo de 4.5: usar el token `placeholder` (80%) |
+| `surface` como borde sobre `campo` | 2.7 | Por debajo de 3: los bordes de selección van en `surface-oscuro` |
+| `bg-oscuro` como borde de control sobre `campo` | 2.0 | Por debajo de 3: las casillas y los días sin elegir van con borde `ink-soft` |
+| `accent` sobre `bg` | 2.2 | El botón coral necesita borde `ink` de 2 px |
 
-## 8. Lista de verificación antes de entregar
+Las tarjetas `campo` sobre el fondo claro (1.5:1) se distinguen por su sombra, que es lo que Material acepta. No se usan como única señal de un estado.
 
-- Todo el texto cumple al menos 4.5:1 (o 3:1 si es texto grande).
-- Cada pantalla tiene un único CTA coral.
-- Ningún estado depende solo del color.
-- Foco de teclado visible en todos los elementos interactivos.
-- Áreas táctiles de 44 px o más.
-- Se respeta la proporción 60-30-10.
-- Probado con simulación de daltonismo (deuteranopía y protanopía), donde oliva y coral pueden acercarse.
+### Reglas derivadas
 
-## 9. Siguientes pasos sugeridos
+1. Todo el texto va en `ink`, `ink-soft` o `texto-naranja`. El blanco solo se usa sobre `peligro` y `confirmar`.
+2. El botón CTA lleva texto `ink` de 19 px en negritas y borde de 2 px en `ink`.
+3. Nunca se comunica un estado solo con color. Siempre va acompañado de un icono, texto, tachado o negritas. Por ejemplo: la opción elegida lleva ✓ y negritas, el hábito hecho se tacha, el pausado muestra ⏸ y el error muestra una X con su mensaje.
+4. Todo elemento interactivo tiene `accessibilityRole`, `accessibilityLabel` y, cuando aplica, `accessibilityState`. Las imágenes decorativas se ocultan al lector de pantalla.
+5. Anillo de foco visible para teclado externo: 3 px en `ink`.
 
-1. Definir los flujos principales y las pantallas clave.
-2. Construir wireframes de baja fidelidad.
-3. Maquetar la biblioteca de componentes con los tokens de esta guía.
-4. Probar con usuarios reales y ajustar los tonos derivados si hace falta.
+## 3. Tipografía
+
+Lexend Deca (`@expo-google-fonts/lexend-deca`), con la del sistema como respaldo. Tamaños en sp: respetan el tamaño de letra del sistema.
+
+| Nivel | Tamaño | Peso |
+| --- | --- | --- |
+| H1 | 32 | 700 |
+| H2 | 24 | 700 |
+| H3 | 20 | 600 |
+| Cuerpo | 16 | 400 |
+| Pequeño | 14 | 400 |
+| Botón | 19 | 700 |
+| Etiqueta de pestaña | 12 | 400, o 700 si está activa |
+
+- Nada por debajo de 12 sp.
+- **Escalado del sistema hasta 2×** (Android llega a 200%). Solo las etiquetas de la barra de pestañas se limitan a 1.3×.
+- Nunca alturas fijas para el texto: los contenedores crecen con él.
+- **Negritas al elegir:** cuando un texto pasa a negritas al seleccionarse, se usa `StableBoldText`, que reserva el ancho para que nada se mueva.
+- **Tachado:** en Android el tachado del sistema casi no se ve con Lexend. Para un renglón se dibuja una línea de 2 px en `ink-soft`.
+
+## 4. Espaciado, rejilla y formas
+
+- **Espaciado:** unidad base de 8 (4, 8, 16, 24, 32, 48, 64).
+- **Márgenes laterales de pantalla:** 32 dp, como en los mockups. Material sugiere 16 dp en teléfonos; si una pantalla necesita más ancho, se baja a 16.
+- **Radios:** 8 en campos, casillas y botones cuadrados; 16 en tarjetas y diálogos; 999 en botones píldora, chips y barras.
+- **Sombra de tarjeta:** color `ink`, opacidad 0.18, radio 8, desplazamiento vertical de 2; en Android, `elevation` 3.
+
+## 5. Componentes (`src/components/ui` y `src/features/*/components`)
+
+| Componente | Especificación |
+| --- | --- |
+| `Button` primario | Píldora `accent`, borde 2 px `ink`, texto `ink` de 19 px en negritas, 48 dp de alto. Presionado: `accent-oscuro`. **Uno por pantalla.** |
+| `Button` secundario y terciario | Secundario: transparente con borde `ink`. Terciario: texto subrayado, al menos 48 dp de alto. |
+| `Field` | Fondo `campo`, borde 2 px `ink-soft`, 48 dp de alto, o más con `multiline`. Etiqueta siempre visible arriba, nunca solo el placeholder. **Enfocado:** borde `surface`. **Error:** borde `accent-oscuro` y X dentro; el mensaje va debajo o en un solo aviso bajo los campos (login y registro). **Válido:** ✓ dentro. |
+| `OptionChip` | Opción grande de `campo` con icono opcional. Elegida: borde 2 px `surface-oscuro`, círculo `surface` con ✓ y texto en negritas. |
+| `ChoicePill` | Píldora de elección. Elegida: relleno `surface` con texto `ink` en negritas. Sin elegir: borde `surface-oscuro`. |
+| `DaySquares` | Cuadros L M M J V S D. Elegido: relleno `surface`, borde `surface-oscuro` y negritas. Sin elegir: borde `ink-soft`. La zona táctil se amplía con `hitSlop`. |
+| `SettingsRow` | Fila «Etiqueta — valor >» de al menos 48 dp. Sin acción, se muestra sin flecha. |
+| `ProgressSteps` | Barra «1/3» dentro de una píldora. |
+| `Dialog` / `ConfirmDialog` | Tarjeta `campo` con borde coral sobre fondo `ink` al 40%. Botones de 48 dp: «Cancelar» con borde y la acción en `peligro` o `confirmar`. Se cierra con el botón «atrás». |
+| Globo de menú (`HabitMenu`) | `bg` con borde `bg-oscuro`, anclado al ⋮. Se abre hacia arriba si no cabe abajo. Filas de 48 dp con icono, texto y `>`; «Eliminar» va en `peligro`. |
+| Tarjeta de hábito (`HabitCheckCard`) | `campo` con sombra y casilla de 48 dp. **Hecho:** casilla `surface` con ✓ `ink`, borde `surface-oscuro` y título tachado en `ink-soft`. **En pausa:** ⏸ en lugar de la casilla, título tachado y borde naranja. **No toca hoy:** casilla apagada con el texto «No toca hoy». |
+| `Alert` | Fondo y borde de su tipo (sección 1), siempre con icono y texto. |
+| `TabBar` | 5 destinos como máximo, sobre `bg`. Activo: indicador `accent` de 4 px, icono `accent-oscuro` y negritas. |
+
+**Iconografía:** iconos de línea (lucide), trazo de 2 px y cuadrícula de 24. Los neutros van en `ink`; solo los destacados usan coral.
+
+## 6. Reglas de Android (Material)
+
+Fuentes: [Layout basics](https://developer.android.com/design/ui/mobile/guides/layout-and-content/layout-basics?hl=es-419), [Accesibilidad](https://developer.android.com/design/ui/mobile/guides/foundations/accessibility) y [Edge-to-edge](https://developer.android.com/design/ui/mobile/guides/layout-and-content/edge-to-edge).
+
+| Regla | Cómo se cumple |
+| --- | --- |
+| **Zona táctil de 48 × 48 dp** | Todo lo tocable mide al menos 48 dp (`h-12`, `min-h-12`). Si el elemento visible es más chico, se amplía con `hitSlop`. |
+| **Edge-to-edge y áreas seguras** | Las pantallas usan `Screen`, con `SafeAreaView`. La barra de pestañas y las hojas inferiores respetan el inset inferior. Los modales anclados a un punto de la pantalla usan `statusBarTranslucent`. Nada tocable va bajo las barras del sistema. |
+| **Teclado** | El campo activo nunca queda tapado: `Screen` usa `KeyboardAvoidingView` (`height` en Android) y las pantallas con campos van dentro de un scroll. |
+| **Botón «atrás» del sistema** | En flujos de varios pasos, como el asistente de hábito, regresa un paso (`BackHandler`). Los diálogos y menús se cierran con él (`onRequestClose`). |
+| **Navegación principal** | Abajo y al alcance del pulgar, con 5 destinos como máximo. |
+| **Pocas acciones por pantalla** | Una acción principal (CTA coral). El contenido relacionado se agrupa en tarjetas. |
+| **Tamaño de letra** | Respetar el del sistema hasta 2× y comprobar que nada se corte. |
+| **Orientación** | Solo vertical en la demo. Los diseños para tabletas y pantallas grandes quedan para antes de publicar (Android 16 ignora el bloqueo de orientación en ellas). |
+
+## 7. Distribución 60-30-10 en pantalla
+
+1. **60%:** fondo (degradado de `crema` a `bg`) y áreas amplias.
+2. **30%:** tarjetas, rellenos de selección y barras en `surface`.
+3. **10%:** CTA, botón «+», indicador activo y alertas en `accent`.
+
+Si el coral aparece en más del 10–12% de la pantalla, pierde su capacidad de guiar la mirada.
+
+## 8. Principios de UX
+
+- **Una acción principal por pantalla:** un solo botón coral visible.
+- **Jerarquía clara:** título, contenido y acción, en ese orden de lectura.
+- **Respuesta inmediata:** toda acción responde con un cambio visual en menos de 100 ms. Lo que se guarda sin conexión se ve al instante.
+- **Consistencia:** los mismos componentes y colores para los mismos significados.
+- **Prevenir errores:** confirmar las acciones destructivas con un diálogo y validar al avanzar de paso.
+- **Tono cercano y sin culpa:** tuteo y mensajes que no regañan («Hoy ya ganaste todas tus monedas», «La dejamos para la próxima»).
+- **Movimiento sobrio:** de 150 a 250 ms con ease-out. Con «reducir movimiento» se sustituye por un cambio sin animación.
+
+## 9. Mockups y desviaciones registradas
+
+Cuando un mockup no cumple una regla, se aplica el ajuste mínimo y se anota en el SDD 9:
+
+- Texto blanco del mockup sobre naranja o coral: pasa a `ink`.
+- Borde de selección `#C98B58`: pasa a `surface-oscuro`.
+- Placeholder al 50%: pasa al 80%.
+- Botón de 18 px: pasa a 19 px.
+- Zonas táctiles de 44 px: pasan a 48 dp.
+
+## 10. Lista de verificación antes de entregar
+
+- [ ] Todo el texto cumple 4.5:1 (o 3:1 si es grande) y los bordes de controles e iconos, 3:1. Se calcula con los tokens; no basta con verlo a ojo.
+- [ ] Todo lo tocable mide 48 dp o más.
+- [ ] Ningún estado depende solo del color.
+- [ ] Un solo CTA coral por pantalla y la proporción 60-30-10.
+- [ ] Probado con la letra del sistema al 200%: nada se corta ni se encima.
+- [ ] Probado con TalkBack: todo se anuncia con nombre, rol y estado; los títulos son encabezados.
+- [ ] El teclado no tapa el campo activo.
+- [ ] El botón «atrás» del sistema hace lo esperado: regresa un paso o cierra el diálogo.
+- [ ] Estados de carga, vacío y error en cada pantalla.
+- [ ] Sin códigos hex sueltos en los componentes: todo sale de los tokens.
+- [ ] Probado con simulación de daltonismo (deuteranopía y protanopía), donde oliva y coral pueden acercarse.

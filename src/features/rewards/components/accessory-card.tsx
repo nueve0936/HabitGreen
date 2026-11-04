@@ -50,12 +50,12 @@ export function AccessoryCard({
         </AppText>
       </View>
       {a.propioId !== null ? (
-        <View className="min-h-11 flex-row items-center gap-1">
+        <View className="min-h-12 flex-row items-center gap-1">
           <Check size={18} color={colors.ink} strokeWidth={3} />
           <AppText weight="bold">{t.esTuyo}</AppText>
         </View>
       ) : faltan > 0 ? (
-        <AppText variant="small" className="min-h-11">
+        <AppText variant="small" className="min-h-12">
           {formatear(t.faltan, { n: faltan })}
         </AppText>
       ) : (

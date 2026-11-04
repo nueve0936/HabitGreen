@@ -238,6 +238,8 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 
 ## 8. Diseño visual (guía de UX/UI aplicada a React Native)
 
+**Las reglas visuales completas y vigentes están en `docs/Guía de UX UI.md`; consúltala antes de cualquier trabajo visual.** Este resumen puede quedarse atrás; si difiere, gana la guía.
+
 ### Tokens (en `tailwind.config.js` y `src/theme`)
 
 | Token | HEX | Uso |
@@ -265,9 +267,9 @@ Alertas: advertencia `#F4D9A8` / borde `#A86F42`; éxito `#D6E0A9` / borde `#5E6
 - `ink-soft` sobre `surface` da unos 3.3:1 y no cumple: sobre tarjetas terracota el texto de apoyo también va en `ink`.
 - El coral sobre `surface` da unos 1.3:1: un icono o botón coral dentro de una tarjeta necesita fondo `bg-claro` o borde `ink`.
 - No comunicar estados solo con color: siempre icono y texto (una opción seleccionada lleva icono de verificación).
-- Tipografía Lexend Deca, como en los mockups (respaldo: sistema). H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 16–18/600. Escalado de texto del sistema permitido hasta 1.3×.
+- Tipografía Lexend Deca, como en los mockups (respaldo: sistema). H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 19/700. Escalado de texto del sistema permitido hasta 2× (guía de Android; las etiquetas de la barra de pestañas, hasta 1.3×).
 - Espaciado en múltiplos de 8 (4, 8, 16, 24, 32, 48, 64). Márgenes de pantalla de 16 px. Radios: 8 campos y botones, 16 tarjetas, 999 chips.
-- Áreas táctiles de 44 × 44 px o más; botones de 48 px de alto.
+- Áreas táctiles de 48 × 48 dp o más (guía de Android); botones de 48 dp de alto. Si el elemento visible es más chico, se amplía la zona táctil (`hitSlop`).
 - Móvil primero: no hay hover; el estado equivalente es «presionado». Estados de foco para lectores de pantalla y teclado externo con anillo de 3 px en `ink`.
 - Movimiento sobrio: 150–250 ms, ease-out; respetar `AccessibilityInfo.isReduceMotionEnabled`.
 - Solo tema claro (`userInterfaceStyle: light`).

@@ -46,15 +46,20 @@ export function Field({
       <AppText variant="small" weight="semibold">
         {label}
       </AppText>
-      <View className={`h-12 flex-row items-center rounded-field border-2 bg-campo px-3 ${borde}`}>
+      <View
+        className={`flex-row rounded-field border-2 bg-campo px-3 ${borde} ${
+          inputProps.multiline ? 'min-h-32 items-start py-2' : 'h-12 items-center'
+        }`}
+      >
         <TextInput
           accessibilityLabel={label}
           accessibilityHint={error}
           aria-invalid={hasError}
-          placeholderTextColor={colors['ink-soft']}
+          placeholderTextColor={colors.placeholder}
           secureTextEntry={hidden}
-          maxFontSizeMultiplier={1.3}
-          className="h-full flex-1 font-sans text-body text-ink"
+          maxFontSizeMultiplier={2}
+          textAlignVertical={inputProps.multiline ? 'top' : 'center'}
+          className={`flex-1 font-sans text-body text-ink ${inputProps.multiline ? 'min-h-28' : 'h-full'}`}
           onFocus={(e) => {
             setEnfocado(true);
             onFocus?.(e);
@@ -71,7 +76,7 @@ export function Field({
             accessibilityLabel={hidden ? es.comun.mostrarContrasena : es.comun.ocultarContrasena}
             onPress={() => setHidden((value) => !value)}
             hitSlop={8}
-            className="h-11 w-11 items-center justify-center"
+            className="h-12 w-12 items-center justify-center"
           >
             {hidden ? (
               <Eye size={22} color={colors.ink} />

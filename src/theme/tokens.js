@@ -29,6 +29,10 @@ const colors = {
   peligro: '#C62828',
   confirmar: '#2E7D32',
   blanco: '#FFFFFF',
+  // Texto de ejemplo dentro de los campos: #46484E al 80 % (con 50 % no llegaba a 4.5:1).
+  placeholder: 'rgba(70, 72, 78, 0.8)',
+  // Naranja para texto: el `surface-oscuro` no llega a 4.5:1 sobre el fondo verde.
+  'texto-naranja': '#724B2D',
 };
 
 // Lexend Deca, según los mockups de Figma. Cada peso es una familia distinta en React Native.

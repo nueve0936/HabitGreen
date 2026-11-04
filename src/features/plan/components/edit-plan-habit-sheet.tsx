@@ -89,7 +89,7 @@ export function EditPlanHabitSheet({
           accessibilityRole="button"
           accessibilityLabel={t.cerrar}
           onPress={onCerrar}
-          className="-ml-2 h-11 w-11 items-center justify-center"
+          className="-ml-2 h-12 w-12 items-center justify-center"
         >
           <X size={24} color={colors.ink} />
         </Pressable>
