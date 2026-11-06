@@ -35,15 +35,25 @@ export type LogDelDia = {
   completado_en: string;
   xp_otorgado: boolean;
   monedas_otorgadas: boolean;
+  /** Ya pagó monedas hoy y no se devolvieron completas (o se eliminó): no vuelve a pagar. */
+  monedas_sin_devolver: boolean;
 };
 
 /** Lo que cambia con un check-in: la planta de la categoría del hábito, el saldo y los logs. */
-export type EstadoDia = { planta: Planta; saldo: number; logs: LogDelDia[] };
+export type EstadoDia = {
+  planta: Planta;
+  saldo: number;
+  logs: LogDelDia[];
+  /** Hábitos desmarcados hoy cuyo pago no se devolvió: siguen contando para el tope. */
+  deshechosSinDevolver: string[];
+};
 
 export type ResultadoRecompensa = {
   estado: EstadoDia;
-  /** Este check-in dio monedas (si es falso al completar, se llegó al tope del día). */
+  /** Este check-in dio monedas. */
   monedas: boolean;
+  /** Por qué no dio monedas al completar. */
+  sinMonedas: 'tope' | 'ya_pagado' | null;
   /** Fase nueva si la planta cambió de fase. */
   cambioFase: number | null;
 };
@@ -64,9 +74,23 @@ function porHora(a: LogDelDia, b: LogDelDia): number {
   return a.completado_en.localeCompare(b.completado_en);
 }
 
-function resultado(antes: EstadoDia, despues: EstadoDia, monedas: boolean): ResultadoRecompensa {
+function resultado(
+  antes: EstadoDia,
+  despues: EstadoDia,
+  monedas: boolean,
+  sinMonedas: ResultadoRecompensa['sinMonedas'] = null,
+): ResultadoRecompensa {
   const cambio = despues.planta.fase !== antes.planta.fase ? despues.planta.fase : null;
-  return { estado: despues, monedas, cambioFase: cambio };
+  return { estado: despues, monedas, sinMonedas, cambioFase: cambio };
+}
+
+/** Pagos que cuentan para el tope del día: los activos y los que no se devolvieron. */
+function pagosDelDia(estado: EstadoDia, sinContar: string): number {
+  const activos = estado.logs.filter(
+    (l) => l.habit_id !== sinContar && (l.monedas_otorgadas || l.monedas_sin_devolver),
+  ).length;
+  const deshechos = estado.deshechosSinDevolver.filter((id) => id !== sinContar).length;
+  return activos + deshechos;
 }
 
 /** Completar: `nuevo` llega sin marcas; se le dan XP y monedas si los topes lo permiten. */
@@ -78,11 +102,12 @@ export function aplicarCompletar(
   const conXp = estado.logs.filter(
     (l) => l.category_id === nuevo.category_id && l.xp_otorgado,
   ).length;
-  const conMonedas = estado.logs.filter((l) => l.monedas_otorgadas).length;
-
   const darXp =
     estado.planta.nivel < c.nivel_maximo && conXp < c.tope_habitos_con_xp_por_planta_dia;
-  const darMonedas = conMonedas < c.tope_habitos_con_monedas_dia;
+
+  const yaPagado = nuevo.monedas_sin_devolver;
+  const hayLugar = pagosDelDia(estado, nuevo.habit_id) < c.tope_habitos_con_monedas_dia;
+  const darMonedas = !yaPagado && hayLugar;
 
   const despues: EstadoDia = {
     planta: darXp ? plantaConXp(estado.planta, c.xp_por_habito, c) : estado.planta,
@@ -91,13 +116,16 @@ export function aplicarCompletar(
       ...estado.logs.filter((l) => l.habit_id !== nuevo.habit_id),
       { ...nuevo, xp_otorgado: darXp, monedas_otorgadas: darMonedas },
     ],
+    deshechosSinDevolver: estado.deshechosSinDevolver.filter((id) => id !== nuevo.habit_id),
   };
-  return resultado(estado, despues, darMonedas);
+  const motivo = darMonedas ? null : yaPagado ? 'ya_pagado' : 'tope';
+  return resultado(estado, despues, darMonedas, motivo);
 }
 
 /**
- * Deshacer: revierte lo que dio ese registro y, si otro del mismo día se había quedado sin XP o
- * sin monedas por el tope, ahora los recibe. El saldo nunca baja de 0.
+ * Deshacer: revierte lo que dio ese registro. Las monedas se devuelven hasta donde alcance el
+ * saldo (nunca baja de 0). Si se devolvieron completas, el lugar queda libre para otro registro
+ * del día que se quedó sin ellas; si no, ese pago sigue contando y el hábito no vuelve a pagar hoy.
  */
 export function aplicarDeshacer(
   estado: EstadoDia,
@@ -105,10 +133,11 @@ export function aplicarDeshacer(
   c: ConfigRecompensas,
 ): ResultadoRecompensa {
   const log = estado.logs.find((l) => l.habit_id === habitId);
-  if (log === undefined) return { estado, monedas: false, cambioFase: null };
+  if (log === undefined) return resultado(estado, estado, false);
 
   let planta = estado.planta;
   let saldo = estado.saldo;
+  let sinDevolver = log.monedas_sin_devolver;
   const logs = estado.logs
     .filter((l) => l.habit_id !== habitId)
     .sort(porHora)
@@ -124,13 +153,46 @@ export function aplicarDeshacer(
   }
 
   if (log.monedas_otorgadas) {
-    saldo -= Math.min(saldo, c.monedas_por_habito);
-    const otro = logs.find((l) => !l.monedas_otorgadas);
-    if (otro) {
-      saldo += c.monedas_por_habito;
-      otro.monedas_otorgadas = true;
+    const devuelto = Math.min(saldo, c.monedas_por_habito);
+    saldo -= devuelto;
+    if (devuelto < c.monedas_por_habito) {
+      sinDevolver = true;
+    } else {
+      const otro = logs.find((l) => !l.monedas_otorgadas && !l.monedas_sin_devolver);
+      if (otro) {
+        saldo += c.monedas_por_habito;
+        otro.monedas_otorgadas = true;
+      }
     }
   }
 
-  return resultado(estado, { planta, saldo, logs }, log.monedas_otorgadas);
+  const despues: EstadoDia = {
+    planta,
+    saldo,
+    logs,
+    deshechosSinDevolver: sinDevolver
+      ? [...estado.deshechosSinDevolver.filter((id) => id !== habitId), habitId]
+      : estado.deshechosSinDevolver,
+  };
+  return resultado(estado, despues, log.monedas_otorgadas);
+}
+
+/**
+ * Eliminar un hábito marcado: devuelve sus monedas hasta donde alcance el saldo. El registro y el
+ * XP se conservan, y ese pago sigue contando para el tope del día.
+ */
+export function aplicarArchivar(
+  estado: EstadoDia,
+  habitId: string,
+  c: ConfigRecompensas,
+): EstadoDia {
+  const log = estado.logs.find((l) => l.habit_id === habitId);
+  if (log === undefined || !log.monedas_otorgadas) return estado;
+  return {
+    ...estado,
+    saldo: estado.saldo - Math.min(estado.saldo, c.monedas_por_habito),
+    logs: estado.logs.map((l) =>
+      l.habit_id === habitId ? { ...l, monedas_otorgadas: false, monedas_sin_devolver: true } : l,
+    ),
+  };
 }

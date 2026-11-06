@@ -172,7 +172,7 @@ La P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o mo
 - En nivel 30 la planta deja de sumar XP. Las monedas siguen.
 - Un registro por hábito y fecha (único por `habit_id + fecha`). `habit_logs` marca `xp_otorgado` y `monedas_otorgadas`.
 - Los hábitos que superan los topes se registran igual y cuentan para estadísticas y progresión.
-- Deshacer el mismo día (`uncomplete_habit`) revierte lo otorgado y, si corresponde, lo transfiere a otro registro del mismo día que no lo recibió.
+- Deshacer el mismo día (`uncomplete_habit`) devuelve lo otorgado hasta donde alcance el saldo. Si se devolvió completo, lo transfiere a otro registro del mismo día que no lo recibió; si no, ese hábito no vuelve a pagar ese día y el pago sigue contando para el tope (SDD 6.1).
 - Nunca se resta XP ni monedas por fallar.
 - Al completar un hábito con el tope de monedas ya alcanzado: sin animación de moneda y mensaje suave «¡Hoy ya ganaste todas tus monedas! Este hábito igual cuenta para tu progreso». El tope de XP no se comunica.
 - Las constantes viven en un solo módulo/tabla de configuración (`app_config`, cacheada en SQLite).
@@ -198,7 +198,7 @@ La P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o mo
 ### Hábitos
 
 - La categoría se fija al crear el hábito y no cambia.
-- «Eliminar» archiva: se oculta y se cancelan sus avisos, pero el historial se conserva.
+- «Eliminar» archiva: se oculta y se cancelan sus avisos, pero el historial se conserva. Si dio monedas ese día, se devuelven hasta donde alcance el saldo y el pago sigue contando para el tope (SDD 6.1).
 - El check-in solo se puede marcar y deshacer para hoy.
 - Rachas por hábito: ocurrencias programadas seguidas completadas; los días no programados no la rompen.
 

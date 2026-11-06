@@ -141,6 +141,7 @@ export const TABLAS = [
       completado_en: T,
       xp_otorgado: B,
       monedas_otorgadas: B,
+      monedas_sin_devolver: B,
       updated_at: T,
       eliminado_en: T,
     },

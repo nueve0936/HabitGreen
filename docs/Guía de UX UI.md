@@ -133,7 +133,7 @@ Lexend Deca (`@expo-google-fonts/lexend-deca`), con la del sistema como respaldo
 | Globo de menú (`HabitMenu`) | `bg` con borde `bg-oscuro`, anclado al ⋮. Se abre hacia arriba si no cabe abajo. Filas de 48 dp con icono, texto y `>`; «Eliminar» va en `peligro`. |
 | Tarjeta de hábito (`HabitCheckCard`) | `campo` con sombra y casilla de 48 dp. **Hecho:** casilla `surface` con ✓ `ink`, borde `surface-oscuro` y título tachado en `ink-soft`. **En pausa:** ⏸ en lugar de la casilla, título tachado y borde naranja. **No toca hoy:** casilla apagada con el texto «No toca hoy». |
 | `Alert` | Fondo y borde de su tipo (sección 1), siempre con icono y texto. |
-| `TabBar` | 5 destinos como máximo, sobre `bg`. Activo: indicador `accent` de 4 px, icono `accent-oscuro` y negritas. |
+| `TabBar` | 5 destinos como máximo, sobre `bg`. Se cambia tocando o deslizando entre pantallas; el toque siempre funciona, para no depender solo del gesto. Activo: indicador `accent` de 4 px, icono `accent-oscuro` y negritas. |
 
 **Iconografía:** iconos de línea (lucide), trazo de 2 px y cuadrícula de 24. Los neutros van en `ink`; solo los destacados usan coral.
 
@@ -147,7 +147,7 @@ Fuentes: [Layout basics](https://developer.android.com/design/ui/mobile/guides/l
 | **Edge-to-edge y áreas seguras** | Las pantallas usan `Screen`, con `SafeAreaView`. La barra de pestañas y las hojas inferiores respetan el inset inferior. Los modales anclados a un punto de la pantalla usan `statusBarTranslucent`. Nada tocable va bajo las barras del sistema. |
 | **Teclado** | El campo activo nunca queda tapado: `Screen` usa `KeyboardAvoidingView` (`height` en Android) y las pantallas con campos van dentro de un scroll. |
 | **Botón «atrás» del sistema** | En flujos de varios pasos, como el asistente de hábito, regresa un paso (`BackHandler`). Los diálogos y menús se cierran con él (`onRequestClose`). |
-| **Navegación principal** | Abajo y al alcance del pulgar, con 5 destinos como máximo. |
+| **Navegación principal** | Abajo y al alcance del pulgar, con 5 destinos como máximo. Deslizar entre pestañas es un atajo: todo se puede hacer también tocando. No se ponen elementos que se deslicen en horizontal dentro de una pestaña, porque el gesto chocaría con el cambio de pantalla. |
 | **Pocas acciones por pantalla** | Una acción principal (CTA coral). El contenido relacionado se agrupa en tarjetas. |
 | **Tamaño de letra** | Respetar el del sistema hasta 2× y comprobar que nada se corte. |
 | **Orientación** | Solo vertical en la demo. Los diseños para tabletas y pantallas grandes quedan para antes de publicar (Android 16 ignora el bloqueo de orientación en ellas). |

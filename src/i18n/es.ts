@@ -292,6 +292,7 @@ export const es = {
     reprogramado: 'Lo moviste a hoy.',
     error: 'No pudimos cargar tus hábitos de hoy.',
     errorGuardar: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
+    errorReloj: 'Revisa la fecha de tu teléfono: parece estar atrasada.',
     sinHabitos: {
       titulo: 'Tu jardín está listo para empezar',
       descripcion: 'Crea tu primer hábito, pequeño y a tu ritmo.',
@@ -326,6 +327,7 @@ export const es = {
     },
     eliminar: {
       pregunta: '¿Seguro que deseas eliminar el hábito «{titulo}»?',
+      devolucion: 'Se devolverán las monedas que te haya dado hoy.',
       cancelar: 'Cancelar',
       confirmar: 'Eliminar',
     },
@@ -405,6 +407,7 @@ export const es = {
     hechoMonedas: '¡Hecho! +{n} monedas',
     hecho: '¡Hecho!',
     topeMonedas: '¡Hoy ya ganaste todas tus monedas! Este hábito igual cuenta para tu progreso.',
+    yaPagado: 'Este hábito ya te dio sus monedas de hoy. Igual cuenta para tu progreso.',
     deshecho: 'Lo desmarcamos.',
     fase2: '¡Tu planta de {categoria} está creciendo! Tu constancia se nota.',
     fase3: '¡Tu planta de {categoria} floreció! Esto ya es parte de ti.',

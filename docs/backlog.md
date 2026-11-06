@@ -77,6 +77,8 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 | 4.3 | Check-in con animación de moneda (Reanimated) y mensaje del tope de monedas; celebración de cambio de fase | 6.1 | en curso (falta tu prueba en el teléfono) |
 | 4.4 | Jardín con las 5 plantas y accesorios equipados (placeholders si el arte no ha llegado) | 9.4, 9.8 | en curso (falta tu prueba en el teléfono) |
 | 4.5 | Tienda: comprar, saldo, «Te faltan N monedas»; equipar en una sola planta | 6.4 | en curso (falta tu prueba en el teléfono) |
+| 4.6 | Detalles de la planta: carrusel de fases con bloqueo, pestañas Hábitos y Objetos, y Jardín según el mockup | 6.1, 6.4, 9.4 | pendiente |
+| 4.7 | Protección de monedas: pago único por hábito y día, eliminar devuelve, validaciones de `complete_habit` y reloj atrasado; deslizar entre pestañas y parte superior de Hoy fija | 6.1, 9.4 | en curso (falta tu prueba en el teléfono) |
 
 **Criterio de prueba:** completas 6 hábitos en un día y el sexto muestra el mensaje del tope. Compras un accesorio, lo equipas en una planta y luego en otra, y desaparece de la primera.
 

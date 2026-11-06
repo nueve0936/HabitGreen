@@ -9,6 +9,7 @@ import {
   type EstadoDia,
   type LogDelDia,
   type Planta,
+  type ResultadoRecompensa,
 } from '@/features/rewards/domain/recompensas';
 import { fechaLocal } from '@/lib/dates';
 import { pedirSincronizacion } from '@/sync/sync-engine';
@@ -24,9 +25,14 @@ import { encolar } from './outbox';
 
 type HabitoCheck = { id: string; category_id: string };
 
+/** La fecha del teléfono es anterior al último registro: se atrasó el reloj. */
+export class RelojAtrasadoError extends Error {}
+
 export type ResultadoCheckIn = {
-  /** Monedas que dio. Al completar, 0 significa que ya se llegó al tope del día. */
+  /** Monedas que dio. */
   monedas: number;
+  /** Por qué no dio monedas: tope del día, o ya pagó hoy y no se devolvió. */
+  sinMonedas: ResultadoRecompensa['sinMonedas'];
   /** Fase nueva de la planta, si cambió. */
   cambioFase: number | null;
 };
@@ -35,7 +41,7 @@ function revisarQueSeaHoy(fecha: string): void {
   if (fecha !== fechaLocal()) throw new Error('Solo se puede marcar el hábito de hoy');
 }
 
-async function leerConfig(db: SQLiteDatabase): Promise<ConfigRecompensas> {
+export async function leerConfig(db: SQLiteDatabase): Promise<ConfigRecompensas> {
   const [fila] = await leerFilas<{ valor: Partial<ConfigRecompensas> }>(
     db,
     'app_config',
@@ -44,7 +50,7 @@ async function leerConfig(db: SQLiteDatabase): Promise<ConfigRecompensas> {
   return { ...RECOMPENSAS_POR_DEFECTO, ...fila?.valor };
 }
 
-async function leerEstado(
+export async function leerEstado(
   db: SQLiteDatabase,
   userId: string,
   categoryId: string,
@@ -64,7 +70,16 @@ async function leerEstado(
     'user_id = ? AND fecha = ? AND eliminado_en IS NULL',
     [userId, fecha],
   );
-  return { planta: planta ?? { xp: 0, nivel: 0, fase: 1 }, saldo: monedero?.saldo ?? 0, logs };
+  const deshechos = await db.getAllAsync<{ habit_id: string }>(
+    'SELECT habit_id FROM habit_logs WHERE user_id = ? AND fecha = ? AND eliminado_en IS NOT NULL AND monedas_sin_devolver = 1',
+    [userId, fecha],
+  );
+  return {
+    planta: planta ?? { xp: 0, nivel: 0, fase: 1 },
+    saldo: monedero?.saldo ?? 0,
+    logs,
+    deshechosSinDevolver: deshechos.map((d) => d.habit_id),
+  };
 }
 
 async function guardarPlantaYSaldo(
@@ -93,9 +108,16 @@ export async function completarHabito(
     const estado = await leerEstado(db, userId, habito.category_id, fecha);
     if (estado.logs.some((l) => l.habit_id === habito.id)) return;
 
-    // Si ya hubo un registro ese día (marcado y deshecho), se reutiliza su id.
-    const previo = await db.getFirstAsync<{ id: string }>(
-      'SELECT id FROM habit_logs WHERE habit_id = ? AND fecha = ?',
+    // Atrasar el reloj no permite marcar días pasados (el servidor tampoco les da recompensas).
+    const ultimo = await db.getFirstAsync<{ fecha: string | null }>(
+      'SELECT MAX(fecha) AS fecha FROM habit_logs WHERE user_id = ?',
+      [userId],
+    );
+    if (ultimo?.fecha && ultimo.fecha > fecha) throw new RelojAtrasadoError();
+
+    // Si ya hubo un registro ese día (marcado y deshecho), se reutiliza su id y su marca de pago.
+    const previo = await db.getFirstAsync<{ id: string; monedas_sin_devolver: number }>(
+      'SELECT id, monedas_sin_devolver FROM habit_logs WHERE habit_id = ? AND fecha = ?',
       [habito.id, fecha],
     );
     const ahora = new Date().toISOString();
@@ -106,6 +128,7 @@ export async function completarHabito(
       completado_en: ahora,
       xp_otorgado: false,
       monedas_otorgadas: false,
+      monedas_sin_devolver: previo?.monedas_sin_devolver === 1,
     };
     const r = aplicarCompletar(estado, nuevo, await leerConfig(db));
     const guardado = r.estado.logs.find((l) => l.habit_id === habito.id) ?? nuevo;
@@ -127,7 +150,11 @@ export async function completarHabito(
       clave: `${habito.id}|${fecha}`,
       payload: { log_id: nuevo.id, habit_id: habito.id, fecha },
     });
-    resultado = { monedas: r.estado.saldo - estado.saldo, cambioFase: r.cambioFase };
+    resultado = {
+      monedas: r.estado.saldo - estado.saldo,
+      sinMonedas: r.sinMonedas,
+      cambioFase: r.cambioFase,
+    };
   });
   avisarCambioLocal();
   pedirSincronizacion();
@@ -150,7 +177,13 @@ export async function deshacerHabito(
       db,
       'habit_logs',
       { habit_id: habito.id, fecha },
-      { eliminado_en: ahora, updated_at: ahora, xp_otorgado: false, monedas_otorgadas: false },
+      {
+        eliminado_en: ahora,
+        updated_at: ahora,
+        xp_otorgado: false,
+        monedas_otorgadas: false,
+        monedas_sin_devolver: r.estado.deshechosSinDevolver.includes(habito.id),
+      },
     );
     // Otros registros del día que recibieron el XP o las monedas que se liberaron.
     for (const log of r.estado.logs) {

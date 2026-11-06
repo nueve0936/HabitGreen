@@ -1,4 +1,4 @@
-import type { BottomTabBarProps } from 'expo-router/tabs';
+import type { MaterialTopTabBarProps } from 'expo-router/js-top-tabs';
 import {
   ChartColumn,
   House,
@@ -27,7 +27,7 @@ const TABS: Record<string, { label: string; Icon: LucideIcon }> = {
   perfil: { label: es.tabs.perfil, Icon: UserRound },
 };
 
-export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
+export function TabBar({ state, emitter, navigateToTab }: MaterialTopTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (

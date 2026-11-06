@@ -20,7 +20,7 @@ import {
 // no se borra, para no perder lo que se hizo sin conexión.
 
 const NOMBRE = 'habitgreen.db';
-const ESQUEMA_VERSION = 1;
+const ESQUEMA_VERSION = 2;
 
 let abierta: Promise<SQLite.SQLiteDatabase> | null = null;
 

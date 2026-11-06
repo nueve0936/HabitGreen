@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo } from 'react-native';
 
-import { completarHabito, deshacerHabito } from '@/db/logs-repository';
+import { completarHabito, deshacerHabito, RelojAtrasadoError } from '@/db/logs-repository';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
 import type { Area } from '@/schemas/onboarding';
@@ -17,8 +17,9 @@ export type HabitoParaCheck = { id: string; category_id: string; categoria: Area
 
 export function useCheckIn(userId: string) {
   const [ocupado, setOcupado] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-  const [topeMonedas, setTopeMonedas] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  /** Aviso cuando un check-in no dio monedas: tope del día, o ya pagó hoy. */
+  const [aviso, setAviso] = useState<string | null>(null);
   const [premio, setPremio] = useState<{ clave: number; monedas: number } | null>(null);
   const [celebracion, setCelebracion] = useState<Celebracion | null>(null);
 
@@ -31,11 +32,11 @@ export function useCheckIn(userId: string) {
 
   const ejecutar = async (habitId: string, accion: () => Promise<void>) => {
     setOcupado(habitId);
-    setError(false);
+    setError(null);
     try {
       await accion();
-    } catch {
-      setError(true);
+    } catch (e) {
+      setError(e instanceof RelojAtrasadoError ? es.hoy.errorReloj : es.hoy.errorGuardar);
     } finally {
       setOcupado(null);
     }
@@ -46,14 +47,20 @@ export function useCheckIn(userId: string) {
       const r = await completarHabito(userId, habito, fechaLocal());
       if (r === null) return;
       const textos = es.recompensas;
-      setTopeMonedas(r.monedas === 0);
+      const motivo =
+        r.sinMonedas === 'ya_pagado'
+          ? textos.yaPagado
+          : r.sinMonedas === 'tope'
+            ? textos.topeMonedas
+            : null;
+      setAviso(motivo);
       if (r.monedas > 0) {
         setPremio({ clave: Date.now(), monedas: r.monedas });
         AccessibilityInfo.announceForAccessibility(
           formatear(textos.hechoMonedas, { n: r.monedas }),
         );
       } else {
-        AccessibilityInfo.announceForAccessibility(`${textos.hecho} ${textos.topeMonedas}`);
+        AccessibilityInfo.announceForAccessibility(`${textos.hecho} ${motivo ?? ''}`);
       }
       if (r.cambioFase !== null && r.cambioFase > 1) {
         setCelebracion({ area: habito.categoria, fase: r.cambioFase });
@@ -62,7 +69,7 @@ export function useCheckIn(userId: string) {
 
   const deshacer = (habito: HabitoParaCheck) =>
     ejecutar(habito.id, async () => {
-      setTopeMonedas(false);
+      setAviso(null);
       await deshacerHabito(userId, habito, fechaLocal());
       AccessibilityInfo.announceForAccessibility(es.recompensas.deshecho);
     });
@@ -70,7 +77,7 @@ export function useCheckIn(userId: string) {
   return {
     ocupado,
     error,
-    topeMonedas,
+    aviso,
     premio,
     celebracion,
     cerrarCelebracion: () => setCelebracion(null),

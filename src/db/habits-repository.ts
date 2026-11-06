@@ -14,6 +14,7 @@ import {
 } from '@/features/habits/domain/habitos-del-dia';
 import { nuevaVersionHorario } from '@/features/habits/domain/horario';
 import { ajustePresupuesto, minutosPorDia } from '@/features/habits/domain/presupuesto';
+import { aplicarArchivar } from '@/features/rewards/domain/recompensas';
 import { fechaLocal } from '@/lib/dates';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import type { HabitoFormValues } from '@/schemas/habit';
@@ -22,6 +23,7 @@ import { pedirSincronizacion } from '@/sync/sync-engine';
 
 import { actualizarFila, getDb, guardarFilas, leerFilas } from './database';
 import { avisarCambioLocal } from './db-version-store';
+import { leerConfig, leerEstado } from './logs-repository';
 import { encolar } from './outbox';
 
 // Repositorio de hábitos (SDD 3.4). Todo se lee y se escribe en SQLite, así que funciona sin
@@ -341,7 +343,44 @@ export function cambiarActivo(id: string, activo: boolean): Promise<void> {
   return cambiarHabito(id, { activo });
 }
 
-/** «Eliminar» archiva: se oculta y su historial se conserva (definición 6). */
-export function archivarHabito(id: string): Promise<void> {
-  return cambiarHabito(id, { archivado_en: new Date().toISOString() });
+/**
+ * «Eliminar» archiva: se oculta y su historial se conserva (definición 6). Si lo marcó hoy, devuelve
+ * las monedas que le dio, hasta donde alcance el saldo (SDD 6.1). El servidor hace lo mismo con la
+ * RPC archivar_habito.
+ */
+export async function archivarHabito(
+  userId: string,
+  habito: { id: string; category_id: string },
+): Promise<void> {
+  await aplicar(async (db) => {
+    const ahora = new Date().toISOString();
+    const fecha = fechaLocal();
+    const estado = await leerEstado(db, userId, habito.category_id, fecha);
+    const despues = aplicarArchivar(estado, habito.id, await leerConfig(db));
+    if (despues !== estado) {
+      await actualizarFila(
+        db,
+        'habit_logs',
+        { habit_id: habito.id, fecha },
+        { monedas_otorgadas: false, monedas_sin_devolver: true, updated_at: ahora },
+      );
+      await guardarFilas(db, 'wallets', [
+        { user_id: userId, saldo: despues.saldo, updated_at: ahora },
+      ]);
+    }
+    await actualizarFila(
+      db,
+      'habits',
+      { id: habito.id },
+      { archivado_en: ahora, updated_at: ahora },
+    );
+    return [
+      {
+        operacion: 'archive',
+        tabla: 'habits',
+        clave: habito.id,
+        payload: { habit_id: habito.id, fecha },
+      },
+    ];
+  });
 }

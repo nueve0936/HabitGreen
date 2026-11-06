@@ -17,6 +17,13 @@ export type OperacionOutbox =
       payload: Record<string, unknown>;
     }
   | {
+      // «Eliminar»: archiva en el servidor y devuelve las monedas que el hábito dio ese día.
+      operacion: 'archive';
+      tabla: 'habits';
+      clave: string;
+      payload: { habit_id: string; fecha: string };
+    }
+  | {
       operacion: 'complete';
       tabla: 'habit_logs';
       clave: string;

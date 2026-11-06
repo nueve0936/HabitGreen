@@ -164,6 +164,13 @@ async function enviar(entrada: EntradaOutbox) {
           .update(entrada.payload)
           .match(claveComoFiltro(tablaLocal(entrada.tabla), entrada.clave))
       ).error;
+    case 'archive':
+      return (
+        await supabase.rpc('archivar_habito', {
+          p_habit_id: entrada.payload.habit_id,
+          p_fecha: entrada.payload.fecha,
+        })
+      ).error;
     case 'complete':
       return (
         await supabase.rpc('complete_habit', {
@@ -204,6 +211,9 @@ async function subirOutbox(db: SQLiteDatabase): Promise<void> {
       );
       await quitarDeOutbox(db, [entrada.id]);
       await refrescarFila(db, entrada);
+      if (entrada.operacion !== 'upsert' && entrada.operacion !== 'update') {
+        await refrescarRecompensas(db);
+      }
     } else {
       await sumarIntento(db, entrada.id);
       throw new SinRed(error.message);
@@ -232,6 +242,22 @@ async function refrescarFila(db: SQLiteDatabase, entrada: EntradaOutbox): Promis
   } else {
     const condicion = tabla.clave.map((c) => `${c} = ?`).join(' AND ');
     await db.runAsync(`DELETE FROM ${tabla.nombre} WHERE ${condicion}`, valores);
+  }
+}
+
+/**
+ * Tras rechazar un check-in, el saldo y las plantas locales pueden traer un cálculo optimista que
+ * el servidor nunca aplicó; como no cambiaron allá, la descarga incremental no los corregiría.
+ */
+async function refrescarRecompensas(db: SQLiteDatabase): Promise<void> {
+  for (const nombre of ['wallets', 'plant_progress'] as const) {
+    const tabla = tablaLocal(nombre);
+    const { data, error } = await supabase
+      .from(nombre)
+      .select(columnas(tabla))
+      .returns<Record<string, unknown>[]>();
+    revisar(error);
+    if (data) await guardarFilas(db, nombre, data);
   }
 }
 

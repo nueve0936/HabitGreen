@@ -72,8 +72,9 @@ export default function HabitosScreen() {
         </Pressable>
       </View>
 
-      {errorGuardar || checkIn.error ? <Alert variant="error" message={t.errorGuardar} /> : null}
-      {checkIn.topeMonedas ? <Alert variant="exito" message={es.recompensas.topeMonedas} /> : null}
+      {errorGuardar ? <Alert variant="error" message={t.errorGuardar} /> : null}
+      {checkIn.error ? <Alert variant="error" message={checkIn.error} /> : null}
+      {checkIn.aviso ? <Alert variant="exito" message={checkIn.aviso} /> : null}
 
       {habitos.cargando && !habitos.data ? (
         <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
@@ -141,14 +142,19 @@ export default function HabitosScreen() {
       <ConfirmDialog
         visible={eliminando !== null}
         tipo="peligro"
-        mensaje={formatear(t.eliminar.pregunta, { titulo: eliminando?.habito.titulo ?? '' })}
+        mensaje={[
+          formatear(t.eliminar.pregunta, { titulo: eliminando?.habito.titulo ?? '' }),
+          eliminando?.hecho ? t.eliminar.devolucion : null,
+        ]
+          .filter(Boolean)
+          .join(' ')}
         cancelar={t.eliminar.cancelar}
         confirmar={t.eliminar.confirmar}
         onCancelar={() => setEliminando(null)}
         onConfirmar={() => {
-          const id = eliminando?.habito.id;
+          const habito = eliminando?.habito;
           setEliminando(null);
-          if (id) void guardar(() => archivarHabito(id));
+          if (habito) void guardar(() => archivarHabito(userId, habito));
         }}
       />
 

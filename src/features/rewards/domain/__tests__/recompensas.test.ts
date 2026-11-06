@@ -1,4 +1,5 @@
 import {
+  aplicarArchivar,
   aplicarCompletar,
   aplicarDeshacer,
   faseDeNivel,
@@ -16,11 +17,17 @@ function log(habit: string, cambios: Partial<LogDelDia> = {}): LogDelDia {
     completado_en: `2026-11-03T10:0${habit.length}:00Z`,
     xp_otorgado: false,
     monedas_otorgadas: false,
+    monedas_sin_devolver: false,
     ...cambios,
   };
 }
 
-const vacio: EstadoDia = { planta: { xp: 0, nivel: 0, fase: 1 }, saldo: 0, logs: [] };
+const vacio: EstadoDia = {
+  planta: { xp: 0, nivel: 0, fase: 1 },
+  saldo: 0,
+  logs: [],
+  deshechosSinDevolver: [],
+};
 
 describe('nivel y fase (SDD 6.1)', () => {
   it('4 XP por nivel, fase 2 desde el 15 y fase 3 en el 30', () => {
@@ -92,7 +99,11 @@ describe('deshacer', () => {
       log('eeeee', { category_id: 'D', monedas_otorgadas: true }),
       log('ffffff', { category_id: 'E' }),
     ];
-    const r = aplicarDeshacer({ planta: { xp: 2, nivel: 0, fase: 1 }, saldo: 50, logs }, 'a', C);
+    const r = aplicarDeshacer(
+      { ...vacio, planta: { xp: 2, nivel: 0, fase: 1 }, saldo: 50, logs },
+      'a',
+      C,
+    );
     expect(r.estado.planta.xp).toBe(2);
     expect(r.estado.saldo).toBe(50);
     expect(r.estado.logs.find((l) => l.habit_id === 'bb')?.xp_otorgado).toBe(true);
@@ -102,18 +113,86 @@ describe('deshacer', () => {
 
   it('si ya se gastaron las monedas, el saldo queda en 0', () => {
     const logs = [log('a', { xp_otorgado: true, monedas_otorgadas: true })];
-    const r = aplicarDeshacer({ planta: { xp: 2, nivel: 0, fase: 1 }, saldo: 4, logs }, 'a', C);
+    const r = aplicarDeshacer(
+      { ...vacio, planta: { xp: 2, nivel: 0, fase: 1 }, saldo: 4, logs },
+      'a',
+      C,
+    );
     expect(r.estado.saldo).toBe(0);
     expect(r.estado.planta.xp).toBe(0);
   });
 
   it('deshacer el hábito que cambió la fase la regresa', () => {
     const logs = [log('a', { xp_otorgado: true })];
-    const r = aplicarDeshacer({ planta: { xp: 60, nivel: 15, fase: 2 }, saldo: 0, logs }, 'a', C);
+    const r = aplicarDeshacer(
+      { ...vacio, planta: { xp: 60, nivel: 15, fase: 2 }, saldo: 0, logs },
+      'a',
+      C,
+    );
     expect(r.estado.planta.fase).toBe(1);
   });
 
   it('sin registro activo no cambia nada', () => {
     expect(aplicarDeshacer(vacio, 'a', C).estado).toBe(vacio);
+  });
+});
+
+describe('protección de monedas (SDD 6.1)', () => {
+  const marcado = (cambios: Partial<LogDelDia> = {}) =>
+    log('a', { xp_otorgado: true, monedas_otorgadas: true, ...cambios });
+
+  it('el ciclo marcar, gastar, desmarcar y volver a marcar paga solo una vez', () => {
+    const r1 = aplicarCompletar(vacio, log('a'), C);
+    expect(r1.estado.saldo).toBe(10);
+    const gastado = { ...r1.estado, saldo: 0 };
+    const r2 = aplicarDeshacer(gastado, 'a', C);
+    expect(r2.estado.saldo).toBe(0);
+    expect(r2.estado.deshechosSinDevolver).toEqual(['a']);
+    const r3 = aplicarCompletar(r2.estado, log('a', { monedas_sin_devolver: true }), C);
+    expect(r3.monedas).toBe(false);
+    expect(r3.sinMonedas).toBe('ya_pagado');
+    expect(r3.estado.saldo).toBe(0);
+  });
+
+  it('desmarcar con saldo devuelve todo y volver a marcar paga igual', () => {
+    const r1 = aplicarCompletar(vacio, log('a'), C);
+    const r2 = aplicarDeshacer(r1.estado, 'a', C);
+    expect(r2.estado.saldo).toBe(0);
+    expect(r2.estado.deshechosSinDevolver).toEqual([]);
+    expect(aplicarCompletar(r2.estado, log('a'), C).estado.saldo).toBe(10);
+  });
+
+  it('sin devolución completa no se transfiere a otro registro', () => {
+    const logs = [marcado(), log('zz', { category_id: 'B' })];
+    const r = aplicarDeshacer({ ...vacio, saldo: 3, logs }, 'a', C);
+    expect(r.estado.saldo).toBe(0);
+    expect(r.estado.logs[0]?.monedas_otorgadas).toBe(false);
+  });
+
+  it('el tope cuenta los pagos no devueltos', () => {
+    const logs = ['b', 'c', 'd', 'e'].map((h) => log(h, { monedas_otorgadas: true }));
+    const r = aplicarCompletar({ ...vacio, logs, deshechosSinDevolver: ['x'] }, log('f'), C);
+    expect(r.monedas).toBe(false);
+    expect(r.sinMonedas).toBe('tope');
+  });
+
+  it('eliminar devuelve lo que alcance y el pago sigue contando', () => {
+    const r = aplicarArchivar({ ...vacio, saldo: 25, logs: [marcado()] }, 'a', C);
+    expect(r.saldo).toBe(15);
+    expect(r.logs[0]).toMatchObject({
+      xp_otorgado: true,
+      monedas_otorgadas: false,
+      monedas_sin_devolver: true,
+    });
+    expect(aplicarArchivar({ ...vacio, saldo: 4, logs: [marcado()] }, 'a', C).saldo).toBe(0);
+    const otros = ['b', 'c', 'd', 'e'].map((h) => log(h, { monedas_otorgadas: true }));
+    expect(aplicarCompletar({ ...vacio, logs: [...r.logs, ...otros] }, log('f'), C).monedas).toBe(
+      false,
+    );
+  });
+
+  it('eliminar un hábito sin marcar no cambia nada', () => {
+    const estado = { ...vacio, saldo: 25 };
+    expect(aplicarArchivar(estado, 'a', C)).toBe(estado);
   });
 });
