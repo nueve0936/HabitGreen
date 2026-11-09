@@ -10,7 +10,7 @@ import { AppText } from './app-text';
 export type AlertVariant = 'error' | 'advertencia' | 'exito' | 'info';
 
 const STYLES: Record<AlertVariant, { container: string; iconColor: string }> = {
-  error: { container: 'bg-accent-claro border-accent-oscuro', iconColor: colors['accent-oscuro'] },
+  error: { container: 'bg-error-claro border-error', iconColor: colors.error },
   advertencia: {
     container: 'bg-alerta-advertencia border-alerta-advertencia-borde',
     iconColor: colors['alerta-advertencia-borde'],

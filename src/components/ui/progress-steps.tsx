@@ -20,13 +20,13 @@ export function ProgressSteps({ current, total }: ProgressStepsProps) {
       accessibilityRole="progressbar"
       accessibilityLabel={`Paso ${safeCurrent} de ${total}`}
       accessibilityValue={{ min: 1, max: total, now: safeCurrent }}
-      className="h-5 w-full overflow-hidden rounded-chip bg-alerta-info"
+      className="h-5 w-full overflow-hidden rounded-chip bg-divisor"
     >
       <View
         style={{ width: `${percent}%` }}
-        className="h-full min-w-12 items-center justify-center rounded-chip bg-surface"
+        className="h-full min-w-12 items-center justify-center rounded-chip bg-accent"
       >
-        <AppText variant="small" weight="semibold" className="text-[12px] leading-4">
+        <AppText variant="small" weight="semibold" tone="blanco" className="text-[12px] leading-4">
           {`${safeCurrent}/${total}`}
         </AppText>
       </View>

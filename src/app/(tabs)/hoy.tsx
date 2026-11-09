@@ -1,34 +1,41 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Coins } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Screen } from '@/components/ui/screen';
+import { Snackbar } from '@/components/ui/snackbar';
 import { avisarCambioLocal } from '@/db/db-version-store';
 import { leerHoy } from '@/db/habits-repository';
+import { leerJardin } from '@/db/rewards-repository';
 import { leerAjustesLocales } from '@/db/settings-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { HabitCheckCard } from '@/features/habits/components/habit-check-card';
 import { useCheckIn } from '@/features/habits/use-check-in';
+import { CoinBalance } from '@/features/rewards/components/coin-balance';
 import { CoinBurst } from '@/features/rewards/components/coin-burst';
 import { PhaseCelebration } from '@/features/rewards/components/phase-celebration';
+import { descripcionPlanta, PlantImage } from '@/features/rewards/components/plant-image';
+import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
 
-// Hoy (SDD 9.4 y mockup «Pantalla Dashboard»): monedas, la ilustración (provisional), la barra de
-// avance de los hábitos de hoy y sus tarjetas con casilla. De la barra hacia arriba queda fijo y
-// solo se desplazan los hábitos. Todo sale de SQLite, así que funciona sin conexión; la
-// sincronización sube los cambios después. Al completar: moneda animada, o el aviso de por qué no
-// dio monedas, y la celebración si la planta cambió de fase (SDD 6.1).
+// Hoy (SDD 9.4 y mockup «Pantalla Dashboard»): monedas, tu planta más avanzada, la barra de avance
+// de los hábitos de hoy y sus tarjetas con casilla. De la barra hacia arriba queda fijo y solo se
+// desplazan los hábitos. Todo sale de SQLite, así que funciona sin conexión; la sincronización sube
+// los cambios después. Al completar: moneda animada, o un aviso flotante de por qué no dio monedas,
+// y la celebración si la planta cambió de fase (SDD 6.1).
 
 // Con letra muy grande o una pantalla baja, la parte fija dejaría sin espacio a la lista: entonces
 // se desplaza toda la pantalla (guía de UX/UI, sección 6).
 const ESCALA_MAXIMA_FIJA = 1.5;
 const ALTO_MINIMO_FIJO = 640;
+// En pantallas de altura media, una planta más chica deja más tarjetas a la vista.
+const ALTO_PLANTA_GRANDE = 760;
+const PLANTA_GRANDE = 160;
+const PLANTA_CHICA = 120;
 
 export default function HoyScreen() {
   const t = es.hoy;
@@ -36,6 +43,7 @@ export default function HoyScreen() {
   const userId = session?.user.id ?? '';
   const hoy = useLocalQuery('hoy', leerHoy);
   const ajustes = useLocalQuery(`ajustes-${userId}`, () => leerAjustesLocales(userId));
+  const jardin = useLocalQuery(`jardin-${userId}`, () => leerJardin(userId));
   const checkIn = useCheckIn(userId);
   const { height, fontScale } = useWindowDimensions();
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
@@ -44,36 +52,36 @@ export default function HoyScreen() {
   const items = hoy.data?.items ?? [];
   const hechos = items.filter((i) => i.hecho).length;
   const avance = items.length === 0 ? 0 : (hechos / items.length) * 100;
+  const todoHecho = items.length > 0 && hechos === items.length;
+  const planta = plantaDestacada(jardin.data?.plantas ?? []);
+  const tamanoPlanta = height < ALTO_PLANTA_GRANDE ? PLANTA_CHICA : PLANTA_GRANDE;
 
   const encabezado = (
     <View className="flex-row items-center justify-between">
       <AppText variant="h1">{t.titulo}</AppText>
-      <View
-        accessible
-        accessibilityLabel={formatear(t.monedas, { n: saldo })}
-        className="min-h-12 flex-row items-center gap-1"
-      >
-        <Coins size={22} color={colors['accent-oscuro']} />
-        <AppText weight="bold" tone="texto-naranja">
-          {saldo.toLocaleString('es-MX')}
-        </AppText>
+      <CoinBalance saldo={saldo}>
         {checkIn.premio ? (
           <CoinBurst key={checkIn.premio.clave} monedas={checkIn.premio.monedas} />
         ) : null}
-      </View>
+      </CoinBalance>
     </View>
   );
 
   const parteFija = (
     <>
       <View className="items-center gap-3">
-        {/* Ilustración provisional: se reemplaza con el arte final de la app. */}
-        <Image
-          source={require('../../../assets/illustrations/hoy.png')}
-          accessibilityLabel={t.ilustracion}
-          contentFit="contain"
-          style={{ width: 160, height: 160 }}
-        />
+        {/* El espacio queda reservado para que nada salte mientras se lee la planta. */}
+        <View
+          accessible={planta !== null}
+          accessibilityRole="image"
+          accessibilityLabel={planta ? descripcionPlanta(planta.area, planta.fase) : undefined}
+          style={{ width: tamanoPlanta, height: tamanoPlanta }}
+          className="items-center justify-center rounded-chip bg-accent-claro p-3"
+        >
+          {planta ? (
+            <PlantImage area={planta.area} fase={planta.fase} equipados={planta.equipados} />
+          ) : null}
+        </View>
         <AppText tone="ink-soft" className="text-center">
           {t.frase}
         </AppText>
@@ -81,9 +89,9 @@ export default function HoyScreen() {
 
       <View className="gap-3">
         <View className="flex-row items-end justify-between">
-          <AppText weight="bold">{t.pendientes}</AppText>
+          <AppText weight="bold">{todoHecho ? t.todoListo : t.pendientes}</AppText>
           {items.length > 0 ? (
-            <AppText variant="small" weight="semibold" tone="texto-naranja">
+            <AppText variant="small" weight="semibold" tone="acento">
               {formatear(t.progreso, { n: hechos, total: items.length })}
             </AppText>
           ) : null}
@@ -94,9 +102,9 @@ export default function HoyScreen() {
             accessibilityRole="progressbar"
             accessibilityLabel={formatear(t.progreso, { n: hechos, total: items.length })}
             accessibilityValue={{ min: 0, max: items.length, now: hechos }}
-            className="h-4 w-full overflow-hidden rounded-chip bg-surface/30"
+            className="h-3 w-full overflow-hidden rounded-chip bg-divisor"
           >
-            <View style={{ width: `${avance}%` }} className="h-full rounded-chip bg-surface" />
+            <View style={{ width: `${avance}%` }} className="h-full rounded-chip bg-accent" />
           </View>
         ) : null}
       </View>
@@ -105,8 +113,6 @@ export default function HoyScreen() {
 
   const lista = (
     <>
-      {checkIn.error ? <Alert variant="error" message={checkIn.error} /> : null}
-      {checkIn.aviso ? <Alert variant="exito" message={checkIn.aviso} /> : null}
       {items.length === 0 ? (
         <AppText tone="ink-soft">{t.vacio}</AppText>
       ) : (
@@ -130,6 +136,14 @@ export default function HoyScreen() {
 
   const celebracion = (
     <PhaseCelebration celebracion={checkIn.celebracion} onCerrar={checkIn.cerrarCelebracion} />
+  );
+
+  const avisoFlotante = (
+    <Snackbar
+      mensaje={checkIn.error ?? checkIn.aviso}
+      variant={checkIn.error ? 'error' : 'exito'}
+      onCerrar={checkIn.cerrarAvisos}
+    />
   );
 
   if (hoy.cargando && !hoy.data) {
@@ -178,28 +192,34 @@ export default function HoyScreen() {
 
   if (todoDesplazable) {
     return (
-      <Screen edges={['top']} scroll contentClassName="gap-6 pt-6">
-        {encabezado}
-        {parteFija}
-        <View className="gap-3">{lista}</View>
-        {celebracion}
-      </Screen>
+      <>
+        <Screen edges={['top']} scroll contentClassName="gap-6 pt-6">
+          {encabezado}
+          {parteFija}
+          <View className="gap-3">{lista}</View>
+          {celebracion}
+        </Screen>
+        {avisoFlotante}
+      </>
     );
   }
 
   return (
-    <Screen edges={['top']} contentClassName="gap-4 pt-6">
-      {encabezado}
-      {parteFija}
-      {/* Márgenes negativos: la sombra de las tarjetas no se corta en los bordes de la lista. */}
-      <ScrollView
-        className="-mx-8 flex-1"
-        contentContainerClassName="gap-3 px-8 pb-6 pt-1"
-        keyboardShouldPersistTaps="handled"
-      >
-        {lista}
-      </ScrollView>
-      {celebracion}
-    </Screen>
+    <>
+      <Screen edges={['top']} contentClassName="gap-4 pt-6">
+        {encabezado}
+        {parteFija}
+        {/* Márgenes negativos: la sombra de las tarjetas no se corta en los bordes de la lista. */}
+        <ScrollView
+          className="-mx-8 flex-1"
+          contentContainerClassName="gap-3 px-8 pb-6 pt-1"
+          keyboardShouldPersistTaps="handled"
+        >
+          {lista}
+        </ScrollView>
+        {celebracion}
+      </Screen>
+      {avisoFlotante}
+    </>
   );
 }

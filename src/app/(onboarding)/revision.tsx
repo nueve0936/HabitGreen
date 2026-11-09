@@ -100,7 +100,7 @@ export default function RevisionPlanScreen() {
             acciones={[
               {
                 label: t.editar,
-                tone: 'texto-naranja',
+                tone: 'acento',
                 accessibilityLabel: `${t.editar}: ${habito.titulo}`,
                 onPress: () => setEditando(habito),
               },
@@ -125,7 +125,7 @@ export default function RevisionPlanScreen() {
             accessibilityRole="button"
             accessibilityLabel={t.agregarOtro}
             onPress={() => router.push('/sugerencias')}
-            className="min-h-14 flex-row items-center justify-center gap-2 rounded-card border-2 border-dashed border-bg-oscuro active:bg-bg-claro"
+            className="min-h-14 flex-row items-center justify-center gap-2 rounded-card border-2 border-dashed border-divisor active:bg-accent-claro"
           >
             <Plus size={20} color={colors.ink} />
             <AppText weight="semibold">{t.agregarOtro}</AppText>

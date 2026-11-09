@@ -55,7 +55,7 @@ export function WheelColumn({ etiqueta, opciones, indice, onCambiar }: WheelColu
       <View
         pointerEvents="none"
         style={{ top: ALTO, height: ALTO }}
-        className="absolute left-2 right-2 border-y-2 border-ink"
+        className="absolute left-2 right-2 border-y-2 border-accent"
       />
       <ScrollView
         ref={scroll}

@@ -1,17 +1,19 @@
 export declare const colors: {
   bg: string;
-  'bg-claro': string;
-  'bg-oscuro': string;
-  crema: string;
   campo: string;
-  surface: string;
-  'surface-claro': string;
-  'surface-oscuro': string;
+  ink: string;
+  'ink-soft': string;
+  borde: string;
+  divisor: string;
   accent: string;
   'accent-oscuro': string;
   'accent-claro': string;
-  ink: string;
-  'ink-soft': string;
+  error: string;
+  'error-claro': string;
+  moneda: string;
+  'moneda-claro': string;
+  'moneda-fondo': string;
+  'moneda-texto': string;
   'alerta-advertencia': string;
   'alerta-advertencia-borde': string;
   'alerta-exito': string;
@@ -22,8 +24,12 @@ export declare const colors: {
   confirmar: string;
   blanco: string;
   placeholder: string;
-  'texto-naranja': string;
 };
+
+export declare const tintes: Record<
+  'salud_fisica' | 'trabajo' | 'salud_mental' | 'finanzas' | 'social',
+  string
+>;
 
 export declare const fonts: {
   regular: string;

@@ -25,7 +25,7 @@ export function SettingsRow({
   destacada = false,
   ultima = false,
 }: SettingsRowProps) {
-  const tono = destacada ? 'texto-naranja' : 'ink';
+  const tono = destacada ? 'acento' : 'ink';
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
@@ -33,8 +33,8 @@ export function SettingsRow({
       accessibilityState={{ disabled: !onPress }}
       disabled={!onPress}
       onPress={onPress}
-      className={`min-h-12 flex-row items-center justify-between gap-2 px-4 active:bg-bg-claro ${
-        ultima ? '' : 'border-b border-bg-claro'
+      className={`min-h-12 flex-row items-center justify-between gap-2 px-4 active:bg-accent-claro ${
+        ultima ? '' : 'border-b border-divisor'
       }`}
     >
       <AppText weight="semibold" tone={tono}>

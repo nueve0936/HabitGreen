@@ -1,12 +1,8 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
-import { gradientBackground } from '@/theme';
-
-// Contenedor de pantalla: degradado crema → oliva de los mockups, áreas seguras y, si hay
-// formulario, desplazamiento y teclado. Márgenes laterales amplios como en Figma.
+// Contenedor de pantalla: fondo liso, áreas seguras y, si hay formulario, desplazamiento y teclado.
 
 export type ScreenProps = {
   children: ReactNode;
@@ -35,7 +31,7 @@ export function Screen({
   );
 
   return (
-    <LinearGradient colors={gradientBackground} style={{ flex: 1 }}>
+    <View className="flex-1 bg-bg">
       <SafeAreaView edges={edges} style={{ flex: 1 }}>
         <KeyboardAvoidingView
           // En Android con edge-to-edge la ventana no se encoge sola con el teclado: 'height' deja
@@ -46,6 +42,6 @@ export function Screen({
           {content}
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }

@@ -111,7 +111,7 @@ export default function GenerandoPlanScreen() {
       <View className="flex-1 items-center justify-center gap-6">
         <GrowingPlant label={t.ilustracion} />
         <View accessibilityLiveRegion="polite" className="items-center gap-2">
-          <AppText variant="h2" tone="texto-naranja" className="text-center">
+          <AppText variant="h2" tone="acento" className="text-center">
             {t.preparando}
           </AppText>
           <AppText className="text-center">{t.descripcion}</AppText>

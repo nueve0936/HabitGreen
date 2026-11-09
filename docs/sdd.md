@@ -100,8 +100,8 @@ La lista con su estado vive en `docs/backlog.md` («Antes de empezar»). Además
 | Límites del nivel gratuito de Gemini (por minuto y por día) | Medio | Al recibir un error de cuota, se usan los textos del catálogo sin mostrar error. `AiProvider` permite cambiar a Claude u OpenAI con variables de entorno. |
 | Alarmas exactas en Android 12+ (`SCHEDULE_EXACT_ALARM`) | Medio | Verificar en la documentación de `expo-notifications` del SDK actual. Probar en un dispositivo físico desde la entrega 5. |
 | Sincronización offline con conflictos | Medio | Registros por día con clave única (hábito + fecha). «Gana el último». Los topes diarios se recalculan en el servidor al sincronizar. |
-| Arte tarde o que no contraste con el fondo oliva | Medio | Placeholders con la misma convención de nombres. Pedir PNG con fondo transparente y contorno oscuro, y mostrar las plantas sobre un panel `bg-claro`. |
-| Contraste del coral y del terracota (ver 9.6) | Medio | Reglas en los componentes base, no en cada pantalla; revisión en la semana 3. |
+| Arte tarde o que no contraste con el fondo | Medio | Placeholders con la misma convención de nombres. Pedir PNG con fondo transparente y contorno oscuro, y mostrar las plantas sobre una tarjeta con tinte. |
+| Contraste de los colores del sistema (ver 9.6) | Medio | Reglas en los componentes base, no en cada pantalla; revisión en la semana 3. |
 | Farmeo de XP o monedas con hábitos manuales triviales | Medio | Topes diarios: 1 hábito por planta suma XP y 5 hábitos dan monedas (6.1). |
 | Alcance excesivo para 3 semanas con una sola persona | Alto | Lottie, Sentry y CI fuera desde el inicio. Geofencing al final. Punto de control del día 9 y recortes en el orden de 2.5. |
 | Offline completo (cola, reconciliación de recompensas) más lento de lo estimado | Alto | **Punto de control al final del día 9:** si la sincronización no funciona de punta a punta (crear hábito, completar, deshacer, reconectar), se pasa a «solo check-in offline»: lectura con caché y cola solo para `complete_habit` / `uncomplete_habit`. |
@@ -577,7 +577,7 @@ La IA (`adjust-plan`) solo redacta textos cuando se agrega un hábito o se cambi
 - Los nombres de los 15 accesorios los define el usuario. Mientras tanto se usan los nombres provisionales de `docs/textos.md`.
 - **Comprar necesita conexión** (RPC `comprar_accesorio`, que revisa el saldo real; comprar algo que ya es tuyo no cobra otra vez). Sin red: «Necesitas conexión para comprar». **Equipar y quitar funcionan sin conexión** con la operación `update` de la cola sobre `user_accessories`.
 - Equipar y quitar se hace desde la pestaña «Objetos» de los detalles de la planta (9.4).
-- Arte provisional (Entrega 4): una imagen genérica para plantas y otra para accesorios en las rutas de 9.8; se reemplazan con el mismo nombre de archivo. Mientras tanto, el panel nombra lo que lleva cada planta.
+- Arte provisional (Entrega 4): una imagen genérica para plantas y otra para accesorios en las rutas de 9.8; se reemplazan con el mismo nombre de archivo.
 
 ### 6.5 Modo tradicional
 
@@ -657,7 +657,7 @@ Es la entrega 10 y el primer recorte si falta tiempo (2.5).
 - Los hábitos que superan los topes de XP o monedas cuentan igual en las estadísticas.
 - Los hábitos archivados conservan su historial y siguen contando en los periodos pasados.
 - **Rachas por hábito:** número de ocurrencias programadas seguidas que se completaron. Los días no programados no la rompen. Una ocurrencia movida cuenta en su fecha nueva. Una ocurrencia descartada o no hecha la rompe. Se muestran la racha actual y la mejor racha. Al romperse, se destaca el mejor valor histórico con una invitación a retomar, nunca «perdiste tu racha». Con `desanimo`, solo se muestra la mejor racha.
-- Estilo: gráficas sobre tarjeta `bg-claro` con borde `ink`; barras en `accent-oscuro` (#B8493D, 3.7:1 sobre `bg-claro`), pista en `bg-oscuro`, etiquetas en `ink`. Cada gráfica incluye un resumen en texto («Cumpliste 5 de 7 hábitos esta semana») para lectores de pantalla.
+- Estilo: gráficas sobre tarjeta `campo` con sombra; barras en `accent`, pista en `divisor`, etiquetas en `ink`. Cada gráfica incluye un resumen en texto («Cumpliste 5 de 7 hábitos esta semana») para lectores de pantalla.
 
 ## 9. Diseño de pantallas y sistema visual
 
@@ -678,43 +678,48 @@ La barra inferior tiene exactamente 5 ítems, el máximo recomendado por la guí
 
 ### 9.2 Tokens
 
+Los valores vigentes y sus contrastes están en `docs/Guía de UX UI.md`, secciones 1 y 2, y en `src/theme/tokens.js`. Resumen:
+
 | Token | HEX | Uso |
 | --- | --- | --- |
-| `bg` (60%) | #C4D18B | Fondo de pantalla |
-| `bg-claro` | #D6E0A9 | Campos, paneles de plantas, tarjetas de gráficas, opciones no seleccionadas |
-| `bg-oscuro` | #A9B870 | Divisores, pistas de gráficas, botón deshabilitado |
-| `surface` (30%) | #C98B58 | Tarjetas, barra de navegación, encabezados de sección |
-| `surface-claro` | #DBA67D | Tarjeta presionada |
-| `surface-oscuro` | #A86F42 | Bordes de tarjeta, ítem activo, opción seleccionada |
-| `accent` (10%) | #D1665A | CTA, iconos destacados, indicador activo |
-| `accent-oscuro` | #B8493D | CTA presionado, borde de error, barras de gráfica |
-| `accent-claro` | #F0C3BC | Fondo de error |
-| `ink` | #2C1E18 | Todo el texto e iconos neutros |
-| `ink-soft` | #5A4034 | Texto de apoyo (solo sobre `bg`) |
+| `bg` | #FBFBF6 | Fondo liso de pantalla |
+| `campo` | #FFFFFF | Tarjetas, campos, barra inferior, menús y diálogos |
+| `accent` | #2E7D4F | Botón principal, selección, casilla marcada, barra de avance, pestaña activa |
+| `accent-oscuro` | #24663F | Botón principal presionado |
+| `accent-claro` | #DFF2E4 | Estado presionado, píldora de la pestaña activa, etiquetas |
+| `borde` | #859488 | Bordes de controles |
+| `divisor` | #D6E8DB | Líneas, pistas de barras, botón deshabilitado |
+| `error` | #B8493D | Borde, icono y texto de error |
+| `error-claro` | #FBE3DF | Fondo de los avisos de error |
+| `moneda`, `moneda-claro`, `moneda-fondo`, `moneda-texto` | #B7791F, #E9B44C, #FFF0CC, #7A4F0E | Monedas y saldo |
+| `tintes` | Uno por área | Tarjetas del Jardín e iconos de categoría |
+| `ink` | #1E2A22 | Texto e iconos neutros |
+| `ink-soft` | #566459 | Texto de apoyo |
 
-Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 18/700. Espaciado en múltiplos de 8; márgenes de 16 px; radios 8 (campos y botones), 16 (tarjetas), 999 (chips).
+Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 19/700. Espaciado en múltiplos de 8; márgenes de 16 a 32 dp; radios 12 (campos), 16 (botón de acción), 20 (tarjetas), 999 (píldoras y casillas).
 
 ### 9.3 Componentes (React Native)
 
-**Ajustes por los mockups (Entrega 1).** Fondo con degradado de `crema` (#F2F4E6) a `bg`; campos y opciones sobre `campo` (#F8F9F2) con borde 2 px `ink-soft`; botones en forma de píldora (radio 999). Se conserva la accesibilidad: el texto del CTA coral va en `ink` (el mockup usa blanco, 3.7:1) y los títulos y etiquetas van en `ink` (el mockup usa terracota y coral, por debajo de 3:1). La barra de pestañas va sobre `bg` como en el mockup, con 5 pestañas. Login y registro piden solo correo (sin «nombre de usuario» ni botones de Google y Facebook, que quedan para antes de publicar).
+**Renovación visual (decisión del usuario).** Dirección «Jardín alegre», con referencias de acabado en Finch y en Todoist o TickTick: fondo casi blanco y liso, un verde como color principal, un tinte por área y un dorado para las monedas, sin bordes oscuros. Reemplaza los colores de Figma en la app; el acomodo de los mockups no cambia, y las pantallas de Figma no se modifican. Login y registro piden solo correo (sin «nombre de usuario» ni botones de Google y Facebook, que quedan para antes de publicar).
 
 | Componente | Especificación |
 | --- | --- |
-| `Button` primario | Fondo `accent`, texto `ink` 18/700, borde 2 px `ink`, alto 48 px. Presionado: `accent-oscuro`. Deshabilitado: `bg-oscuro` con texto `ink-soft`. **Uno por pantalla.** |
-| `Button` secundario | Transparente, texto `ink`, borde 2 px `ink`. |
+| `Button` primario | Fondo `accent`, texto blanco 19/700, alto 48 dp, sin borde. Presionado: `accent-oscuro`. Deshabilitado: `divisor` con texto `ink-soft`. **Uno por pantalla.** |
+| `Button` secundario | Transparente, texto `ink`, borde 2 px `borde`. |
 | `Button` terciario | Texto `ink` subrayado, sin borde, área táctil mínima 48 dp. |
-| `Card` | Fondo `surface`, borde 1 px `surface-oscuro`, radio 16, relleno 16–24, sombra suave. Presionada: `surface-claro`. |
-| `Field` | Fondo `campo`, borde 2 px `ink-soft`, radio 8, alto 48. Etiqueta siempre visible sobre el campo. **Enfocado: borde `surface` (#C98B58).** Error: borde `accent-oscuro` y una X dentro del campo; el mensaje va debajo o, en login y registro, en un solo aviso bajo los campos. Válido (registro, tras intentar enviar): marca de verificación dentro del campo. |
-| `OptionChip` (opciones del formulario) | Alto mínimo 48 px, fondo `campo`. No seleccionado: sin borde visible. **Seleccionado (mockup «Encuesta inicial #1.1»): borde 2 px `surface` (#C98B58), icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
+| `ActionSquare` | Botón cuadrado `accent` de 48 dp con icono blanco («+» y bolsa de la Tienda). |
+| `Card` | Fondo `campo`, radio 20, relleno 16, sombra suave. Presionada: `accent-claro`. |
+| `Field` | Fondo `campo`, borde 2 px `borde`, radio 12, alto 48. Etiqueta siempre visible sobre el campo. **Enfocado: borde `accent`.** Error: borde `error` y una X dentro del campo; el mensaje va debajo o, en login y registro, en un solo aviso bajo los campos. Válido (registro, tras intentar enviar): marca de verificación dentro del campo. |
+| `OptionChip` (opciones del formulario) | Alto mínimo 48 px, con sombra. No seleccionado: fondo `campo` y borde 2 px `divisor`. **Seleccionado: relleno `accent-claro`, borde 2 px `accent`, icono de verificación y texto en negrita** (no depende del color). Rol de accesibilidad `radio` o `checkbox` con estado `selected`. |
 | Avisos de login y registro | Un solo `Alert` de error bajo los campos al pulsar el botón (mockups «Login/Registrar #1.1–1.3»): campos vacíos («Por favor, ingresa tu correo y contraseña» / «Por favor, llena cada uno de los campos»), contraseñas distintas, credenciales incorrectas («Tu correo o contraseña son incorrectos») y sin conexión («No hay conexión a internet. Inténtalo más tarde»). Con error del servidor se marcan todos los campos. |
-| `ProgressSteps` | Texto «Paso 3 de 7» + barra de 8 px (pista `bg-oscuro`, relleno `ink`). |
-| `TabBar` | Fondo `surface`, texto e iconos `ink`. Activo: fondo `surface-oscuro`, indicador de 4 px `accent`, texto en negrita. |
-| `Alert` | Error `accent-claro`/`accent-oscuro`; advertencia #F4D9A8/#A86F42; éxito `bg-claro`/#5E6B2B; informativo #E8DCC8/`ink-soft`. Siempre icono + texto. |
-| `PlantPanel` | Panel `bg-claro` con borde 2 px `ink` y radio 16; la planta (PNG transparente) va centrada. |
+| `ProgressSteps` | Barra «3/7» dentro de una píldora: pista `divisor`, relleno `accent` y texto blanco. |
+| `TabBar` | Fondo `campo`, texto e iconos `ink`. Activo: píldora `accent-claro` detrás del icono `accent` y texto en negrita. La pestaña de estadísticas se llama «Progreso». |
+| `Alert` | Error `error-claro`/`error`; advertencia #F4D9A8/#A86F42; éxito #DFF2E4/#2E7D4F; informativo #E8ECE6/`ink-soft`. Siempre icono + texto. |
+| `PlantPanel` | Tarjeta con el tinte de su área, sin sombra, y radio 20; la planta (PNG transparente) va centrada. |
 
 ### 9.4 Pantallas clave
 
-**Bienvenida y elección de modo.** Después de confirmar la cuenta se ve «Empezar» (mockup) y, al pulsarla, la elección de modo con dos opciones: «Quiero un plan para mí» (guiado) y «Prefiero crear mis hábitos» (tradicional). El único CTA coral es «Continuar», que se habilita al elegir una.
+**Bienvenida y elección de modo.** Después de confirmar la cuenta se ve «Empezar» (mockup) y, al pulsarla, la elección de modo con dos opciones: «Quiero un plan para mí» (guiado) y «Prefiero crear mis hábitos» (tradicional). El único botón principal es «Continuar», que se habilita al elegir una.
 
 **Formulario (7 pasos).** Una pregunta por pantalla. Arriba: `ProgressSteps`. Cuerpo: título H2, ayuda en texto pequeño (5.1) y opciones como `OptionChip` en lista vertical. Pie fijo: botón secundario «Atrás» y CTA «Siguiente» (en el paso 7, «Crear mi plan»). La pregunta 2 muestra las opciones agrupadas por área con encabezados H3.
 
@@ -722,77 +727,68 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 
 **Revisión del plan** (mockups «Tu plan está listo», «Editar hábito», «Quitar» y «Sugerencias de hábitos»). Título «Tu plan está listo» y una tarjeta clara por hábito (verificación verde, título, duración, días y hora, etiqueta de categoría) con los enlaces «Editar» y «Quitar». «Editar» abre una hoja inferior con nombre, frecuencia (todos los días o días específicos) y hora del recordatorio (reloj de Android, sujeto a cambio) o «Sin recordatorio». «Quitar» pide confirmación en un diálogo. «+ Agregar otro hábito» abre las sugerencias: 4 hábitos de nivel 1 de objetivos no elegidos (los de las áreas elegidas primero, devueltos por `generate-plan` en `sugerencias`) y «Sugerir otros hábitos» muestra los 4 siguientes; al agregar se confirma en un diálogo. **El plan inicial admite hasta 3 hábitos**; si un día supera `presupuesto_min`, este sube a la suma (como en 6.5). «Bajar nivel» ya no se ofrece aquí. Si aplica la precedencia de 5.6, se muestra el interruptor «Segundo aviso». Nota al pie «Si un día no puedes, tu meta se ajusta sin perder progreso» y CTA «Confirmar plan». En este punto se pide el permiso de notificaciones con un texto previo que explica para qué sirve.
 
-**Colores fuera de la paleta (mockups del plan).** Los diálogos de confirmación y los enlaces «Quitar» y «Agregar» usan `peligro` (#C62828) y `confirmar` (#2E7D32); los botones de esos colores llevan texto blanco (contraste mayor a 5:1). Las píldoras elegidas de «Editar hábito» van rellenas de `surface` con texto `ink` (el mockup usa blanco, que no contrasta). Las opciones que se ponen en negritas al elegirse reservan el ancho del texto en negritas para no moverse (`StableBoldText`).
+**Colores fuera de la paleta (mockups del plan).** Los diálogos de confirmación y los enlaces «Quitar» y «Agregar» usan `peligro` (#C62828) y `confirmar` (#2E7D4F); los botones de esos colores llevan texto blanco (contraste mayor a 5:1). Las píldoras elegidas de «Editar hábito» van rellenas de `accent` con texto blanco. Las opciones que se ponen en negritas al elegirse reservan el ancho del texto en negritas para no moverse (`StableBoldText`).
 
 **Cambiar de pestaña.** Se toca la barra inferior o se desliza en horizontal entre pantallas (`TopTabs` de `expo-router/js-top-tabs`, con la barra abajo). Las pantallas fuera de las pestañas no se deslizan.
 
-**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; ilustración (provisional: `assets/illustrations/hoy.png`) con «Tu árbol crece con cada micro-paso»; «Pendientes de hoy» con una barra de avance y «N de M hechos»; tarjetas claras con casilla cuadrada. Al marcar: casilla rellena de `surface` con ✓, borde naranja, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los pendientes que se reprogramaron aparecen con un `Alert` informativo (Entrega 6).
+**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; la planta más avanzada del usuario, con sus objetos (fase más alta; en un empate, una con hábitos y después el orden de las áreas), de 160 dp o de 120 dp si la pantalla mide menos de 760 dp de alto, con «Tu planta crece con cada paso» (ajuste al texto del mockup, decisión del usuario); «Pendientes de hoy», que cambia a «¡Todo listo por hoy!» cuando todo está hecho, con una barra de avance y «N de M hechos»; tarjetas claras con casilla redonda. Al marcar: casilla rellena de `accent` con ✓ blanca, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los avisos del check-in (tope de monedas, pago ya recibido, error) son flotantes y temporales (`Snackbar`), para no mover las tarjetas mientras se marcan. Los pendientes que se reprogramaron aparecen con un `Alert` informativo (Entrega 6).
 
-**Hábitos** (mockups «Hábitos #1–#2»). Título y botón «+» coral (CTA único). Una sección por categoría con hábitos (icono y nombre), sin filtros por ahora. Cada tarjeta tiene la misma casilla que en Hoy, activa solo si el hábito toca hoy (si no, «No toca hoy»), y el menú ⋮ con Editar, Pausar o Reanudar y Eliminar.
+**Hábitos** (mockups «Hábitos #1–#2»). Título y botón «+» (acción principal única), fijos arriba; solo se desplaza la lista. Una sección por categoría con hábitos (icono sobre el tinte del área y nombre), sin filtros por ahora. Cada tarjeta tiene la misma casilla que en Hoy, activa solo si el hábito toca hoy (si no, «No toca hoy»), y el menú ⋮ con Editar, Pausar o Reanudar y Eliminar.
 
-**Ajustes por los mockups (Entrega 3).** Hoy sigue el mockup «Inicio»: saludo, monedas arriba a la derecha, la frase «Tu árbol crece con cada micro-paso» y «Pendientes de hoy»; sin hábitos muestra «Tu jardín está listo para empezar» con el CTA «Crear mi primer hábito». En Hábitos se mantiene la agrupación por categoría (decisión del usuario) en lugar de «pendientes / diarios» del mockup, para que el check-in viva solo en Hoy; de él se toman el «+» y el menú ⋮ (Editar, Pausar o Reanudar, Eliminar), que se abre como hoja inferior. Crear hábito sigue el orden del mockup (nombre, descripción, categoría con iconos, frecuencia) y agrega duración, hora y «Avisarme» (6.5). La barra conserva las 5 pestañas.
+**Ajustes por los mockups (Entrega 3).** Hoy sigue el mockup «Inicio»: saludo, monedas arriba a la derecha, la frase de la planta y «Pendientes de hoy»; sin hábitos muestra «Tu jardín está listo para empezar» con el CTA «Crear mi primer hábito». En Hábitos se mantiene la agrupación por categoría (decisión del usuario) en lugar de «pendientes / diarios» del mockup, para que el check-in viva solo en Hoy; de él se toman el «+» y el menú ⋮ (Editar, Pausar o Reanudar, Eliminar), que se abre como hoja inferior. Crear hábito sigue el orden del mockup (nombre, descripción, categoría con iconos, frecuencia) y agrega duración, hora y «Avisarme» (6.5). La barra conserva las 5 pestañas.
 
-**Jardín** (mockup «Plantas #1»). Título «Jardín» y un botón coral cuadrado con icono de bolsa arriba a la derecha, que abre la Tienda (CTA único). Las 5 plantas desde el primer día, en 2 columnas: tarjetas `campo` con la imagen de la planta en su fase actual, sus accesorios equipados y el nombre de la categoría; sin números de nivel ni barras de XP. Las plantas de áreas sin hábitos se ven en fase 1 con el texto «Crece cuando agregues un hábito de esta área». Tocar una planta abre sus detalles. El saldo se ve en Hoy y en la Tienda.
+**Jardín** (mockup «Plantas #1»). Título «Jardín», saldo de monedas y un botón cuadrado con icono de bolsa arriba a la derecha, que abre la Tienda (acción principal única); este encabezado queda fijo y solo se desplazan las plantas. Las 5 plantas desde el primer día, en 2 columnas: tarjetas con el tinte de su área, con la imagen de la planta en su fase actual, sus accesorios equipados y el nombre de la categoría; sin números de nivel ni barras de XP. Las plantas de áreas sin hábitos se ven en fase 1 con el texto «Sin hábitos aún»; la explicación completa («Crece cuando agregues un hábito de esta área») va en Detalles y en el lector de pantalla. Tocar una planta abre sus detalles. Si las categorías aún no se han descargado, se muestra un estado vacío. **Desviación del mockup (decisión del usuario):** el saldo junto a la bolsa, para saber si alcanza antes de entrar a la Tienda.
 
-**Detalles de la planta** (mockups «Detalles #1: Hábitos» y «Detalles #2: Objetos»; ruta `src/app/planta/[categoria].tsx`, que reemplaza a la pantalla de equipar). Funciona sin conexión: todo sale de SQLite y equipar va por la cola de salida.
+**Detalles de la planta** (mockups «Detalles #1: Hábitos», «#2: Objetos» y «#2.1: Objeto seleccionado»; ruta `src/app/planta/[categoria].tsx`, que reemplaza a la pantalla de equipar). Funciona sin conexión: todo sale de SQLite y equipar va por la cola de salida.
 
-- **Parte superior.** Flecha atrás e imagen grande de la planta en un **carrusel horizontal paginado con las 3 fases**, que abre en la fase actual. Debajo, 3 puntos tocables de 48 dp, para que no dependa solo del gesto; el punto actual se distingue también por tamaño. Después, el nombre de la categoría.
+- **Parte superior.** Flecha atrás e imagen grande de la planta en un **carrusel horizontal paginado con las 3 fases**, que abre en la fase actual. Debajo, el nombre de la categoría y después 3 puntos tocables de 48 dp, para que no dependa solo del gesto; el punto actual se distingue también por tamaño. Esta parte queda fija.
 - **Fases bloqueadas.** Las fases que la planta aún no alcanza se ven como silueta con candado y el texto «Sigue cuidando tu planta para descubrirla». Nunca se muestran XP, niveles ni cuánto falta (6.1). Se desbloquean solas al llegar a esa fase; no se compran. La vista siempre refleja la fase de `plant_progress`, así que si deshacer un hábito regresa la planta de fase, esa fase vuelve a verse bloqueada.
-- **Accesorios.** Los equipados se ven sobre la imagen de la fase actual y también se nombran con texto.
+- **Accesorios.** Los equipados se ven sobre la imagen de la fase actual. No se nombran en pantalla; solo el lector de pantalla los dice («Lleva: …»).
 - **Panel inferior.** Fondo `campo` con las esquinas superiores redondeadas y dos pestañas, **Hábitos** y **Objetos**; la activa va subrayada y en negritas. Se cambia tocando la pestaña o deslizando en horizontal dentro del panel, sin interferir con el carrusel de arriba.
-  - **Hábitos:** los hábitos de esa categoría con la tarjeta de casilla (marcar los de hoy y menú ⋮). Si no hay: «Crece cuando agregues un hábito de esta área».
-  - **Objetos:** los accesorios comprados en la tienda, agrupados por tipo. Tocar uno se lo pone a esta planta o se lo quita, con las reglas de 6.4; si estaba en otra planta: «Lo movimos a tu planta de {categoría}». Sin compras: un texto y un enlace a la Tienda.
+  - **Hábitos:** los hábitos de esa categoría con la tarjeta de casilla (marcar los de hoy y menú ⋮). Se aparta de la tarjeta simple del mockup para ser consistente con Hoy y Hábitos (decisión del usuario). Si no hay: «Crece cuando agregues un hábito de esta área» y «Agregar hábito», con el área ya elegida.
+  - **Objetos:** los accesorios comprados del tipo elegido, en 3 columnas, con las pestañas **Sombreros, Lentes y Macetas** fijas abajo. Tocar uno se lo pone a esta planta al instante, sin confirmación, y reemplaza al del mismo tipo (6.4); tocar el puesto se lo quita. El puesto lleva relleno `accent-claro`, borde `accent` y ✓. Si estaba en otra planta: «Lo movimos a tu planta de {categoría}». Sin compras de ese tipo: un texto y un enlace a la Tienda.
 
-**Tienda.** Cuadrícula de 15 accesorios en tarjetas `surface` con precio en monedas (6.4). Los accesorios sin saldo suficiente se muestran con texto «Te faltan N monedas» (no solo atenuados).
+**Tienda** (mockups «Tienda #1–#3»). Regresar, título y monedero quedan fijos; solo se desplaza la lista. Secciones por tipo en una cuadrícula de 3 columnas (2 con letra de 1.5× o más), con tarjetas `campo` de imagen, nombre y precio en monedas (6.4). Los accesorios sin saldo suficiente dicen «Te faltan N monedas» (no solo atenuados) y los propios, «Es tuyo». Tocar una tarjeta abre una hoja inferior:
 
-**Estadísticas.** Selector segmentado Semana / Mes / Año (activo con icono y texto en negrita), gráfica sobre tarjeta `bg-claro` y resumen en texto.
+- **Te alcanza:** «¿Comprar {objeto}?», con precio, tu saldo y cuánto te quedará; «Comprar por N» y «Ahora no».
+- **No te alcanza:** la misma hoja, con cuánto te falta y solo «Ahora no».
+- **Comprado o ya es tuyo:** «¡Ya es tuyo!», con tu saldo; «Equipar ahora» y «Seguir en la tienda».
+
+**«Equipar ahora»** pone el objeto y abre Detalles → Objetos, en el tipo de ese objeto. La planta se elige sola, sin pedir nada: la planta desde la que se abrió la Tienda; si no, la que ya lo lleva; si no, la primera con hábitos que tenga ese tipo libre; la primera con hábitos; la primera con ese tipo libre; o la primera. Desde Jardín, «atrás» regresa a Jardín.
+
+**Estadísticas.** Selector segmentado Semana / Mes / Año (activo con icono y texto en negrita), gráfica sobre tarjeta `campo` y resumen en texto.
 
 **Perfil.** Notificaciones (estilo, horas, segundo aviso), presupuesto diario, privacidad y cerrar sesión. «Eliminar cuenta» (con confirmación explícita) queda fuera de la demo y se agrega antes de publicar.
 
-### 9.5 Reglas de distribución 60-30-10
+### 9.5 Distribución del color
 
-1. Aproximadamente 60%: fondo `bg` y áreas amplias.
-2. Aproximadamente 30%: tarjetas, barra de navegación y encabezados en `surface`.
-3. Aproximadamente 10%: CTA, indicador activo, badges y alertas en `accent`.
-
-Si el coral supera el 10–12% de la pantalla, pierde su capacidad de guiar la mirada.
+Fondo y tarjetas casi blancos en lo más amplio; tintes de área y dorado donde el contenido lo pide; `accent`, reservado a acciones y estados. Detalle en la guía de UX/UI, sección 7.
 
 ### 9.6 Accesibilidad y contraste
 
-| Combinación | Ratio | Regla resultante |
-| --- | --- | --- |
-| `ink` sobre `bg` | 9.8:1 | Texto normal sin restricciones. |
-| `ink` sobre `surface` | 5.6:1 | Texto normal permitido. |
-| `ink` sobre `accent` | 4.4:1 | Solo 18 px o más en negrita (botones). |
-| `ink-soft` sobre `bg` | 5.8:1 | Permitido. |
-| `ink-soft` sobre `surface` | 3.3:1 | **No usar**; en tarjetas, texto de apoyo en `ink`. |
-| `accent` sobre `bg` | 2.2:1 | Botón con borde `ink` de 2 px. |
-| `accent` sobre `surface` | 1.3:1 | No poner coral directamente sobre tarjetas; usar fondo `bg-claro` o borde `ink`. |
-| `surface` sobre `bg` | 1.8:1 | Tarjetas con borde y sombra. |
-| `accent-oscuro` sobre `bg-claro` | 3.7:1 | Válido para barras de gráfica (≥ 3:1). |
-| Blanco sobre `accent` | 3.7:1 | No usar. |
+Las combinaciones medidas y las prohibidas están en la guía de UX/UI, sección 2.
 
 Reglas complementarias:
 
 - Áreas táctiles de 48 × 48 dp o más (guía de accesibilidad de Android); botones de 48 dp. Si el elemento visible es más chico (los cuadros de días), se amplía la zona táctil con `hitSlop`.
 - Cada elemento interactivo tiene `accessibilityRole`, `accessibilityLabel` y `accessibilityState`.
 - Escalado de texto del sistema permitido hasta 2× (Android llega a 200 %); solo las etiquetas de la barra de pestañas se limitan a 1.3×. Los diseños no usan alturas fijas para texto.
-- **Revisión contra las guías de Android (Entregas 1 a 3).** Texto con al menos 4.5:1 y bordes de controles con al menos 3:1: el texto naranja usa `texto-naranja` (#724B2D) en lugar de `surface-oscuro`; los bordes de selección usan `surface-oscuro` y los de casillas y días sin elegir, `ink-soft`; la ✓ de la casilla va en `ink`; el texto de ejemplo de los campos va en #46484E al 80 % (al 50 % daba 2.45:1); el texto del botón coral sube a 19 px en negritas (texto grande: 3:1). En Android la pantalla se ajusta al teclado (`KeyboardAvoidingView` con `height`) y el botón «atrás» del sistema regresa al paso anterior del asistente. Observaciones sin cambio: márgenes de 32 dp (los mockups; Material sugiere 16), botón «+» arriba (Material sugiere un botón flotante abajo), solo orientación vertical (las tabletas quedan para antes de publicar).
+- **Revisión contra las guías de Android.** Texto con al menos 4.5:1 y bordes de controles con al menos 3:1, calculados en la guía de UX/UI; el texto de ejemplo de los campos va en #46484E al 80 % (al 50 % daba 2.45:1). En Android la pantalla se ajusta al teclado (`KeyboardAvoidingView` con `height`) y el botón «atrás» del sistema regresa al paso anterior del asistente. Observaciones sin cambio: márgenes de 32 dp (los mockups; Material sugiere 16), botón «+» arriba (Material sugiere un botón flotante abajo), solo orientación vertical (las tabletas quedan para antes de publicar).
 - Movimiento: duraciones de 150–250 ms con ease-out; con `isReduceMotionEnabled` las animaciones de evolución y celebración se sustituyen por un cambio de imagen con fundido corto.
 - Ningún estado depende solo del color.
 - Solo tema claro; `userInterfaceStyle: light` en `app.json`.
-- Prueba con simulación de daltonismo (deuteranopía y protanopía), donde oliva y coral pueden acercarse.
+- Prueba con simulación de daltonismo (deuteranopía y protanopía), donde el verde y el rojo de error pueden acercarse.
 
 ### 9.7 Lista de verificación de UX/UI (antes de entregar)
 
-Se usa la lista de la sección 10 de [`docs/Guía de UX UI.md`](Guía%20de%20UX%20UI.md): contrastes calculados, zonas táctiles de 48 dp, estados que no dependen solo del color, un solo CTA coral, letra del sistema al 200%, TalkBack, teclado, botón «atrás» del sistema, estados de carga, vacío y error, y prueba de daltonismo. Antes de publicar se agrega la prueba con VoiceOver en iOS.
+Se usa la lista de la sección 10 de [`docs/Guía de UX UI.md`](Guía%20de%20UX%20UI.md): contrastes calculados, zonas táctiles de 48 dp, estados que no dependen solo del color, un solo botón principal, letra del sistema al 200%, TalkBack, teclado, botón «atrás» del sistema, estados de carga, vacío y error, y prueba de daltonismo. Antes de publicar se agrega la prueba con VoiceOver en iOS.
 
 ### 9.8 Arte de plantas y accesorios
 
 - Ruta: `assets/plants/{categoria}/fase{1-3}.png` y `assets/accessories/{tipo}/{n}.png`.
-- PNG con fondo transparente, lienzo cuadrado uniforme (por ejemplo 1024 × 1024) y contorno oscuro (#2C1E18), para que se distingan sobre el panel `bg-claro`.
-- Los accesorios usan el mismo lienzo para superponerse sin recalcular posiciones; si hace falta, se define un punto de anclaje por tipo.
-- Paleta de las plantas coordinada con la del sistema; evitar coral puro y verdes casi iguales a `bg`.
+- Las plantas y los accesorios usan PNG con fondo transparente, lienzo cuadrado uniforme (por ejemplo 1024 × 1024) y contorno oscuro (#2C1E18), para que se distingan sobre la tarjeta con el tinte de su área.
+- Cada accesorio va centrado en su propio lienzo, para verse bien en la Tienda. `src/features/rewards/imagenes.ts` lo coloca sobre la planta con una tabla de posición y tamaño por tipo y fase.
+- Paleta de las plantas coordinada con la del sistema; evitar verdes casi iguales a `accent` y a los tintes.
 
 ## 10. Seguridad y privacidad
 

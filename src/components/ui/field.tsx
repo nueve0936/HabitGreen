@@ -8,7 +8,7 @@ import { colors } from '@/theme';
 import { AppText } from './app-text';
 
 // Campo de texto del SDD 9.3 con los estados de los mockups de login y registro:
-// - enfocado: borde naranja (`surface`);
+// - enfocado: borde `accent`;
 // - con error: borde rojo y una X dentro del campo; si hay `error`, además el mensaje debajo;
 // - `valido`: una marca de verificación dentro del campo.
 // Los estados nunca dependen solo del color. Con `password` agrega el botón para mostrar u
@@ -39,7 +39,7 @@ export function Field({
   const [enfocado, setEnfocado] = useState(false);
   const hasError = Boolean(error) || invalido;
 
-  const borde = hasError ? 'border-accent-oscuro' : enfocado ? 'border-surface' : 'border-ink-soft';
+  const borde = hasError ? 'border-error' : enfocado ? 'border-accent' : 'border-borde';
 
   return (
     <View className="gap-1">
@@ -86,7 +86,7 @@ export function Field({
           </Pressable>
         ) : null}
         {hasError ? (
-          <X size={22} color={colors['accent-oscuro']} strokeWidth={2.5} accessible={false} />
+          <X size={22} color={colors.error} strokeWidth={2.5} accessible={false} />
         ) : valido ? (
           <Check
             size={22}
@@ -98,7 +98,7 @@ export function Field({
       </View>
       {error ? (
         <View className="flex-row items-center gap-1" accessibilityLiveRegion="polite">
-          <CircleAlert size={16} color={colors['accent-oscuro']} />
+          <CircleAlert size={16} color={colors.error} />
           <AppText variant="small" className="flex-1">
             {error}
           </AppText>

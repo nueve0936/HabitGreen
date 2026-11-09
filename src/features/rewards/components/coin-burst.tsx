@@ -1,4 +1,3 @@
-import { Coins } from 'lucide-react-native';
 import { useEffect } from 'react';
 import Animated, {
   Easing,
@@ -12,7 +11,8 @@ import Animated, {
 
 import { AppText } from '@/components/ui/app-text';
 import { formatear } from '@/i18n/es';
-import { colors } from '@/theme';
+
+import { CoinIcon } from './coin-icon';
 
 // «+10» con una moneda que sube y se desvanece junto al saldo al completar un hábito (SDD 6.1).
 // Movimiento corto con ease-out (SDD 9.6); con «reducir movimiento» solo aparece y se va.
@@ -44,7 +44,7 @@ export function CoinBurst({ monedas }: { monedas: number }) {
       style={estilo}
       className="absolute -top-6 right-0 flex-row items-center gap-1"
     >
-      <Coins size={18} color={colors['accent-oscuro']} />
+      <CoinIcon size={18} />
       <AppText weight="bold">{formatear('+{n}', { n: monedas })}</AppText>
     </Animated.View>
   );

@@ -244,37 +244,36 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 
 | Token | HEX | Uso |
 |---|---|---|
-| `bg` (60%) | `#C4D18B` | Fondo de pantalla |
-| `bg-claro` | `#D6E0A9` | Campos, tarjetas de gráficas, paneles de plantas |
-| `bg-oscuro` | `#A9B870` | Divisores, deshabilitado |
-| `surface` (30%) | `#C98B58` | Tarjetas, navegación |
-| `surface-claro` | `#DBA67D` | Tarjeta presionada |
-| `surface-oscuro` | `#A86F42` | Bordes de tarjeta, ítem activo |
-| `accent` (10%) | `#D1665A` | CTA, iconos destacados |
-| `accent-oscuro` | `#B8493D` | CTA presionado, borde de error |
-| `accent-claro` | `#F0C3BC` | Fondo de error |
-| `ink` | `#2C1E18` | Todo el texto |
-| `ink-soft` | `#5A4034` | Texto de apoyo, **solo sobre `bg`** |
+| `bg` | `#FBFBF6` | Fondo de pantalla |
+| `campo` | `#FFFFFF` | Tarjetas, campos, barra inferior, menús y diálogos |
+| `accent` | `#2E7D4F` | Botón principal, selección, barra de avance, pestaña activa |
+| `accent-oscuro` | `#24663F` | Botón principal presionado |
+| `accent-claro` | `#DFF2E4` | Estado presionado, píldora activa, etiquetas |
+| `borde` | `#859488` | Bordes de controles |
+| `divisor` | `#D6E8DB` | Líneas, pistas de barras, deshabilitado |
+| `error` | `#B8493D` | Borde, icono y texto de error |
+| `error-claro` | `#FBE3DF` | Fondo de error |
+| `moneda-fondo` y `moneda-texto` | `#FFF0CC` y `#7A4F0E` | Saldo de monedas |
+| `ink` | `#1E2A22` | Texto |
+| `ink-soft` | `#566459` | Texto de apoyo |
 
-Alertas: advertencia `#F4D9A8` / borde `#A86F42`; éxito `#D6E0A9` / borde `#5E6B2B`; informativo `#E8DCC8` / borde `#5A4034`.
+Más los tintes por área y las alertas de la guía.
 
 ### Reglas
 
 - Los colores se usan solo por tokens, nunca hex sueltos en componentes.
-- Todo el texto va en `ink`. Nunca blanco sobre estos colores.
-- Un solo CTA coral por pantalla; texto del botón de 18 px o más en negrita (contraste 4.4:1) y borde de 2 px en `ink`.
-- Tarjetas `surface`: borde 1 px `surface-oscuro` y sombra suave (iOS: color `#2C1E18`, opacidad 0.18, radio 8, offset y 2; Android: `elevation` 3).
-- `ink-soft` sobre `surface` da unos 3.3:1 y no cumple: sobre tarjetas terracota el texto de apoyo también va en `ink`.
-- El coral sobre `surface` da unos 1.3:1: un icono o botón coral dentro de una tarjeta necesita fondo `bg-claro` o borde `ink`.
+- Figma manda en el acomodo; los colores de la app son los de la guía. Las pantallas de Figma no se modifican.
+- Un solo botón principal por pantalla: relleno `accent` con texto blanco de 19 px en negritas (5:1), sin borde.
+- Tarjetas `campo` con sombra suave (color `ink`, opacidad 0.10, radio 8, offset y 2; Android: `elevation` 2).
 - No comunicar estados solo con color: siempre icono y texto (una opción seleccionada lleva icono de verificación).
 - Tipografía Lexend Deca, como en los mockups (respaldo: sistema). H1 32/700, H2 24/700, H3 20/600, cuerpo 16/400, pequeño 14/400, botón 19/700. Escalado de texto del sistema permitido hasta 2× (guía de Android; las etiquetas de la barra de pestañas, hasta 1.3×).
-- Espaciado en múltiplos de 8 (4, 8, 16, 24, 32, 48, 64). Márgenes de pantalla de 16 px. Radios: 8 campos y botones, 16 tarjetas, 999 chips.
+- Espaciado en múltiplos de 8 (4, 8, 16, 24, 32, 48, 64). Márgenes de pantalla de 16 a 32 dp. Radios: 12 campos, 16 botón de acción, 20 tarjetas, 999 píldoras.
 - Áreas táctiles de 48 × 48 dp o más (guía de Android); botones de 48 dp de alto. Si el elemento visible es más chico, se amplía la zona táctil (`hitSlop`).
 - Móvil primero: no hay hover; el estado equivalente es «presionado». Estados de foco para lectores de pantalla y teclado externo con anillo de 3 px en `ink`.
 - Movimiento sobrio: 150–250 ms, ease-out; respetar `AccessibilityInfo.isReduceMotionEnabled`.
 - Solo tema claro (`userInterfaceStyle: light`).
-- Arte de plantas y accesorios: PNG con fondo transparente, contorno oscuro (`#2C1E18`) y lienzo cuadrado uniforme, para que se vean sobre el fondo oliva. Las plantas se muestran sobre un panel `bg-claro` con borde `ink`.
-- Gráficas sobre tarjetas `bg-claro`: barras `#B8493D`, pista `#A9B870`, etiquetas `ink`.
+- Arte de plantas y accesorios: PNG con fondo transparente, contorno oscuro (`#2C1E18`) y lienzo cuadrado uniforme, para que se vean sobre los tintes. Las plantas se muestran sobre tarjetas con el tinte de su área.
+- Gráficas sobre tarjetas `campo`: barras `accent`, pista `divisor`, etiquetas `ink`.
 
 ## 9. Convenciones de código
 

@@ -13,6 +13,6 @@
 Formato final:
 
 - PNG con fondo transparente y contorno oscuro (`#2C1E18`).
-- El mismo lienzo cuadrado que las plantas, con el accesorio ya colocado donde va sobre la planta (el sombrero arriba, los lentes a la altura de la "cara", la maceta abajo). Así la app solo los apila encima de la planta, sin calcular posiciones.
+- Lienzo cuadrado, con el accesorio centrado, para que se vea bien en la Tienda. La app lo coloca sobre la planta con la tabla de `src/features/rewards/imagenes.ts`, por tipo y fase; con el arte final puede hacer falta ajustarla.
 
-Los nombres de los accesorios todavía son provisionales (pendiente 1 de la definición). Las ilustraciones provisionales se reemplazan después con el mismo nombre de archivo, sin tocar el código.
+Los nombres de los accesorios todavía son provisionales (pendiente 1 de la definición). Los dibujos actuales son provisionales y siguen esos nombres. Se reemplazan después con el mismo nombre de archivo, sin tocar el código.

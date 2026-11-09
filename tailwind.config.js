@@ -17,7 +17,7 @@ module.exports = {
       bold: [fonts.bold],
     },
     extend: {
-      // Escala tipográfica del SDD 9.2: h1 32, h2 24, h3 20, cuerpo 16, pequeño 14, botón 18.
+      // Escala tipográfica de la guía de UX/UI, sección 3.
       fontSize: {
         h1: ['32px', '40px'],
         h2: ['24px', '32px'],
@@ -27,8 +27,9 @@ module.exports = {
         button: ['19px', '24px'],
       },
       borderRadius: {
-        field: '8px',
-        card: '16px',
+        field: '12px',
+        accion: '16px',
+        card: '20px',
         chip: '999px',
       },
     },

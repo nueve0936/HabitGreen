@@ -2,10 +2,10 @@ import { Pressable, type PressableProps, View, type ViewProps } from 'react-nati
 
 import { cardShadow } from '@/theme';
 
-// Tarjeta del SDD 9.3: fondo surface, borde surface-oscuro, radio 16 y sombra suave.
-// Si recibe onPress se vuelve presionable (presionada: surface-claro).
+// Tarjeta clara con sombra suave (guía de UX/UI, sección 5).
+// Si recibe onPress se vuelve presionable (presionada: accent-claro).
 
-const BASE_CLASS = 'rounded-card border border-surface-oscuro bg-surface p-4';
+const BASE_CLASS = 'rounded-card bg-campo p-4';
 
 type StaticCardProps = ViewProps & { className?: string; onPress?: undefined };
 type PressableCardProps = Omit<PressableProps, 'style'> & {
@@ -22,7 +22,7 @@ export function Card(props: CardProps) {
       <Pressable
         accessibilityRole="button"
         style={cardShadow}
-        className={`${BASE_CLASS} active:bg-surface-claro ${className}`}
+        className={`${BASE_CLASS} active:bg-accent-claro ${className}`}
         {...rest}
       />
     );

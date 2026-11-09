@@ -73,7 +73,7 @@ export function DateWheelDialog({
           accessibilityRole="button"
           accessibilityLabel={textos.cancelar}
           onPress={onCancelar}
-          className="h-12 flex-1 items-center justify-center rounded-field border-2 border-accent bg-campo active:bg-bg-claro"
+          className="h-12 flex-1 items-center justify-center rounded-field border-2 border-borde bg-campo active:bg-accent-claro"
         >
           <AppText weight="bold">{textos.cancelar}</AppText>
         </Pressable>
@@ -81,9 +81,11 @@ export function DateWheelDialog({
           accessibilityRole="button"
           accessibilityLabel={textos.aceptar}
           onPress={() => onAceptar(fechaDesdeMesDia(mes, diaSeguro, minima))}
-          className="h-12 flex-1 items-center justify-center rounded-field border-2 border-ink bg-accent active:bg-accent-oscuro"
+          className="h-12 flex-1 items-center justify-center rounded-field bg-accent active:bg-accent-oscuro"
         >
-          <AppText weight="bold">{textos.aceptar}</AppText>
+          <AppText weight="bold" tone="blanco">
+            {textos.aceptar}
+          </AppText>
         </Pressable>
       </View>
 

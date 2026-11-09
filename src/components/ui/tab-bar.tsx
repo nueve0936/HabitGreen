@@ -15,9 +15,8 @@ import { colors } from '@/theme';
 
 import { StableBoldText } from './stable-bold-text';
 
-// Barra inferior con las 5 pestañas del SDD y el estilo del mockup (fondo oliva, iconos de
-// línea). La pestaña activa se marca con indicador coral, icono más oscuro y texto en negrita:
-// no depende solo del color.
+// Barra inferior con las 5 pestañas del SDD. La activa se marca con una píldora detrás del icono y
+// texto en negrita: no depende solo del color.
 
 const TABS: Record<string, { label: string; Icon: LucideIcon }> = {
   hoy: { label: es.tabs.hoy, Icon: House },
@@ -34,7 +33,7 @@ export function TabBar({ state, emitter, navigateToTab }: MaterialTopTabBarProps
     <View
       accessibilityRole="tablist"
       style={{ paddingBottom: Math.max(insets.bottom, 8) }}
-      className="flex-row border-t border-bg-oscuro bg-bg pt-1"
+      className="flex-row border-t border-divisor bg-campo pt-2"
     >
       {state.routes.map((route, index) => {
         const tab = TABS[route.name];
@@ -63,20 +62,28 @@ export function TabBar({ state, emitter, navigateToTab }: MaterialTopTabBarProps
             className="min-h-14 flex-1 items-center justify-center gap-0.5 active:opacity-70"
           >
             <View
-              className={`mb-1 h-1 w-8 rounded-chip ${focused ? 'bg-accent' : 'bg-transparent'}`}
-            />
-            <Icon
-              size={26}
-              color={focused ? colors['accent-oscuro'] : colors.ink}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+              // Se vuelve a crear al cambiar de estado: si solo cambia el fondo de la vista ya creada,
+              // Android dibuja la píldora con las esquinas rectas.
+              key={focused ? 'activa' : 'inactiva'}
+              style={{
+                borderRadius: 16,
+                backgroundColor: focused ? colors['accent-claro'] : 'transparent',
+              }}
+              className="h-8 w-14 items-center justify-center"
+            >
+              <Icon
+                size={24}
+                color={focused ? colors.accent : colors.ink}
+                strokeWidth={focused ? 2.5 : 2}
+              />
+            </View>
             <StableBoldText
               variant="small"
               bold={focused}
               weight="regular"
               numberOfLines={1}
               maxFontSizeMultiplier={1.3}
-              className="text-[12px] leading-4"
+              className="text-[12px] leading-[18px]"
             >
               {label}
             </StableBoldText>

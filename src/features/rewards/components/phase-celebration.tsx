@@ -36,10 +36,10 @@ export function PhaseCelebration({
       <View className="flex-1 items-center justify-center bg-ink/40 px-8">
         <View
           accessibilityViewIsModal
-          className="w-full items-center gap-6 rounded-card border-2 border-ink bg-campo p-6"
+          className="w-full items-center gap-6 rounded-card bg-campo p-6"
         >
           {celebracion ? (
-            <View className="aspect-square w-48 overflow-hidden rounded-card border-2 border-ink bg-bg-claro">
+            <View className="aspect-square w-48 overflow-hidden rounded-card bg-accent-claro">
               <Image
                 source={imagenPlanta(celebracion.area, celebracion.fase)}
                 contentFit="contain"

@@ -2,8 +2,8 @@ import { Modal, Pressable, View } from 'react-native';
 
 import { AppText } from './app-text';
 
-// Diálogo de confirmación de los mockups del plan («Quitar» y «Agregar hábito»): tarjeta clara
-// con borde coral, «Cancelar» con borde y la acción en rojo (peligro) o verde (confirmar).
+// Diálogo de confirmación de los mockups del plan («Quitar» y «Agregar hábito»): tarjeta clara,
+// «Cancelar» con borde y la acción en rojo (peligro) o verde (confirmar).
 
 export type ConfirmDialogProps = {
   visible: boolean;
@@ -27,10 +27,7 @@ export function ConfirmDialog({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>
       <View className="flex-1 items-center justify-center bg-ink/40 px-10">
-        <View
-          accessibilityViewIsModal
-          className="w-full gap-6 rounded-card border-2 border-accent bg-campo p-6"
-        >
+        <View accessibilityViewIsModal className="w-full gap-6 rounded-card bg-campo p-6">
           <AppText weight="bold" className="text-center" accessibilityRole="header">
             {mensaje}
           </AppText>
@@ -39,7 +36,7 @@ export function ConfirmDialog({
               accessibilityRole="button"
               accessibilityLabel={cancelar}
               onPress={onCancelar}
-              className="h-12 flex-1 items-center justify-center rounded-field border-2 border-accent bg-campo active:bg-bg-claro"
+              className="h-12 flex-1 items-center justify-center rounded-field border-2 border-borde bg-campo active:bg-accent-claro"
             >
               <AppText weight="bold">{cancelar}</AppText>
             </Pressable>

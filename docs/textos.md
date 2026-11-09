@@ -63,9 +63,19 @@ Versiones cortas (para `distraccion`): «Tú puedes.», «Paso a paso.», «A tu
 | Deshacer | Lo desmarcamos. |
 | Cambio a fase 2 | ¡Tu planta de {categoría} está creciendo! Tu constancia se nota. |
 | Cambio a fase 3 | ¡Tu planta de {categoría} floreció! Esto ya es parte de ti. |
-| Planta sin hábitos | Crece cuando agregues un hábito de esta área. |
+| Planta sin hábitos (tarjeta del Jardín) | Sin hábitos aún |
+| Planta sin hábitos (Detalles y lector de pantalla) | Crece cuando agregues un hábito de esta área. |
+| Jardín sin datos descargados | Todavía estamos trayendo tus plantas. Si no tienes conexión, aparecerán cuando te conectes. |
 | Tienda, saldo insuficiente | Te faltan {n} monedas. |
-| Compra | ¡Es tuyo! Pruébalo en alguna de tus plantas. |
+| Hoja de compra, título | ¿Comprar {objeto}? |
+| Hoja de compra, texto | Se agregará a tu colección y podrás equiparlo cuando quieras. |
+| Hoja de compra, botones | Comprar por {n} / Ahora no |
+| Compra hecha, título | ¡Ya es tuyo! |
+| Compra hecha, texto | {objeto} se agregó a tu colección. Gracias por seguir cuidando tus hábitos. |
+| Compra hecha, botones | Equipar ahora / Seguir en la tienda |
+| Objeto que ya era tuyo | Este objeto ya está en tu colección. |
+| Fase bloqueada | Sigue cuidando tu planta para descubrirla. |
+| Objetos, sin compras | Todavía no tienes {tipo}. Consíguelos en la Tienda. |
 | Equipar en otra planta | Lo movimos a tu planta de {categoría}. |
 
 ## 4. Reprogramación

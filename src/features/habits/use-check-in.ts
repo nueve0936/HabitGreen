@@ -60,7 +60,8 @@ export function useCheckIn(userId: string) {
           formatear(textos.hechoMonedas, { n: r.monedas }),
         );
       } else {
-        AccessibilityInfo.announceForAccessibility(`${textos.hecho} ${motivo ?? ''}`);
+        // El motivo lo anuncia el propio aviso flotante.
+        AccessibilityInfo.announceForAccessibility(textos.hecho);
       }
       if (r.cambioFase !== null && r.cambioFase > 1) {
         setCelebracion({ area: habito.categoria, fase: r.cambioFase });
@@ -81,6 +82,10 @@ export function useCheckIn(userId: string) {
     premio,
     celebracion,
     cerrarCelebracion: () => setCelebracion(null),
+    cerrarAvisos: () => {
+      setError(null);
+      setAviso(null);
+    },
     alternar: (habito: HabitoParaCheck, hecho: boolean) =>
       hecho ? deshacer(habito) : completar(habito),
   };

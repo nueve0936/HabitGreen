@@ -84,7 +84,7 @@ export function EditPlanHabitSheet({
         style={{ paddingBottom: insets.bottom + 16 }}
         className="gap-4 rounded-t-card bg-campo px-6 pt-4"
       >
-        <View className="h-1 w-10 self-center rounded-chip bg-bg-oscuro" />
+        <View className="h-1 w-10 self-center rounded-chip bg-divisor" />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t.cerrar}

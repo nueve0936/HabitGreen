@@ -17,7 +17,7 @@ export function BackButton({ onPress }: BackButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={es.comun.volver}
       onPress={onPress ?? (() => router.back())}
-      className="h-12 w-12 items-center justify-center rounded-chip border border-bg-oscuro bg-campo active:bg-bg-claro"
+      className="h-12 w-12 items-center justify-center rounded-chip border border-divisor bg-campo active:bg-accent-claro"
     >
       <ArrowLeft size={24} color={colors.ink} strokeWidth={2} />
     </Pressable>

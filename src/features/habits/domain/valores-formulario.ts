@@ -11,14 +11,18 @@ export const DURACION_POR_DEFECTO = 10;
 
 /**
  * Al crear: todos los días, 10 min, desde hoy y sin fecha de fin. Con el estilo `minimo` solo
- * avisan los hábitos que el usuario elija (SDD 7.1), así que empieza sin recordatorio.
+ * avisan los hábitos que el usuario elija (SDD 7.1), así que empieza sin recordatorio. Desde Detalles de una planta, llega con su área ya elegida.
  */
-export function valoresNuevos(estiloNotificaciones: string | null, hoy: string): HabitoFormInput {
+export function valoresNuevos(
+  estiloNotificaciones: string | null,
+  hoy: string,
+  categoria: Area | null = null,
+): HabitoFormInput {
   const avisa = estiloNotificaciones !== 'minimo';
   return {
     nombre: '',
     descripcion: '',
-    categoria: null,
+    categoria,
     dias: [...TODOS_LOS_DIAS],
     duracion: DURACION_POR_DEFECTO,
     hora: avisa ? HORA_POR_DEFECTO : null,

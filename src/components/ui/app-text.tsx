@@ -1,11 +1,12 @@
 import { Text, type TextProps } from 'react-native';
 
 // Texto base de la app: Lexend Deca, color ink y escala del SDD 9.2.
-// El escalado del sistema se limita a 1.3× (definición 8).
+// El escalado del sistema se limita a 2× (guía de UX/UI, sección 3).
 
 export type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'button';
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
-export type TextTone = 'ink' | 'ink-soft' | 'texto-naranja' | 'peligro' | 'confirmar' | 'blanco';
+export type TextTone =
+  'ink' | 'ink-soft' | 'acento' | 'moneda' | 'peligro' | 'confirmar' | 'blanco';
 
 const VARIANT_CLASS: Record<TextVariant, string> = {
   h1: 'text-h1',
@@ -34,11 +35,11 @@ const WEIGHT_CLASS: Record<TextWeight, string> = {
 
 const TONE_CLASS: Record<TextTone, string> = {
   ink: 'text-ink',
-  // ink-soft solo sobre el fondo bg o crema, nunca sobre tarjetas surface (SDD 9.6).
   'ink-soft': 'text-ink-soft',
-  // Enlaces de color de los mockups del plan («Editar», «Quitar», «Agregar») sobre fondo claro, y
-  // texto blanco solo sobre los botones peligro y confirmar.
-  'texto-naranja': 'text-texto-naranja',
+  // Texto de acento y enlaces («Editar», «Quitar», «Agregar») sobre fondo claro; blanco solo sobre
+  // rellenos `accent`, `peligro` y `confirmar`.
+  acento: 'text-accent',
+  moneda: 'text-moneda-texto',
   peligro: 'text-peligro',
   confirmar: 'text-confirmar',
   blanco: 'text-blanco',

@@ -4,10 +4,10 @@ import { colors } from '@/theme';
 
 import { AppText } from './app-text';
 
-// Botones del SDD 9.3 con la forma de píldora de los mockups.
-// - primary: el único CTA coral de la pantalla. Texto ink (no blanco) por contraste (SDD 9.6).
-// - secondary: transparente con borde ink.
-// - tertiary: enlace de texto subrayado, con área táctil de 44 px.
+// Botones con forma de píldora (guía de UX/UI, sección 5).
+// - primary: la acción principal de la pantalla, con texto blanco.
+// - secondary: transparente con borde.
+// - tertiary: enlace de texto subrayado, con área táctil de 48 dp.
 
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
 
@@ -21,17 +21,16 @@ export type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
 
 const CONTAINER_CLASS: Record<ButtonVariant, string> = {
   primary:
-    'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-accent px-6 active:bg-accent-oscuro',
+    'h-12 flex-row items-center justify-center rounded-chip bg-accent px-6 active:bg-accent-oscuro',
   secondary:
-    'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-transparent px-6 active:bg-bg-claro',
+    'h-12 flex-row items-center justify-center rounded-chip border-2 border-borde bg-transparent px-6 active:bg-accent-claro',
   tertiary: 'min-h-12 flex-row items-center justify-center px-2 active:opacity-70',
 };
 
 const DISABLED_CLASS: Record<ButtonVariant, string> = {
-  primary:
-    'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink bg-bg-oscuro px-6',
+  primary: 'h-12 flex-row items-center justify-center rounded-chip bg-divisor px-6',
   secondary:
-    'h-12 flex-row items-center justify-center rounded-chip border-2 border-ink-soft bg-transparent px-6',
+    'h-12 flex-row items-center justify-center rounded-chip border-2 border-divisor bg-transparent px-6',
   tertiary: 'min-h-12 flex-row items-center justify-center px-2',
 };
 
@@ -63,7 +62,7 @@ export function Button({
           <AppText
             variant={variant === 'tertiary' ? 'body' : 'button'}
             weight={variant === 'tertiary' ? 'semibold' : 'bold'}
-            tone={isDisabled ? 'ink-soft' : 'ink'}
+            tone={isDisabled ? 'ink-soft' : variant === 'primary' ? 'blanco' : 'ink'}
             className={variant === 'tertiary' ? 'underline' : ''}
           >
             {label}

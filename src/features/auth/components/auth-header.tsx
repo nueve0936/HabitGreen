@@ -24,7 +24,7 @@ export function AuthHeader({ title, description }: AuthHeaderProps) {
       </View>
       <View
         importantForAccessibility="no-hide-descendants"
-        className="h-20 w-20 items-center justify-center self-center rounded-card border-2 border-ink bg-bg-claro"
+        className="h-20 w-20 items-center justify-center self-center rounded-card bg-accent-claro"
       >
         <Sprout size={44} color={colors.ink} />
       </View>

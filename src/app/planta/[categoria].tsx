@@ -1,129 +1,256 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import PagerView from 'react-native-pager-view';
+import { useReducedMotion } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Screen } from '@/components/ui/screen';
+import { Snackbar } from '@/components/ui/snackbar';
+import { StableBoldText } from '@/components/ui/stable-bold-text';
+import { leerHabitos } from '@/db/habits-repository';
 import { equiparAccesorio, leerJardin, type Accesorio } from '@/db/rewards-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
-import { PlantPanel } from '@/features/rewards/components/plant-panel';
+import { HabitCheckCard } from '@/features/habits/components/habit-check-card';
+import { useHabitActions } from '@/features/habits/use-habit-actions';
+import { ObjectGrid, TIPOS_OBJETO } from '@/features/rewards/components/object-grid';
+import { PhaseCarousel } from '@/features/rewards/components/phase-carousel';
 import type { TipoAccesorio } from '@/features/rewards/domain/equipar';
 import { es, formatear } from '@/i18n/es';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
 
-// Equipar accesorios en una planta (SDD 9.1 y 6.4). Cada planta lleva uno por tipo; ponerle uno
-// que está en otra planta lo mueve. Funciona sin conexión: se guarda en el teléfono y se sube al
-// sincronizar.
+// Detalles de la planta (SDD 9.4, mockups «Detalles #1», «#2» y «#2.1»): la planta en sus 3 fases y un
+// panel con Hábitos y Objetos, que cambia tocando o deslizando. Equipar es instantáneo y funciona sin
+// conexión: se guarda en el teléfono y se sube al sincronizar.
 
-const TIPOS: TipoAccesorio[] = ['sombrero', 'lentes', 'maceta'];
+// Con letra muy grande o una pantalla baja, la parte fija dejaría sin espacio al panel: entonces se
+// desplaza toda la pantalla (guía de UX/UI, sección 6).
+const ESCALA_MAXIMA_FIJA = 1.5;
+const ALTO_MINIMO_FIJO = 640;
+const PROPORCION_PLANTA = 0.27;
+const PROPORCION_ANCHO = 0.6;
+const PROPORCION_PANEL = 0.8;
+
+const PAGINA_OBJETOS = 1;
+// Los avisos flotan sobre las pestañas de tipo de Objetos y la barra del sistema.
+const MARGEN_AVISO = 72;
 
 export default function PlantaScreen() {
   const t = es.planta;
-  const areas = es.onboarding.formulario.areas;
-  const { categoria } = useLocalSearchParams<{ categoria: string }>();
-  const area = (AREAS as readonly string[]).includes(categoria) ? (categoria as Area) : null;
+  const params = useLocalSearchParams<{
+    categoria: string;
+    pestana?: string;
+    tipo?: string;
+    llegada?: string;
+  }>();
+  const area = (AREAS as readonly string[]).includes(params.categoria)
+    ? (params.categoria as Area)
+    : null;
+  const paginaPedida = params.pestana === 'objetos' ? PAGINA_OBJETOS : 0;
+  const tipoPedido = TIPOS_OBJETO.find((opcion) => opcion === params.tipo);
+
   const { session } = useSession();
   const userId = session?.user.id ?? '';
   const jardin = useLocalQuery(`jardin-${userId}`, () => leerJardin(userId));
+  const habitos = useLocalQuery('habitos', leerHabitos);
+  const { width, height, fontScale } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const margenAviso = insets.bottom + MARGEN_AVISO;
+  const acciones = useHabitActions(userId, margenAviso);
+  const reducirMovimiento = useReducedMotion();
+
+  const panel = useRef<PagerView>(null);
+  const [pagina, setPagina] = useState(paginaPedida);
+  const [tipo, setTipo] = useState<TipoAccesorio>(tipoPedido ?? 'sombrero');
   const [aviso, setAviso] = useState<{ tipo: 'exito' | 'error'; texto: string } | null>(null);
-  const [ocupado, setOcupado] = useState<string | null>(null);
+
+  // Al regresar desde la Tienda con «Equipar ahora», la pantalla ya abierta recibe parámetros nuevos.
+  const llegada = `${params.pestana}|${params.tipo}|${params.llegada}`;
+  const [llegadaVista, setLlegadaVista] = useState(llegada);
+  if (llegada !== llegadaVista) {
+    setLlegadaVista(llegada);
+    if (params.pestana === 'objetos') setPagina(PAGINA_OBJETOS);
+    if (tipoPedido) setTipo(tipoPedido);
+  }
+
+  useEffect(() => {
+    if (reducirMovimiento) panel.current?.setPageWithoutAnimation(pagina);
+    else panel.current?.setPage(pagina);
+  }, [pagina, reducirMovimiento]);
 
   const planta = jardin.data?.plantas.find((p) => p.area === area);
-  const propios = (jardin.data?.accesorios ?? []).filter((a) => a.propioId !== null);
-  const nombreDe = (categoryId: string) => {
-    const otra = jardin.data?.plantas.find((p) => p.categoryId === categoryId);
-    return otra ? areas[otra.area] : '';
-  };
+  const lista = (habitos.data ?? []).filter((h) => h.categoria === area);
+  const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
+  const tamanoPlanta = Math.min(height * PROPORCION_PLANTA, width * PROPORCION_ANCHO);
 
-  const equipar = async (accesorio: Accesorio, destino: string | null) => {
-    setOcupado(accesorio.id);
+  const equipar = async (accesorio: Accesorio) => {
+    if (!planta || !area) return;
+    const puesto = accesorio.categoriaEquipada === planta.categoryId;
     setAviso(null);
     try {
-      const { movidoDe } = await equiparAccesorio(userId, accesorio, destino);
-      if (movidoDe !== null && area) {
-        setAviso({ tipo: 'exito', texto: formatear(t.movido, { categoria: areas[area] }) });
+      const { movidoDe } = await equiparAccesorio(
+        userId,
+        accesorio,
+        puesto ? null : planta.categoryId,
+      );
+      if (movidoDe !== null) {
+        setAviso({
+          tipo: 'exito',
+          texto: formatear(t.movido, { categoria: es.onboarding.formulario.areas[area] }),
+        });
       }
     } catch {
       setAviso({ tipo: 'error', texto: t.error });
-    } finally {
-      setOcupado(null);
     }
   };
 
-  return (
-    <Screen scroll contentClassName="gap-6 pt-2">
-      <View className="flex-row items-center gap-4">
-        <View className="-ml-4">
-          <BackButton />
+  if (!area || !planta) {
+    return (
+      <View className="flex-1 bg-bg">
+        <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+          <View className="flex-1 gap-6 px-8 pt-2">
+            <View className="-ml-4">
+              <BackButton />
+            </View>
+            {jardin.cargando && !jardin.data ? (
+              <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
+            ) : (
+              <Alert variant="error" message={es.jardin.error} />
+            )}
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  const nombreArea = es.onboarding.formulario.areas[area];
+
+  const parteSuperior = (
+    <View>
+      <View className="z-10 px-4">
+        <BackButton />
+      </View>
+      <PhaseCarousel planta={planta} tamano={tamanoPlanta}>
+        <View className="items-center px-8 pt-2">
+          <AppText variant="h2" className="text-center">
+            {nombreArea}
+          </AppText>
         </View>
-        <AppText variant="h2" className="flex-1">
-          {area ? formatear(t.titulo, { categoria: areas[area] }) : ''}
-        </AppText>
+      </PhaseCarousel>
+    </View>
+  );
+
+  const pestanas = [t.pestanaHabitos, t.pestanaObjetos];
+
+  const panelInferior = (
+    <View
+      style={todoDesplazable ? { height: height * PROPORCION_PANEL } : undefined}
+      className={`rounded-t-card bg-campo pt-2 ${todoDesplazable ? '' : 'flex-1'}`}
+    >
+      <View accessibilityRole="tablist" className="flex-row px-5">
+        {pestanas.map((etiqueta, i) => {
+          const activa = pagina === i;
+          return (
+            <Pressable
+              key={etiqueta}
+              accessibilityRole="tab"
+              accessibilityLabel={etiqueta}
+              accessibilityState={{ selected: activa }}
+              onPress={() => setPagina(i)}
+              className="min-h-12 flex-1 items-center justify-center"
+            >
+              <View className="items-center gap-1">
+                <StableBoldText bold={activa}>{etiqueta}</StableBoldText>
+                {/* La `key` la vuelve a montar: en Android, cambiar solo el fondo no siempre se pinta. */}
+                <View
+                  key={activa ? 'activa' : 'inactiva'}
+                  className={`h-1 self-stretch rounded-chip ${activa ? 'bg-accent' : ''}`}
+                />
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
 
-      {jardin.cargando && !jardin.data ? (
-        <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
-      ) : !planta ? (
-        <Alert variant="error" message={es.jardin.error} />
-      ) : (
-        <>
-          <View className="w-2/3 self-center">
-            <PlantPanel planta={planta} conDetalle={false} />
-          </View>
+      <PagerView
+        ref={panel}
+        initialPage={paginaPedida}
+        onPageSelected={(e) => setPagina(e.nativeEvent.position)}
+        style={{ flex: 1 }}
+      >
+        <View key="habitos" className="flex-1">
+          <ScrollView
+            nestedScrollEnabled
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+            contentContainerClassName="grow gap-3 px-5 pt-2"
+          >
+            {habitos.cargando && !habitos.data ? (
+              <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
+            ) : lista.length === 0 ? (
+              <View className="flex-1 items-center justify-center gap-4 py-6">
+                <AppText tone="ink-soft" className="text-center">
+                  {es.jardin.sinHabitos}
+                </AppText>
+                <Button
+                  label={es.habitos.agregar}
+                  onPress={() =>
+                    router.push({ pathname: '/habit/nuevo', params: { categoria: area } })
+                  }
+                />
+              </View>
+            ) : (
+              lista.map((item) => (
+                <HabitCheckCard key={item.habito.id} {...acciones.propsTarjeta(item)} />
+              ))
+            )}
+          </ScrollView>
+        </View>
 
-          {aviso ? <Alert variant={aviso.tipo} message={aviso.texto} /> : null}
+        <View key="objetos" className="flex-1">
+          <ObjectGrid
+            planta={planta}
+            plantas={jardin.data?.plantas ?? []}
+            accesorios={jardin.data?.accesorios ?? []}
+            tipo={tipo}
+            onCambiarTipo={setTipo}
+            onTocar={(a) => void equipar(a)}
+            onIrATienda={() => router.push({ pathname: '/tienda', params: { desde: area } })}
+            margenInferior={insets.bottom}
+          />
+        </View>
+      </PagerView>
+    </View>
+  );
 
-          {propios.length === 0 ? (
-            <View className="gap-4">
-              <AppText tone="ink-soft" className="text-center">
-                {t.sinAccesorios}
-              </AppText>
-              <Button label={es.jardin.tienda} onPress={() => router.push('/tienda')} />
-            </View>
-          ) : (
-            TIPOS.map((tipo) => {
-              const delTipo = propios.filter((a) => a.tipo === tipo);
-              if (delTipo.length === 0) return null;
-              return (
-                <View key={tipo} className="gap-3">
-                  <AppText variant="h3" accessibilityRole="header">
-                    {t.tipos[tipo]}
-                  </AppText>
-                  {delTipo.map((a) => {
-                    const puesto = a.categoriaEquipada === planta.categoryId;
-                    const estado = puesto
-                      ? t.puesto
-                      : a.categoriaEquipada
-                        ? formatear(t.enOtra, { categoria: nombreDe(a.categoriaEquipada) })
-                        : null;
-                    return (
-                      <Card key={a.id} className="flex-row items-center gap-3">
-                        <View className="flex-1 gap-1">
-                          <AppText weight="semibold">{a.nombre}</AppText>
-                          {estado ? <AppText variant="small">{estado}</AppText> : null}
-                        </View>
-                        <Button
-                          variant={puesto ? 'tertiary' : 'secondary'}
-                          label={puesto ? t.quitar : t.ponerselo}
-                          accessibilityLabel={`${puesto ? t.quitar : t.ponerselo}: ${a.nombre}`}
-                          loading={ocupado === a.id}
-                          onPress={() => equipar(a, puesto ? null : planta.categoryId)}
-                        />
-                      </Card>
-                    );
-                  })}
-                </View>
-              );
-            })
-          )}
-        </>
-      )}
-    </Screen>
+  return (
+    <View className="flex-1 bg-bg">
+      <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+        {todoDesplazable ? (
+          <ScrollView nestedScrollEnabled>
+            {parteSuperior}
+            {panelInferior}
+          </ScrollView>
+        ) : (
+          <>
+            {parteSuperior}
+            {panelInferior}
+          </>
+        )}
+      </SafeAreaView>
+      {acciones.capas}
+      {acciones.aviso}
+      <Snackbar
+        mensaje={aviso?.texto ?? null}
+        variant={aviso?.tipo}
+        margenInferior={margenAviso}
+        onCerrar={() => setAviso(null)}
+      />
+    </View>
   );
 }

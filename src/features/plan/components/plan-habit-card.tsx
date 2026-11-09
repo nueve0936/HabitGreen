@@ -14,7 +14,7 @@ import { textoHorario } from '../domain/plan-format';
 
 export type AccionTarjeta = {
   label: string;
-  tone: Extract<TextTone, 'texto-naranja' | 'peligro' | 'confirmar'>;
+  tone: Extract<TextTone, 'acento' | 'peligro' | 'confirmar'>;
   accessibilityLabel: string;
   onPress: () => void;
 };
@@ -42,7 +42,7 @@ export function PlanHabitCard({ habito, ventana, acciones }: PlanHabitCardProps)
       </AppText>
 
       <View className="flex-row items-center justify-between gap-2">
-        <View className="rounded-field bg-surface-claro px-3 py-1">
+        <View className="rounded-field bg-accent-claro px-3 py-1">
           <AppText variant="small" weight="semibold">
             {es.onboarding.formulario.areas[habito.categoria]}
           </AppText>

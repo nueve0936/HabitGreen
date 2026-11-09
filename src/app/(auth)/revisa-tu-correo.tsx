@@ -46,7 +46,7 @@ export default function RevisaTuCorreoScreen() {
       <View className="items-center gap-4">
         <View
           importantForAccessibility="no-hide-descendants"
-          className="h-24 w-24 items-center justify-center rounded-chip border-2 border-ink bg-bg-claro"
+          className="h-24 w-24 items-center justify-center rounded-chip bg-accent-claro"
         >
           <MailCheck size={48} color={colors.ink} />
         </View>

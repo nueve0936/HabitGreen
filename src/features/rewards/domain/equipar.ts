@@ -38,3 +38,29 @@ export function cambiosAlEquipar(
   cambios.push({ id: accesorio.id, categoria_equipada: categoriaId });
   return cambios;
 }
+
+export type PlantaCandidata = {
+  categoryId: string;
+  tieneHabitos: boolean;
+  equipados: readonly { tipo: TipoAccesorio }[];
+};
+
+/**
+ * Planta donde «Equipar ahora» pone un objeto recién comprado (SDD 9.4). Prioridad: la planta desde
+ * la que se abrió la Tienda; la primera con hábitos que tenga libre ese tipo; la primera con
+ * hábitos; la primera con ese tipo libre; la primera. Devuelve null si no hay plantas.
+ */
+export function plantaParaEquipar(
+  tipo: TipoAccesorio,
+  plantas: readonly PlantaCandidata[],
+  origenId?: string | null,
+): string | null {
+  const tipoLibre = (p: PlantaCandidata) => !p.equipados.some((a) => a.tipo === tipo);
+  const elegida =
+    plantas.find((p) => p.categoryId === origenId) ??
+    plantas.find((p) => p.tieneHabitos && tipoLibre(p)) ??
+    plantas.find((p) => p.tieneHabitos) ??
+    plantas.find(tipoLibre) ??
+    plantas[0];
+  return elegida?.categoryId ?? null;
+}

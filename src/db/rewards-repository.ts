@@ -1,6 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { cambiosAlEquipar, type TipoAccesorio } from '@/features/rewards/domain/equipar';
+import {
+  cambiosAlEquipar,
+  plantaParaEquipar,
+  type TipoAccesorio,
+} from '@/features/rewards/domain/equipar';
 import { supabase } from '@/lib/supabase';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { esRechazoDefinitivo } from '@/sync/domain/sync-rules';
@@ -143,6 +147,35 @@ export async function equiparAccesorio(
   return {
     movidoDe: categoryId !== null && anterior !== null && anterior !== categoryId ? anterior : null,
   };
+}
+
+/**
+ * «Equipar ahora» en la Tienda (SDD 9.4). Con `origen`, lo pone en la planta desde la que se abrió
+ * la Tienda; si ya lo lleva una planta, no lo mueve; si no, la app elige. Devuelve dónde quedó, o
+ * null si el objeto todavía no llega a este teléfono, para que el usuario pueda reintentar.
+ */
+export async function equiparDesdeTienda(
+  userId: string,
+  accessoryId: string,
+  origen: Area | null,
+): Promise<{ area: Area; tipo: TipoAccesorio } | null> {
+  let jardin = await leerJardin(userId);
+  let accesorio = jardin.accesorios.find((a) => a.id === accessoryId);
+  if (accesorio?.propioId == null) {
+    await sincronizarAhora().catch(() => {});
+    jardin = await leerJardin(userId);
+    accesorio = jardin.accesorios.find((a) => a.id === accessoryId);
+  }
+  if (!accesorio || accesorio.propioId === null) return null;
+
+  const origenId = jardin.plantas.find((p) => p.area === origen)?.categoryId ?? null;
+  const destino =
+    origenId ?? accesorio.categoriaEquipada ?? plantaParaEquipar(accesorio.tipo, jardin.plantas);
+  const planta = jardin.plantas.find((p) => p.categoryId === destino);
+  if (!planta) return null;
+
+  await equiparAccesorio(userId, accesorio, planta.categoryId);
+  return { area: planta.area, tipo: accesorio.tipo };
 }
 
 export type ResultadoCompra = 'comprado' | 'sin_conexion' | 'saldo_insuficiente' | 'error';

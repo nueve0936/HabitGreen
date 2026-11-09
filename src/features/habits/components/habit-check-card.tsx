@@ -10,10 +10,10 @@ import { horaCorta } from '../domain/horario';
 import type { Ancla } from './habit-menu';
 
 // Tarjeta de hábito de Hoy y Hábitos (mockups «Pantalla Dashboard» y «Hábitos #1»): casilla
-// cuadrada, título y «08:00 · 30 min». Hecho: casilla rellena de `surface` con ✓, borde naranja y
-// título tachado (no depende solo del color). Si no toca hoy, la casilla está desactivada y lo
-// dice con texto. En pausa (mockup «Hábitos #3»): el símbolo ⏸ en lugar de la casilla, título
-// tachado y borde naranja; se reanuda desde el menú ⋮.
+// redonda, título y «08:00 · 30 min». Hecho: casilla rellena de `accent` con ✓ y título tachado (no
+// depende solo del color). Si no toca hoy, la casilla es punteada y lo dice con texto. En pausa
+// (mockup «Hábitos #3»): el símbolo ⏸ en lugar de la casilla y título tachado; se reanuda desde el
+// menú ⋮.
 
 export type HabitCheckCardProps = {
   titulo: string;
@@ -61,11 +61,14 @@ export function HabitCheckCard({
       style={cardShadow}
       disabled={!onPress}
       onPress={onPress}
+      // Sin acción propia (Hoy) no agrupa: el lector recorre el título y la casilla por separado.
+      accessible={Boolean(onPress)}
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={onPress ? titulo : undefined}
-      className={`flex-row items-center gap-3 rounded-card border-2 bg-campo py-2 pl-2 pr-1 ${
-        tachado ? 'border-surface-oscuro' : 'border-transparent'
-      } ${onPress ? 'active:bg-bg-claro' : ''}`}
+      accessibilityLabel={onPress ? `${titulo}, ${detalle}` : undefined}
+      accessibilityHint={onPress ? t.menu.editar : undefined}
+      className={`flex-row items-center gap-3 rounded-card bg-campo py-2 pl-2 pr-1 ${
+        onPress ? 'active:bg-accent-claro' : ''
+      }`}
     >
       {enPausa ? (
         <View
@@ -87,15 +90,15 @@ export function HabitCheckCard({
           className="h-12 w-12 items-center justify-center"
         >
           <View
-            className={`h-8 w-8 items-center justify-center rounded-field border-2 ${
+            className={`h-7 w-7 items-center justify-center rounded-chip border-2 ${
               hecho
-                ? 'border-surface-oscuro bg-surface'
+                ? 'border-accent bg-accent'
                 : marcable
-                  ? 'border-ink-soft bg-campo'
-                  : 'border-bg-oscuro bg-bg-claro'
+                  ? 'border-borde bg-campo'
+                  : 'border-dashed border-borde'
             }`}
           >
-            {hecho ? <Check size={20} color={colors.ink} strokeWidth={3} /> : null}
+            {hecho ? <Check size={18} color={colors.blanco} strokeWidth={3} /> : null}
           </View>
         </Pressable>
       )}
@@ -137,8 +140,8 @@ export function HabitCheckCard({
           accessibilityLabel={formatear(t.opciones, { titulo })}
           accessibilityState={{ expanded: menuAbierto }}
           onPress={abrirMenu}
-          className={`h-12 w-12 items-center justify-center rounded-field active:bg-bg-claro ${
-            menuAbierto ? 'bg-bg-claro' : ''
+          className={`h-12 w-12 items-center justify-center rounded-field active:bg-accent-claro ${
+            menuAbierto ? 'bg-accent-claro' : ''
           }`}
         >
           <EllipsisVertical size={24} color={colors.ink} />

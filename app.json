@@ -14,7 +14,7 @@
     "android": {
       "package": "com.habitgreen.app",
       "adaptiveIcon": {
-        "backgroundColor": "#C4D18B",
+        "backgroundColor": "#DFF2E4",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -34,7 +34,7 @@
         {
           "image": "./assets/splash-icon.png",
           "imageWidth": 200,
-          "backgroundColor": "#F2F4E8"
+          "backgroundColor": "#FBFBF6"
         }
       ],
       "expo-secure-store",

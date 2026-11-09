@@ -71,3 +71,31 @@ export function imagenPlanta(area: Area, fase: number): ImagenLocal {
 export function imagenAccesorio(tipo: TipoAccesorio, orden: number): ImagenLocal {
   return ACCESORIOS[tipo][Math.min(5, Math.max(1, orden)) as 1 | 2 | 3 | 4 | 5];
 }
+
+/** Lugar de un accesorio sobre la planta, como porcentaje del lienzo de la planta. */
+export type CajaAccesorio = { left: `${number}%`; top: `${number}%`; width: `${number}%` };
+
+// Cada accesorio va centrado en su propio lienzo, para verse bien en la Tienda. Aquí se coloca sobre
+// la planta (SDD 9.8): la maceta no se mueve; el sombrero y los lentes siguen la altura de cada fase.
+// Con el arte final solo hay que ajustar esta tabla.
+const CAJAS_ACCESORIO: Record<TipoAccesorio, Record<1 | 2 | 3, CajaAccesorio>> = {
+  maceta: {
+    1: { left: '22%', top: '54%', width: '56%' },
+    2: { left: '22%', top: '54%', width: '56%' },
+    3: { left: '22%', top: '54%', width: '56%' },
+  },
+  lentes: {
+    1: { left: '33%', top: '36%', width: '34%' },
+    2: { left: '34%', top: '20%', width: '32%' },
+    3: { left: '37%', top: '3%', width: '26%' },
+  },
+  sombrero: {
+    1: { left: '32%', top: '17%', width: '36%' },
+    2: { left: '34%', top: '-9%', width: '32%' },
+    3: { left: '34%', top: '-11%', width: '32%' },
+  },
+};
+
+export function cajaAccesorio(tipo: TipoAccesorio, fase: number): CajaAccesorio {
+  return CAJAS_ACCESORIO[tipo][(fase >= 3 ? 3 : fase <= 1 ? 1 : 2) as 1 | 2 | 3];
+}

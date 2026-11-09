@@ -37,7 +37,7 @@ export function GrowingPlant({ label }: { label: string }) {
       accessible
       accessibilityRole="image"
       accessibilityLabel={label}
-      className="h-32 w-32 items-center justify-center rounded-card border-2 border-ink bg-bg-claro"
+      className="h-32 w-32 items-center justify-center rounded-card bg-accent-claro"
     >
       <Animated.View style={estilo}>
         <Sprout size={64} color={colors.ink} strokeWidth={2} />

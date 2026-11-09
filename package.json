@@ -73,6 +73,7 @@
     "build:dev": "npx eas-cli@latest build --profile development --platform android",
     "start:dev": "expo start --dev-client",
     "start:usb": "expo start --dev-client --localhost",
+    "usb": "node scripts/dev-usb.mjs",
     "build:preview": "npx eas-cli@latest build --profile preview --platform android"
   },
   "jest": {

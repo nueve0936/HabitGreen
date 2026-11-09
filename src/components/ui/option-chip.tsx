@@ -2,13 +2,14 @@ import { Check } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { colors } from '@/theme';
+import { cardShadow, colors } from '@/theme';
 
 import { AppText } from './app-text';
 import { StableBoldText } from './stable-bold-text';
 
-// Opción del formulario (mockup «Encuesta inicial #1.1»): la elegida lleva borde naranja
-// (`surface`), texto en negrita e icono de verificación, para no depender solo del color.
+// Opción del formulario (mockup «Encuesta inicial #1.1»). Sin elegir: tarjeta con borde suave y
+// sombra, para separarse del fondo. Elegida: relleno verde claro, borde `accent`, texto en negrita e
+// icono de verificación, para no depender solo del color.
 
 export type OptionChipProps = {
   label: string;
@@ -38,8 +39,11 @@ export function OptionChip({
       accessibilityState={{ checked: selected, selected, disabled }}
       onPress={onPress}
       disabled={disabled}
-      className={`min-h-12 flex-row items-center gap-3 rounded-card border-2 bg-campo px-4 py-3 ${
-        selected ? 'border-surface-oscuro' : 'border-transparent active:bg-bg-claro'
+      style={cardShadow}
+      className={`min-h-12 flex-row items-center gap-3 rounded-card border-2 px-4 py-3 ${
+        selected
+          ? 'border-accent bg-accent-claro'
+          : 'border-divisor bg-campo active:bg-accent-claro'
       }`}
     >
       {icon}
@@ -55,10 +59,10 @@ export function OptionChip({
       </View>
       <View
         className={`h-7 w-7 items-center justify-center rounded-chip border-2 ${
-          selected ? 'border-surface-oscuro bg-surface' : 'border-ink-soft bg-transparent'
+          selected ? 'border-accent bg-accent' : 'border-borde bg-transparent'
         }`}
       >
-        {selected ? <Check size={18} color={colors.ink} strokeWidth={3} /> : null}
+        {selected ? <Check size={18} color={colors.blanco} strokeWidth={3} /> : null}
       </View>
     </Pressable>
   );

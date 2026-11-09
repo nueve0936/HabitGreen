@@ -30,8 +30,8 @@ export function SwitchRow({ label, help, value, onChange }: SwitchRowProps) {
         accessibilityHint={help}
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: colors['bg-oscuro'], true: colors['surface-oscuro'] }}
-        thumbColor={value ? colors.ink : colors['bg-claro']}
+        trackColor={{ false: colors.borde, true: colors.accent }}
+        thumbColor={colors.blanco}
       />
     </View>
   );

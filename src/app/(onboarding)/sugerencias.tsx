@@ -68,7 +68,7 @@ export default function SugerenciasScreen() {
           accessibilityRole="button"
           accessibilityLabel={t.otras}
           onPress={() => setPagina((p) => p + 1)}
-          className="min-h-14 flex-row items-center justify-center gap-2 rounded-card border-2 border-dashed border-bg-oscuro active:bg-bg-claro"
+          className="min-h-14 flex-row items-center justify-center gap-2 rounded-card border-2 border-dashed border-divisor active:bg-accent-claro"
         >
           <RefreshCw size={20} color={colors.ink} />
           <AppText weight="semibold">{t.otras}</AppText>

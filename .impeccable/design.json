@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T23:59:00.000Z",
+  "title": "Design System: Habit Green",
+  "extensions": {
+    "shadows": [
+      {
+        "name": "sombra-tarjeta",
+        "value": "color ink, opacidad 0.10, radio 8, desplazamiento vertical 2; elevation 2 en Android",
+        "purpose": "Separa las tarjetas blancas del fondo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "movimiento-sobrio",
+        "value": "150-250 ms, ease-out",
+        "purpose": "Transiciones de estado; con reducir movimiento, cambio directo."
+      }
+    ]
+  },
+  "components": [],
+  "narrative": {
+    "northStar": "El jardín paciente",
+    "keyCharacteristics": [
+      "Fondo casi blanco y liso, siempre claro.",
+      "Un solo verde para acciones y estados, y una acción principal por pantalla.",
+      "Un tinte suave por área y un dorado reservado a las monedas.",
+      "Lexend Deca en toda la app, con tamaños que respetan la letra del sistema.",
+      "El progreso se ve en la planta, nunca en números de nivel o XP."
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert as AlertNativo, View } from 'react-native';
 
@@ -12,6 +12,7 @@ import { valoresNuevos } from '@/features/habits/domain/valores-formulario';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
 import type { HabitoFormValues } from '@/schemas/habit';
+import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
 
 // Crear un hábito manual (SDD 6.5, mockups «Crear hábito #1–#3»). Se guarda en el teléfono y se
@@ -20,6 +21,8 @@ import { colors } from '@/theme';
 
 export default function NuevoHabitoScreen() {
   const t = es.habitForm;
+  const { categoria } = useLocalSearchParams<{ categoria?: string }>();
+  const area = (AREAS as readonly string[]).includes(categoria ?? '') ? (categoria as Area) : null;
   const { session } = useSession();
   const userId = session?.user.id ?? '';
   const ajustes = useLocalQuery(`ajustes-${userId}`, () => leerAjustesLocales(userId));
@@ -38,9 +41,14 @@ export default function NuevoHabitoScreen() {
           formatear(es.habitos.presupuestoSubio, { n: presupuestoNuevo }),
         );
       }
-      // Vuelve a la pestaña Hábitos aunque se haya llegado desde Hoy.
-      router.dismissAll();
-      router.navigate('/habitos');
+      // Desde Detalles de una planta se regresa ahí; si no, a la pestaña Hábitos, aunque se haya
+      // llegado desde Hoy.
+      if (area) {
+        router.back();
+      } else {
+        router.dismissAll();
+        router.navigate('/habitos');
+      }
     } catch {
       setError(true);
       setEnviando(false);
@@ -61,7 +69,7 @@ export default function NuevoHabitoScreen() {
     <HabitWizard
       titulo={t.crearTitulo}
       textoFinal={t.crear}
-      valoresIniciales={valoresNuevos(ajustes.data?.estiloNotificaciones ?? null, hoy)}
+      valoresIniciales={valoresNuevos(ajustes.data?.estiloNotificaciones ?? null, hoy, area)}
       editando={false}
       hoy={hoy}
       inicioEditable
