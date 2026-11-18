@@ -100,8 +100,8 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 6.1 | Detección al abrir la app, búsqueda de día libre y `habit_occurrences` | 6.2 | pendiente |
-| 6.2 | Interfaz: aceptar, elegir otro día o descartar; modo silencioso con `desanimo`; hábitos de 7 días se omiten | 6.2 | pendiente |
+| 6.1 | Detección al abrir la app, búsqueda de día libre y `habit_occurrences` | 6.2 | hecho |
+| 6.2 | Interfaz: tarjeta en Hoy para aceptar, elegir otro día o descartar; modo silencioso con `desanimo`; hábitos de 7 días se omiten | 6.2 | hecho |
 
 **Criterio de prueba:** con datos de prueba de un hábito no hecho ayer, al abrir la app se ofrece moverlo a un día libre y aparece en Hoy ese día con su aviso.
 

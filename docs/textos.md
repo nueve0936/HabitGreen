@@ -87,9 +87,14 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 
 | Situación | Texto |
 | --- | --- |
-| Propuesta | Movimos «{hábito}» al {día}. Puedes cambiarlo. Botones: «Está bien», «Elegir otro día», «Dejarlo» |
-| Sin día disponible | Esta semana está completa. La dejamos para la próxima. |
-| Con `desanimo` (aviso suave) | Reacomodamos tu semana para que te quede más ligera. |
+| Propuesta (tarjeta en Hoy) | Movimos «{hábito}» {destino}. Puedes cambiarlo. ({destino}: «a hoy», «a mañana» o «al jueves 19».) Botones: «Elegir otro día», «Está bien» y el enlace «Dejarlo» |
+| Varias propuestas | {n} de {total} |
+| Sin día disponible | Esta semana está completa para «{hábito}». La dejamos para la próxima. Botón: «Entendido» |
+| Elegir otro día (diálogo) | ¿Qué día te queda mejor? Opciones: «Hoy», «Mañana», «Jue 19». Enlace: «Cancelar» |
+| Con `desanimo`, uno (aviso suave) | Movimos «{hábito}» {destino}. |
+| Con `desanimo`, varios (aviso suave) | Acomodamos {n} hábitos en días libres. |
+| Hábito movido, en su tarjeta | Reprogramado para hoy |
+| Error al guardar | No pudimos guardar el cambio. Inténtalo de nuevo. |
 
 ## 5. Progresión
 

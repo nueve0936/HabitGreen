@@ -18,6 +18,9 @@ import { useCheckIn } from '@/features/habits/use-check-in';
 import { CoinBalance } from '@/features/rewards/components/coin-balance';
 import { CoinBurst } from '@/features/rewards/components/coin-burst';
 import { PhaseCelebration } from '@/features/rewards/components/phase-celebration';
+import { DayDialog } from '@/features/reschedule/components/day-dialog';
+import { RescheduleCard } from '@/features/reschedule/components/reschedule-card';
+import { useReprogramacion } from '@/features/reschedule/use-reprogramacion';
 import { descripcionPlanta, PlantImage } from '@/features/rewards/components/plant-image';
 import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
@@ -48,6 +51,7 @@ export default function HoyScreen() {
   const jardin = useLocalQuery(`jardin-${userId}`, () => leerJardin(userId));
   const semanaApoyo = useLocalQuery(`apoyo-${userId}`, () => leerSemanaApoyo(userId));
   const checkIn = useCheckIn(userId);
+  const reprogramar = useReprogramacion(userId);
   const { height, fontScale } = useWindowDimensions();
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
 
@@ -119,6 +123,19 @@ export default function HoyScreen() {
 
   const lista = (
     <>
+      {/* Reprogramación (SDD 6.2): una propuesta a la vez, arriba de los hábitos. */}
+      {reprogramar.actual ? (
+        <RescheduleCard
+          propuesta={reprogramar.actual}
+          hoy={reprogramar.hoy}
+          indice={reprogramar.indice}
+          total={reprogramar.total}
+          ocupado={reprogramar.ocupado}
+          onAceptar={reprogramar.aceptar}
+          onOtroDia={reprogramar.abrirDias}
+          onDejar={reprogramar.dejar}
+        />
+      ) : null}
       {apoyo ? <Alert variant="info" message={apoyo.mensaje} /> : null}
       {items.length === 0 ? (
         <AppText tone="ink-soft">{t.vacio}</AppText>
@@ -130,6 +147,7 @@ export default function HoyScreen() {
             hora={item.horario.notificar ? item.horario.hora : null}
             duracionMin={item.habito.duracion_min}
             hecho={item.hecho}
+            reprogramado={item.reprogramado}
             marcable
             ocupado={checkIn.ocupado === item.habito.id}
             onAlternar={() =>
@@ -142,14 +160,29 @@ export default function HoyScreen() {
   );
 
   const celebracion = (
-    <PhaseCelebration celebracion={checkIn.celebracion} onCerrar={checkIn.cerrarCelebracion} />
+    <>
+      <PhaseCelebration celebracion={checkIn.celebracion} onCerrar={checkIn.cerrarCelebracion} />
+      {reprogramar.eligiendo && reprogramar.actual ? (
+        <DayDialog
+          dias={reprogramar.actual.diasLibres}
+          hoy={reprogramar.hoy}
+          onElegir={reprogramar.elegirDia}
+          onCerrar={reprogramar.cerrarDias}
+        />
+      ) : null}
+    </>
   );
 
+  // Un solo aviso flotante para el check-in y la reprogramación: los errores van primero.
+  const error = checkIn.error ?? reprogramar.error;
   const avisoFlotante = (
     <Snackbar
-      mensaje={checkIn.error ?? checkIn.aviso}
-      variant={checkIn.error ? 'error' : 'exito'}
-      onCerrar={checkIn.cerrarAvisos}
+      mensaje={error ?? checkIn.aviso ?? reprogramar.aviso}
+      variant={error ? 'error' : 'exito'}
+      onCerrar={() => {
+        checkIn.cerrarAvisos();
+        reprogramar.cerrarAvisos();
+      }}
     />
   );
 

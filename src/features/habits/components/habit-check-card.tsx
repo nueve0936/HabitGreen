@@ -24,6 +24,8 @@ export type HabitCheckCardProps = {
   /** Toca hoy: solo entonces se puede marcar. */
   marcable: boolean;
   enPausa?: boolean;
+  /** Llegó a hoy por una reprogramación (SDD 6.2). */
+  reprogramado?: boolean;
   ocupado?: boolean;
   onAlternar: () => void;
   /** Abre el menú ⋮ (solo en Hábitos) con la posición del botón para anclar el globo. */
@@ -40,6 +42,7 @@ export function HabitCheckCard({
   hecho,
   marcable,
   enPausa = false,
+  reprogramado = false,
   ocupado = false,
   onAlternar,
   onOpciones,
@@ -127,6 +130,11 @@ export function HabitCheckCard({
         <AppText variant="small" tone="ink-soft">
           {detalle}
         </AppText>
+        {reprogramado ? (
+          <AppText variant="small" tone="ink-soft">
+            {es.reprogramar.reprogramadoHoy}
+          </AppText>
+        ) : null}
         {!enPausa && !marcable ? (
           <AppText variant="small" tone="ink-soft">
             {t.noTocaHoy}

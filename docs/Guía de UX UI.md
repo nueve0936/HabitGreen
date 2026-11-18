@@ -162,6 +162,7 @@ Lexend Deca (`@expo-google-fonts/lexend-deca`), con la del sistema como respaldo
 | Carrusel de fases (`PhaseCarousel`) | Páginas horizontales y puntos de 48 dp de zona táctil; el actual es más grande y `accent`. Fase bloqueada: silueta `divisor`, candado y texto. |
 | Cuadrícula de objetos (`ObjectGrid`) | 3 columnas de celdas con borde `divisor`. Puesto: relleno `accent-claro`, borde `accent` y ✓. Pestañas de tipo fijas abajo, con `ChoicePill`. |
 | Icono de categoría | Icono `ink` sobre un cuadro de 36 dp con el tinte del área, junto al nombre. |
+| Tarjeta de reprogramación (`RescheduleCard`) | `campo` con sombra, arriba de la lista de Hoy y dentro de lo que se desplaza. Icono de calendario `accent` sobre un círculo `accent-claro`, mensaje en `ink` y «1 de N» en `ink-soft`. «Elegir otro día» y «Está bien» con borde (no compiten con marcar hábitos) y lado a lado; con letra grande se apilan. «Dejarlo» es un enlace. Sin día libre: solo el mensaje y «Entendido». «Elegir otro día» abre un `Dialog` con los días en `ChoicePill`. |
 | `Alert` | Fondo y borde de su tipo (sección 1), siempre con icono y texto. |
 | `Snackbar` | Un `Alert` flotante y temporal (5 s) sobre la parte baja de la pantalla, para avisos de una acción en una lista. No mueve el contenido y deja pasar los toques a lo que tiene debajo. |
 | `TabBar` | 5 destinos como máximo, sobre `campo`. Se cambia tocando o deslizando entre pantallas; el toque siempre funciona, para no depender solo del gesto. Activo: píldora `accent-claro` detrás del icono `accent` y etiqueta `ink` en negritas. |

@@ -362,4 +362,4 @@ El MVP está terminado cuando el flujo formulario → plan → hábitos → chec
 1. Nombres de los 15 accesorios (los define el usuario).
 2. Validar los textos del catálogo semilla.
 3. Revisar el borrador de `docs/textos.md`.
-4. Validar las propuestas de 7 días (ventana de notificaciones, reprogramación y tolerancia del servidor).
+4. Validar la tolerancia de 7 días del servidor (la ventana de 7 días de avisos y reprogramación ya está aprobada).

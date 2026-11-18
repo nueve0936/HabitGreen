@@ -19,12 +19,11 @@ import { fechaLocal } from '@/lib/dates';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import type { HabitoFormValues } from '@/schemas/habit';
 import type { OperacionOutbox } from '@/sync/domain/sync-rules';
-import { pedirSincronizacion } from '@/sync/sync-engine';
 
-import { actualizarFila, enTransaccion, getDb, guardarFilas, leerFilas } from './database';
-import { avisarCambioLocal } from './db-version-store';
+import { aplicar } from './aplicar-cambio';
+import { actualizarFila, getDb, guardarFilas, leerFilas } from './database';
 import { leerConfig, leerEstado } from './logs-repository';
-import { encolar } from './outbox';
+import { descartarMovidasDelPatron } from './occurrences-repository';
 
 // Repositorio de hábitos (SDD 3.4). Todo se lee y se escribe en SQLite, así que funciona sin
 // conexión. Cada cambio guarda la fila local y su operación en la cola de salida dentro de la
@@ -133,16 +132,6 @@ export async function leerHoy(): Promise<HoyLocal> {
     return categoria === undefined ? [] : [{ ...item, categoria }];
   });
   return { fecha, items, tieneHabitos: habitos.some(estaVisible) };
-}
-
-/** Escribe filas locales y sus operaciones juntas, y avisa a la UI y a la sincronización. */
-async function aplicar(pasos: (db: SQLiteDatabase) => Promise<OperacionOutbox[]>): Promise<void> {
-  const db = await getDb();
-  await enTransaccion(db, async () => {
-    for (const operacion of await pasos(db)) await encolar(db, operacion);
-  });
-  avisarCambioLocal();
-  pedirSincronizacion();
 }
 
 /**
@@ -313,6 +302,9 @@ export async function editarHabito(
         });
       }
     }
+
+    // Las movidas que ahora caen en un día de su patrón ya no hacen falta (SDD 6.2).
+    operaciones.push(...(await descartarMovidasDelPatron(db, id, valores.dias_semana)));
 
     const presupuesto = await subirPresupuestoSiHaceFalta(db, userId, {
       habitId: id,

@@ -50,6 +50,13 @@ describe('compactar la cola (SDD 3.4)', () => {
     expect(idsCompactables([complete(1), uncomplete(2), complete(3)])).toEqual([1, 2]);
   });
 
+  it('no quita un complete que ya se intentó enviar (pudo llegar al servidor sin respuesta)', () => {
+    expect(idsCompactables([{ ...complete(1), intentos: 1 }, uncomplete(2)])).toEqual([]);
+    expect(idsCompactables([{ ...complete(1), intentos: 2 }, uncomplete(2), complete(3)])).toEqual(
+      [],
+    );
+  });
+
   it('no mezcla hábitos ni fechas distintas', () => {
     expect(
       idsCompactables([

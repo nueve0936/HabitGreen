@@ -194,7 +194,7 @@ assets/ plants/ accessories/ icons/ animations/
 | Tema | Regla |
 | --- | --- |
 | Identificadores | UUID generados en el cliente para `habits`, `habit_schedules`, `habit_logs`, `habit_occurrences`, `habit_places`, `plans` y `user_accessories`, para poder crear sin conexión. |
-| Cola de salida | Tabla local `outbox` (id, operación, payload, creado_en, intentos). Se procesa en orden. Un `complete` seguido de un `uncomplete` del mismo hábito y fecha que no se han enviado se compactan (se eliminan ambos). |
+| Cola de salida | Tabla local `outbox` (id, operación, payload, creado_en, intentos). Se procesa en orden. Un `complete` seguido de un `uncomplete` del mismo hábito y fecha se compactan (se eliminan ambos) solo si el `complete` nunca se intentó enviar: un intento sin respuesta pudo llegar al servidor, y entonces se mandan los dos en orden. |
 | Carga inicial | Al iniciar sesión con SQLite vacío se descargan perfil, `user_settings`, `app_config`, categorías, catálogo, hábitos, horarios, ocurrencias y registros de los últimos 365 días, `plant_progress`, `wallets` y accesorios. |
 | Descarga incremental | Por `updated_at` mayor a la última sincronización. Todas las tablas sincronizadas llevan `updated_at` (actualizado por un trigger). |
 | Borrados | Las tablas sincronizadas no borran filas: llevan `eliminado_en` (timestamptz, nulo) y un borrado actualiza `eliminado_en` y `updated_at`, para que la descarga incremental lo propague a otros dispositivos. Aplica a `habit_logs` (deshacer), `habit_places` y `user_accessories`. Las restricciones únicas siguen valiendo: completar de nuevo un hábito deshecho reutiliza su fila y limpia `eliminado_en`. Las consultas y las políticas de lectura filtran `eliminado_en is null`. |
@@ -506,13 +506,13 @@ La app calcula lo mismo en local para respuesta inmediata y reconcilia al sincro
 
 Reprogramar es **mover la ocurrencia a un día libre, fuera del patrón semanal del hábito**. El día original no cuenta como fallado.
 
-**Detección.** Al abrir la app se buscan ocurrencias programadas de los últimos 7 días (propuesta) que no tengan registro ni excepción en `habit_occurrences`. Aplica a los dos modos.
+**Detección.** Al abrir la app se buscan ocurrencias programadas de los últimos 7 días (sin contar hoy) que no tengan registro ni excepción en `habit_occurrences`. Aplica a los dos modos. **Por hábito se ofrece solo el día más reciente sin hacer**; los anteriores se dejan pasar sin mensaje y se guardan como `descartada` cuando se resuelve la propuesta, para no traer una pila de pendientes (decisión del usuario). La lógica está en `src/features/reschedule/domain/reprogramar.ts`.
 
-**Día destino.** Es el primer día, de hoy a 7 días después, que cumple todo esto:
+**Día destino.** Es el primer día, de hoy a 7 días después, que cumple todo esto (también debe tener horario vigente, así que respeta la fecha de fin del hábito):
 
 1. No está en `dias_semana` del hábito.
 2. No tiene ya otra ocurrencia movida del mismo hábito.
-3. La suma de duraciones programadas ese día más la de este hábito no supera `presupuesto_min`.
+3. La suma de duraciones programadas ese día más la de este hábito no supera `presupuesto_min`. Un hábito «Sin duración fija» siempre cabe. Las propuestas se asignan de la más antigua a la más reciente y cada una cuenta las anteriores, para que no caigan juntas en un día que se pasaría.
 
 Si ningún día cumple, se ofrece descartarla («La dejamos para la próxima»).
 
@@ -522,9 +522,9 @@ Si ningún día cumple, se ofrece descartarla («La dejamos para la próxima»).
 
 **Interacción.**
 
-- El usuario puede aceptar, elegir otro día libre o descartar. El mensaje es neutro: «Movimos este hábito a [día]. Puedes cambiarlo».
+- **Tarjeta arriba de la lista de Hoy** (no un diálogo, decisión del usuario), una propuesta a la vez con «1 de N»: aceptar, elegir otro día libre o descartar. El mensaje es neutro: «Movimos «{hábito}» al {día}. Puedes cambiarlo». Sin día libre: «Esta semana está completa para «{hábito}». La dejamos para la próxima.» con «Entendido».
 - Con `desanimo`, se mueve automáticamente y solo se muestra un aviso suave.
-- Una ocurrencia movida que tampoco se completa no se vuelve a mover: queda `descartada` sin mensaje (propuesta).
+- Una ocurrencia movida que tampoco se completa no se vuelve a mover ni a ofrecer, sin mensaje y sin escribir nada: cuenta como programada y no hecha en su fecha nueva (aprobado por el usuario).
 - La ocurrencia movida genera su aviso en la nueva fecha (ventana móvil, 7.1).
 
 **Efecto en estadísticas y progresión.**
@@ -734,7 +734,7 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 
 **Cambiar de pestaña.** Se toca la barra inferior o se desliza en horizontal entre pantallas (`TopTabs` de `expo-router/js-top-tabs`, con la barra abajo). Las pantallas fuera de las pestañas no se deslizan.
 
-**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; la planta más avanzada del usuario, con sus objetos (fase más alta; en un empate, una con hábitos y después el orden de las áreas), de 160 dp o de 120 dp si la pantalla mide menos de 760 dp de alto, con «Tu planta crece con cada paso» (ajuste al texto del mockup, decisión del usuario); «Pendientes de hoy», que cambia a «¡Todo listo por hoy!» cuando todo está hecho, con una barra de avance y «N de M hechos»; tarjetas claras con casilla redonda. Al marcar: casilla rellena de `accent` con ✓ blanca, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los avisos del check-in (tope de monedas, pago ya recibido, error) son flotantes y temporales (`Snackbar`), para no mover las tarjetas mientras se marcan. Los pendientes que se reprogramaron aparecen con un `Alert` informativo (Entrega 6).
+**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; la planta más avanzada del usuario, con sus objetos (fase más alta; en un empate, una con hábitos y después el orden de las áreas), de 160 dp o de 120 dp si la pantalla mide menos de 760 dp de alto, con «Tu planta crece con cada paso» (ajuste al texto del mockup, decisión del usuario); «Pendientes de hoy», que cambia a «¡Todo listo por hoy!» cuando todo está hecho, con una barra de avance y «N de M hechos»; tarjetas claras con casilla redonda. Al marcar: casilla rellena de `accent` con ✓ blanca, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los avisos del check-in (tope de monedas, pago ya recibido, error) son flotantes y temporales (`Snackbar`), para no mover las tarjetas mientras se marcan. Arriba de la lista va la tarjeta de reprogramación (6.2), y un hábito que llegó movido muestra «Reprogramado para hoy» bajo su hora.
 
 **Hábitos** (mockups «Hábitos #1–#2»). Título y botón «+» (acción principal única), fijos arriba; solo se desplaza la lista. Una sección por categoría con hábitos (icono sobre el tinte del área y nombre), sin filtros por ahora. Cada tarjeta tiene la misma casilla que en Hoy, activa solo si el hábito toca hoy (si no, «No toca hoy»), y el menú ⋮ con Editar, Pausar o Reanudar y Eliminar.
 
@@ -858,5 +858,5 @@ Se usa la lista de la sección 10 de [`docs/Guía de UX UI.md`](Guía%20de%20UX%
 1. **Nombres de los 15 accesorios.** Los define el usuario; mientras tanto, nombres provisionales en `docs/textos.md`.
 2. **Catálogo semilla.** Validar los textos de 5.7 antes de la entrega 2.
 3. **Textos.** Revisar y aprobar el borrador de `docs/textos.md`.
-4. **Propuestas por validar.** Ventana de 7 días para notificaciones y reprogramación, tolerancia de 7 días en el servidor y descarte silencioso de una ocurrencia movida que tampoco se completa.
+4. **Propuestas por validar.** Tolerancia de 7 días en el servidor. (La ventana de 7 días de notificaciones y reprogramación y el no volver a ofrecer una ocurrencia movida ya los aprobó el usuario.)
 5. **Pruebas SQL de las RPC (antes de la Entrega 4).** `supabase test db` (pgTAP) necesita Docker Desktop en Windows. Decidir entre instalar Docker o correr las pruebas contra un proyecto de Supabase de desarrollo, separado del de la demo.

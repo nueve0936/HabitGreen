@@ -246,6 +246,10 @@ Cálidos y táctiles: cada toque recibe respuesta en menos de 100 ms, con cambio
 
 Casilla redonda con zona táctil de 48 dp, título y «hora · duración». Hecho: casilla verde con ✓ blanca y título tachado con una línea de 2 px. En pausa: ⏸ en lugar de la casilla. No toca hoy: casilla punteada con el texto «No toca hoy».
 
+### Tarjeta de reprogramación
+
+Tarjeta blanca arriba de la lista de Hoy, con un calendario verde en un círculo verde claro: «Movimos «Caminar» al jueves 19. Puedes cambiarlo.». Dos botones con borde lado a lado («Elegir otro día», «Está bien») y «Dejarlo» como enlace. Tono neutro, nunca de reproche. Un hábito que llegó movido dice «Reprogramado para hoy» en su tarjeta.
+
 ### Ruedas
 
 Fecha, duración del hábito y tiempo diario de Perfil se eligen con ruedas: tres opciones a la vista y la elegida en negritas entre dos líneas verde brote. En las de horas y minutos (duración y tiempo diario) se puede tocar el número del centro y escribirlo; el total va debajo en h3 y los botones «Cancelar» y «Aceptar» son los mismos en los dos diálogos.

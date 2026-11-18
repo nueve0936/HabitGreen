@@ -41,6 +41,8 @@ export type EntradaOutbox = OperacionOutbox & { id: number; intentos: number };
 /**
  * Ids de la cola que se pueden quitar sin enviarlos: un `complete` seguido de un `uncomplete`
  * del mismo hábito y fecha se anulan entre sí (el servidor nunca supo del check-in).
+ * Solo si el `complete` nunca se intentó enviar: un intento sin respuesta (red lenta) pudo llegar
+ * al servidor, y entonces hay que mandar los dos en orden (las dos RPC toleran repetirse).
  * La cola llega en orden de creación.
  */
 export function idsCompactables(cola: readonly EntradaOutbox[]): number[] {
@@ -50,7 +52,8 @@ export function idsCompactables(cola: readonly EntradaOutbox[]): number[] {
   for (const entrada of cola) {
     if (entrada.tabla !== 'habit_logs') continue;
     if (entrada.operacion === 'complete') {
-      ultimoComplete.set(entrada.clave, entrada.id);
+      if (entrada.intentos === 0) ultimoComplete.set(entrada.clave, entrada.id);
+      else ultimoComplete.delete(entrada.clave);
     } else {
       const completeId = ultimoComplete.get(entrada.clave);
       if (completeId !== undefined) quitar.push(completeId, entrada.id);
