@@ -6,9 +6,11 @@ import { Alert } from '@/components/ui/alert';
 import { BackButton } from '@/components/ui/back-button';
 import { Screen } from '@/components/ui/screen';
 import { editarHabito, leerHabito } from '@/db/habits-repository';
+import { leerLimiteDuracion } from '@/db/settings-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { HabitWizard } from '@/features/habits/components/habit-wizard';
+import { textoDuracion } from '@/features/habits/domain/formato';
 import { valoresDeHabito } from '@/features/habits/domain/valores-formulario';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
@@ -26,6 +28,7 @@ export default function EditarHabitoScreen() {
   const { session } = useSession();
   const userId = session?.user.id ?? '';
   const consulta = useLocalQuery(`habito-${id}`, () => leerHabito(id));
+  const limite = useLocalQuery(`limite-${id}`, () => leerLimiteDuracion(userId, id));
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState(false);
   const hoy = fechaLocal();
@@ -38,11 +41,12 @@ export default function EditarHabitoScreen() {
       if (presupuestoNuevo !== null) {
         AlertNativo.alert(
           t.editarTitulo,
-          formatear(es.habitos.presupuestoSubio, { n: presupuestoNuevo }),
+          formatear(es.habitos.presupuestoSubio, { n: textoDuracion(presupuestoNuevo) }),
         );
       }
       router.back();
-    } catch {
+    } catch (causa) {
+      console.warn('No se pudo guardar el hábito', causa);
       setError(true);
       setEnviando(false);
     }
@@ -77,11 +81,13 @@ export default function EditarHabitoScreen() {
       textoFinal={t.guardar}
       valoresIniciales={valoresDeHabito(item.habito, item.horario, item.categoria, inicio)}
       editando
+      permitirSinDuracion={item.habito.plan_id === null}
+      limiteDuracion={limite.data ?? null}
       hoy={hoy}
       inicioEditable={inicio >= hoy}
       enviando={enviando}
       error={error}
-      onEnviar={guardar}
+      onEnviar={(valores) => void guardar(valores)}
       onCerrar={() => router.back()}
     />
   );

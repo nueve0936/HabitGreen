@@ -14,7 +14,7 @@ import { OptionChip } from '@/components/ui/option-chip';
 import { ProgressSteps } from '@/components/ui/progress-steps';
 import { Screen } from '@/components/ui/screen';
 import { SettingsRow } from '@/components/ui/settings-row';
-import { es, formatear } from '@/i18n/es';
+import { es } from '@/i18n/es';
 import {
   DESCRIPCION_MAX,
   habitoFormSchema,
@@ -25,8 +25,11 @@ import {
 import { AREAS } from '@/schemas/onboarding';
 import { cardShadow, colors } from '@/theme';
 
+import { usePermisoAvisos } from '@/features/reminders/use-permiso-avisos';
+
 import { ICONO_CATEGORIA } from '../categoria-icono';
 import { textoFecha } from '../domain/fechas';
+import { textoDuracion } from '../domain/formato';
 import { DurationDialog } from './duration-dialog';
 import { ReminderDialog } from './reminder-dialog';
 
@@ -47,6 +50,12 @@ export type HabitWizardProps = {
   hoy: string;
   /** Al editar, la fecha de inicio solo cambia si el hábito todavía no empieza. */
   inicioEditable: boolean;
+  /** Hora con que abre el reloj del recordatorio (la de «Mañana» en Perfil). */
+  horaInicial?: string;
+  /** La duración puede quedar en 0, «Sin duración fija»: solo hábitos propios (SDD 6.5). */
+  permitirSinDuracion?: boolean;
+  /** Minutos máximos de un hábito del plan; sin límite si no se pasa. */
+  limiteDuracion?: number | null;
   enviando: boolean;
   error: boolean;
   onEnviar: (valores: HabitoFormValues) => void;
@@ -60,6 +69,9 @@ export function HabitWizard({
   editando,
   hoy,
   inicioEditable,
+  horaInicial,
+  permitirSinDuracion = false,
+  limiteDuracion = null,
   enviando,
   error,
   onEnviar,
@@ -69,6 +81,8 @@ export function HabitWizard({
   const areas = es.onboarding.formulario.areas;
   const [paso, setPaso] = useState<Paso>(1);
   const [dialogo, setDialogo] = useState<Dialogo>(null);
+  // Los recordatorios necesitan el permiso de avisos: se pide al elegir la hora (SDD 7.1).
+  const permiso = usePermisoAvisos();
   const {
     control,
     handleSubmit,
@@ -218,7 +232,7 @@ export function HabitWizard({
             />
             <SettingsRow
               label={t.duracion}
-              value={formatear(t.minutos, { n: valores.duracion })}
+              value={textoDuracion(valores.duracion)}
               onPress={() => setDialogo('duracion')}
             />
             <SettingsRow
@@ -234,6 +248,17 @@ export function HabitWizard({
               ultima
             />
           </View>
+          {/* Un recordatorio guardado con los avisos apagados no suena: se dice y se ofrece activarlos. */}
+          {valores.notificar && permiso.concedido === false ? (
+            <View className="gap-2">
+              <Alert variant="advertencia" message={es.avisos.apagadosHabito} />
+              <Button
+                variant="secondary"
+                label={es.avisos.activar}
+                onPress={() => void permiso.conPermiso(() => {}, 'exigir')}
+              />
+            </View>
+          ) : null}
           {editando && !inicioEditable ? (
             <AppText variant="small" tone="ink-soft">
               {t.inicioFijo}
@@ -258,6 +283,8 @@ export function HabitWizard({
       {dialogo === 'hora' ? (
         <ReminderDialog
           hora={valores.hora}
+          horaInicial={horaInicial}
+          antesDeElegir={(abrir) => void permiso.conPermiso(abrir, 'exigir')}
           onElegir={(hora) => {
             setValue('hora', hora);
             setValue('notificar', true);
@@ -267,9 +294,12 @@ export function HabitWizard({
           onCerrar={() => setDialogo(null)}
         />
       ) : null}
+      {permiso.dialogo}
       {dialogo === 'duracion' ? (
         <DurationDialog
           valor={valores.duracion}
+          permitirSinDuracion={permitirSinDuracion}
+          limite={limiteDuracion}
           onElegir={(minutos) => setValue('duracion', minutos)}
           onCerrar={() => setDialogo(null)}
         />

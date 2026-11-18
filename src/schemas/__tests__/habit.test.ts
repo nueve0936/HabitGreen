@@ -47,7 +47,11 @@ describe('asistente de hábito', () => {
     expect(errores({ nombre: 'a'.repeat(61) })).toEqual([e.nombreLargo]);
   });
 
-  it.each([0, 121, 1.5])('rechaza la duración %j', (duracion) => {
+  it.each([0, 25, 1439])('acepta la duración %j (0 es «Sin duración fija»)', (duracion) => {
+    expect(errores({ duracion })).toEqual([]);
+  });
+
+  it.each([-1, 1440, 1.5])('rechaza la duración %j', (duracion) => {
     expect(errores({ duracion })).toEqual([e.duracion]);
   });
 

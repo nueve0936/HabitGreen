@@ -52,6 +52,8 @@ export async function guardarPlan(
   borrador: BorradorPlan,
   respuestas: Respuestas,
   ids: IdsPlan,
+  /** false si la persona no dio el permiso de avisos: los hábitos quedan sin recordatorio. */
+  conRecordatorios = true,
 ): Promise<void> {
   const filas = filasDelPlan({
     userId,
@@ -60,6 +62,7 @@ export async function guardarPlan(
     ids,
     categorias: await categoriasDelSistema(),
     hoy: fechaLocal(),
+    conRecordatorios,
   });
 
   // El orden importa: las políticas de RLS revisan que el plan y el hábito ya existan.

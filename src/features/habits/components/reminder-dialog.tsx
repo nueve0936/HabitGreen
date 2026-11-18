@@ -12,27 +12,36 @@ import { HORA_POR_DEFECTO } from '../domain/valores-formulario';
 
 export type ReminderDialogProps = {
   hora: string | null;
+  /** Hora con que abre el reloj si aún no hay una (la de «Mañana» en Perfil). */
+  horaInicial?: string;
   onElegir: (hora: string) => void;
   onSinRecordatorio: () => void;
   onCerrar: () => void;
+  /** Antes de abrir el reloj (por ejemplo, pedir el permiso de avisos). Llama a `abrir` si sigue. */
+  antesDeElegir?: (abrir: () => void) => void;
 };
 
 export function ReminderDialog({
   hora,
+  horaInicial = HORA_POR_DEFECTO,
   onElegir,
   onSinRecordatorio,
   onCerrar,
+  antesDeElegir,
 }: ReminderDialogProps) {
   const t = es.habitForm.dialogoHora;
 
   const elegir = () => {
     onCerrar();
-    DateTimePickerAndroid.open({
-      value: fechaDesdeHora(hora ?? HORA_POR_DEFECTO),
-      mode: 'time',
-      is24Hour: true,
-      onValueChange: (_evento, fecha) => onElegir(horaDesdeFecha(fecha)),
-    });
+    const abrir = () =>
+      DateTimePickerAndroid.open({
+        value: fechaDesdeHora(hora ?? horaInicial),
+        mode: 'time',
+        is24Hour: true,
+        onValueChange: (_evento, fecha) => onElegir(horaDesdeFecha(fecha)),
+      });
+    if (antesDeElegir) antesDeElegir(abrir);
+    else abrir();
   };
 
   return (

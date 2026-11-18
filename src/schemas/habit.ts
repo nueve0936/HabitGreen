@@ -13,8 +13,8 @@ const e = es.habitForm.errores;
 export const NOMBRE_MIN = 3;
 export const NOMBRE_MAX = 60;
 export const DESCRIPCION_MAX = 140;
-export const DURACION_MAX = 120;
-export const DURACIONES = [5, 10, 15, 20, 30, 45, 60] as const;
+/** 23 h 59 min. 0 es «Sin duración fija», solo en hábitos propios (SDD 6.5). */
+export const DURACION_MAX = 23 * 60 + 59;
 export const TODOS_LOS_DIAS = [1, 2, 3, 4, 5, 6, 7];
 
 const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -37,7 +37,7 @@ export const habitoFormSchema = z
         return z.NEVER;
       }),
     dias: z.array(z.int().min(1).max(7)).min(1, e.dias),
-    duracion: z.int(e.duracion).min(1, e.duracion).max(DURACION_MAX, e.duracion),
+    duracion: z.int(e.duracion).min(0, e.duracion).max(DURACION_MAX, e.duracion),
     hora: z
       .string()
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/, e.hora)

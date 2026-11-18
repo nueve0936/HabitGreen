@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/app-text';
 import { es, formatear } from '@/i18n/es';
 import { cardShadow, colors } from '@/theme';
 
+import { textoDuracion } from '../domain/formato';
 import { horaCorta } from '../domain/horario';
 import type { Ancla } from './habit-menu';
 
@@ -52,7 +53,7 @@ export function HabitCheckCard({
 
   const abrirMenu = () =>
     botonMenu.current?.measureInWindow((x, y, ancho, alto) => onOpciones?.({ x, y, ancho, alto }));
-  const detalle = [horaCorta(hora), formatear(t.tarjeta.minutos, { n: duracionMin })]
+  const detalle = [horaCorta(hora), duracionMin > 0 ? textoDuracion(duracionMin) : null]
     .filter(Boolean)
     .join(' · ');
 

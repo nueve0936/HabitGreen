@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 
 import { getProfile, saveMode, type AppMode, type Profile } from '@/db/profile-repository';
 import { vaciarBaseLocal } from '@/db/database';
+import { cancelarAvisos } from '@/features/reminders/avisos';
 import { leerSesionGuardada, supabase } from '@/lib/supabase';
 import { deviceTimeZone } from '@/lib/time-zone';
 import { sincronizarAhora } from '@/sync/sync-engine';
@@ -144,6 +145,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await sincronizarAhora().catch(() => {});
     await supabase.auth.signOut();
     await vaciarBaseLocal().catch(() => {});
+    await cancelarAvisos().catch(() => {});
   }, []);
 
   const value = useMemo<SessionContextValue>(

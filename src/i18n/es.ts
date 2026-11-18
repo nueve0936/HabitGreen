@@ -1,6 +1,66 @@
 // Textos de interfaz en español (tuteo). Ningún texto visible vive dentro de los componentes.
 
 export const es = {
+  // Duración de un hábito: «25 min», «1 h», «1 h 25 min»; 0 es «Sin duración fija».
+  duracion: {
+    sinDuracion: 'Sin duración fija',
+    minutos: '{m} min',
+    horas: '{h} h',
+    horasMinutos: '{h} h {m} min',
+  },
+  avisos: {
+    canal: 'Recordatorios de hábitos',
+    explicacion:
+      'Te avisaremos a la hora de cada hábito, de forma suave. Puedes cambiarlo cuando quieras en Perfil.',
+    ahoraNo: 'Ahora no',
+    activar: 'Activar avisos',
+    explicacionAjustes:
+      'Los avisos están apagados en tu teléfono. Para usar recordatorios, actívalos en Ajustes.',
+    abrirAjustes: 'Abrir ajustes',
+    apagadosHabito:
+      'Los avisos están apagados en tu teléfono: este recordatorio no sonará hasta que los actives.',
+    // Notificaciones (docs/textos.md §1). {habito} va en el título de cada aviso por hábito.
+    suave: 'Es un buen momento para tus {duracion}.',
+    suaveSinDuracion: 'Es un buen momento para tu hábito.',
+    segundoTitulo: '¿Un momento para {habito}?',
+    segundoCuerpo: 'Todavía estás a tiempo hoy.',
+    flexibleTarde: 'Cuando encuentres un hueco esta tarde.',
+    flexibleNoche: 'Si aún te queda energía, son solo {duracion}.',
+    flexibleNocheSinDuracion: 'Si aún te queda energía, todavía estás a tiempo.',
+    distraccion: '{duracion} y listo. {animo}',
+    resumenVarios: 'Mañana te esperan {n} hábitos',
+    resumenUno: 'Mañana te espera un hábito',
+    resumenCuerpo: '{lista}. Descansa bien.',
+    olvidoTitulo: '¿Un momento para tus hábitos de hoy?',
+    olvidoCuerpo: '{lista}. Todavía estás a tiempo.',
+    finTitulo: 'Tus hábitos te esperan',
+    finCuerpo: 'Abre Habit Green para seguir recibiendo tus avisos.',
+    y: 'y',
+    animo: [
+      'Un paso pequeño también cuenta.',
+      'Tu planta está creciendo contigo.',
+      'Hoy no tiene que ser perfecto, solo empezar.',
+      'Unos minutos para ti valen mucho.',
+      'Vas construyendo algo que dura.',
+      'Lo importante es volver, no la perfección.',
+      'Hazlo a tu ritmo.',
+      'Cada vez se vuelve un poco más fácil.',
+      'Pequeño hoy, grande con el tiempo.',
+      'Tu yo de mañana te lo va a agradecer.',
+    ],
+    animoCorto: ['Tú puedes.', 'Paso a paso.', 'A tu ritmo.'],
+    apoyo: {
+      3: {
+        titulo: 'Llevas dos semanas',
+        mensaje:
+          'Esta es la etapa en la que muchos lo sueltan. Si hoy cuesta, la versión corta también vale.',
+      },
+      4: {
+        titulo: 'Ya casi es parte de tu rutina',
+        mensaje: 'Un mes de pequeños pasos. Sigue a tu ritmo; no hace falta hacer más.',
+      },
+    },
+  },
   comun: {
     volver: 'Volver',
     continuar: 'Continuar',
@@ -311,7 +371,7 @@ export const es = {
     error: 'No pudimos cargar tus hábitos.',
     errorGuardar: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
     presupuestoSubio:
-      'Con este hábito, algunos días suman {n} min. Subimos tu tiempo diario a {n} min; puedes cambiarlo en Perfil.',
+      'Con este hábito, algunos días suman {n}. Subimos tu tiempo diario a {n}; puedes cambiarlo en Perfil.',
     tarjeta: {
       todosLosDias: 'Todos los días',
       dias: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
@@ -362,7 +422,17 @@ export const es = {
       sinRecordatorio: 'Sin recordatorio',
       cancelar: 'Cancelar',
     },
-    dialogoDuracion: 'Duración del hábito',
+    dialogoDuracion: {
+      titulo: '¿Cuánto dura?',
+      horas: 'Horas',
+      minutos: 'Minutos',
+      escribir: 'Desliza o toca un número para escribirlo.',
+      elegir: 'Elige cuánto dura.',
+      limitePlan: 'Tu plan permite hasta {n} por hábito, según tu tiempo diario.',
+      sinDuracion: 'Sin duración fija',
+      cancelar: 'Cancelar',
+      aceptar: 'Aceptar',
+    },
     dialogoFecha: {
       titulo: 'Seleccionar una fecha',
       meses: [
@@ -395,7 +465,7 @@ export const es = {
       descripcionLarga: 'Usa 140 caracteres o menos.',
       categoria: 'Elige una categoría.',
       dias: 'Escoge mínimo un día.',
-      duracion: 'Elige una duración de 1 a 120 minutos.',
+      duracion: 'Elige una duración de hasta 23 h 59 min.',
       hora: 'Elige una hora.',
       fechaFin: 'La fecha de fin no puede ser antes de la de inicio.',
     },
@@ -473,6 +543,36 @@ export const es = {
     modoGuiado: 'Modo: plan guiado',
     modoTradicional: 'Modo: mis propios hábitos',
     cerrarSesion: 'Cerrar sesión',
+    avisos: 'Avisos',
+    avisosApagados:
+      'Los avisos están apagados en tu teléfono. Actívalos para recibir tus recordatorios.',
+    abrirAjustes: 'Abrir ajustes',
+    estilo: 'Estilo',
+    estiloTitulo: '¿Cómo te acompañamos?',
+    estilos: {
+      resumen_nocturno: 'Resumen nocturno',
+      recordatorio_suave: 'Aviso suave',
+      recordatorio_y_animo: 'Aviso con ánimo',
+      minimo: 'Lo mínimo',
+    },
+    horas: 'Horas',
+    resumen: 'Resumen nocturno',
+    horasNota:
+      'Se usan para tus hábitos nuevos, el resumen y el horario flexible. Cada hábito conserva su hora.',
+    tiempo: 'Tiempo diario',
+    tiempoAlDia: 'Tiempo al día',
+    tiempoTitulo: '¿Cuánto tiempo al día quieres dedicarle?',
+    tiempoCorto: 'Algunos días tus hábitos suman {n}. Puedes ajustarlos cuando quieras.',
+    dialogoTiempo: {
+      elegir: 'Elige tu tiempo al día.',
+      diaMasCargado: 'Tu día con más hábitos suma {n}.',
+      debajo: 'Tu día con más hábitos suma {n}. Puedes guardarlo igual; tus hábitos no cambian.',
+      maximo: 'Puedes elegir hasta {n} al día.',
+    },
+    cuenta: 'Cuenta',
+    sinAjustes: 'Tus ajustes llegarán en cuanto te conectes.',
+    errorLeer: 'No pudimos cargar tus ajustes.',
+    errorGuardar: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
   },
   sesion: {
     errorPerfil: 'No pudimos cargar tu perfil.',

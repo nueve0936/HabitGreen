@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import * as Network from 'expo-network';
 
 import { avisarCambioLocal } from '@/db/db-version-store';
-import { getDb, guardarFilas, vaciarBaseLocal } from '@/db/database';
+import { enTransaccion, getDb, guardarFilas, vaciarBaseLocal } from '@/db/database';
 import { claveDeFila, TABLAS, tablaLocal, type TablaLocal } from '@/db/local-schema';
 import { leerOutbox, quitarDeOutbox, sumarIntento } from '@/db/outbox';
 import { fechaLocal, sumarDias } from '@/lib/dates';
@@ -298,7 +298,7 @@ async function descargar(db: SQLiteDatabase): Promise<void> {
         (f) => claveDeFila(tabla, f),
         pendientes,
       );
-      await db.withTransactionAsync(() => guardarFilas(db, tabla, aplicables));
+      await enTransaccion(db, () => guardarFilas(db, tabla, aplicables));
       nuevoCursor = siguienteCursor(nuevoCursor, filas);
       if (filas.length < PAGINA) break;
     }

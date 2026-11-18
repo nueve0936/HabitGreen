@@ -21,7 +21,7 @@ import type { HabitoFormValues } from '@/schemas/habit';
 import type { OperacionOutbox } from '@/sync/domain/sync-rules';
 import { pedirSincronizacion } from '@/sync/sync-engine';
 
-import { actualizarFila, getDb, guardarFilas, leerFilas } from './database';
+import { actualizarFila, enTransaccion, getDb, guardarFilas, leerFilas } from './database';
 import { avisarCambioLocal } from './db-version-store';
 import { leerConfig, leerEstado } from './logs-repository';
 import { encolar } from './outbox';
@@ -138,7 +138,7 @@ export async function leerHoy(): Promise<HoyLocal> {
 /** Escribe filas locales y sus operaciones juntas, y avisa a la UI y a la sincronización. */
 async function aplicar(pasos: (db: SQLiteDatabase) => Promise<OperacionOutbox[]>): Promise<void> {
   const db = await getDb();
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     for (const operacion of await pasos(db)) await encolar(db, operacion);
   });
   avisarCambioLocal();

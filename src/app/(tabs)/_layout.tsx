@@ -2,12 +2,13 @@ import { TopTabs } from 'expo-router/js-top-tabs';
 
 import { TabBar } from '@/components/ui/tab-bar';
 import { useSession } from '@/features/auth/session-context';
+import { useAvisos } from '@/features/reminders/use-avisos';
 import { es } from '@/i18n/es';
 import { useSync } from '@/sync/use-sync';
 
 // Las 5 pestañas del SDD 9.1: se cambia tocando la barra o deslizando en horizontal (TopTabs, con
 // la barra abajo). La barra es propia para seguir el mockup y las reglas de accesibilidad (estado
-// activo con indicador, icono y negrita). Aquí se monta la sincronización:
+// activo con indicador, icono y negrita). Aquí se montan la sincronización y los avisos:
 // solo corre cuando el usuario ya terminó el onboarding y está en las pestañas.
 
 export const unstable_settings = {
@@ -17,6 +18,7 @@ export const unstable_settings = {
 export default function TabsLayout() {
   const { session } = useSession();
   useSync(session?.user.id ?? null);
+  useAvisos(session?.user.id ?? null);
 
   return (
     <TopTabs tabBarPosition="bottom" tabBar={(props) => <TabBar {...props} />}>

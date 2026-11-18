@@ -1,4 +1,10 @@
-import { ajustePresupuesto, minutosPorDia } from '../presupuesto';
+import {
+  ajustePresupuesto,
+  limiteDuracionPlan,
+  limiteTiempoDiario,
+  minutosPorDia,
+  TIEMPO_DIARIO_MAX,
+} from '../presupuesto';
 
 describe('presupuesto diario (SDD 6.5)', () => {
   it('suma los minutos de cada día de la semana', () => {
@@ -26,5 +32,31 @@ describe('presupuesto diario (SDD 6.5)', () => {
       excede: false,
       nuevoPresupuesto: 20,
     });
+  });
+});
+
+describe('límite de duración de un hábito del plan', () => {
+  it('es el tiempo diario entre los hábitos del plan', () => {
+    expect(limiteDuracionPlan(20, 2, 5)).toBe(10);
+    expect(limiteDuracionPlan(40, 3, 5)).toBe(13);
+  });
+
+  it('nunca baja de lo que el hábito ya tiene', () => {
+    expect(limiteDuracionPlan(10, 2, 8)).toBe(8);
+  });
+
+  it('sin hábitos contados, todo el tiempo diario', () => {
+    expect(limiteDuracionPlan(20, 0, 5)).toBe(20);
+  });
+});
+
+describe('límite del tiempo diario en Perfil', () => {
+  it('es de 8 h', () => {
+    expect(TIEMPO_DIARIO_MAX).toBe(480);
+    expect(limiteTiempoDiario(60)).toBe(480);
+  });
+
+  it('respeta un tiempo que ya subió por encima de 8 h', () => {
+    expect(limiteTiempoDiario(540)).toBe(540);
   });
 });

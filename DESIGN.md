@@ -2,110 +2,110 @@
 name: Habit Green
 description: App de hábitos para Android con un jardín que crece a tu ritmo, alegre y sin culpa.
 colors:
-  bg: "#FBFBF6"
-  campo: "#FFFFFF"
-  ink: "#1E2A22"
-  ink-soft: "#566459"
-  borde: "#859488"
-  divisor: "#D6E8DB"
-  accent: "#2E7D4F"
-  accent-oscuro: "#24663F"
-  accent-claro: "#DFF2E4"
-  error: "#B8493D"
-  error-claro: "#FBE3DF"
-  moneda: "#B7791F"
-  moneda-claro: "#E9B44C"
-  moneda-fondo: "#FFF0CC"
-  moneda-texto: "#7A4F0E"
-  peligro: "#C62828"
-  confirmar: "#2E7D4F"
-  blanco: "#FFFFFF"
-  placeholder: "rgba(70, 72, 78, 0.8)"
-  tinte-salud-fisica: "#FDE8E2"
-  tinte-trabajo: "#DFEDF9"
-  tinte-salud-mental: "#E9E6FB"
-  tinte-finanzas: "#E3F3DF"
-  tinte-social: "#FCEBD3"
+  bg: '#FBFBF6'
+  campo: '#FFFFFF'
+  ink: '#1E2A22'
+  ink-soft: '#566459'
+  borde: '#859488'
+  divisor: '#D6E8DB'
+  accent: '#2E7D4F'
+  accent-oscuro: '#24663F'
+  accent-claro: '#DFF2E4'
+  error: '#B8493D'
+  error-claro: '#FBE3DF'
+  moneda: '#B7791F'
+  moneda-claro: '#E9B44C'
+  moneda-fondo: '#FFF0CC'
+  moneda-texto: '#7A4F0E'
+  peligro: '#C62828'
+  confirmar: '#2E7D4F'
+  blanco: '#FFFFFF'
+  placeholder: 'rgba(70, 72, 78, 0.8)'
+  tinte-salud-fisica: '#FDE8E2'
+  tinte-trabajo: '#DFEDF9'
+  tinte-salud-mental: '#E9E6FB'
+  tinte-finanzas: '#E3F3DF'
+  tinte-social: '#FCEBD3'
 typography:
   h1:
-    fontFamily: "Lexend Deca"
-    fontSize: "32px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '32px'
     fontWeight: 700
-    lineHeight: "40px"
+    lineHeight: '40px'
   h2:
-    fontFamily: "Lexend Deca"
-    fontSize: "24px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '24px'
     fontWeight: 600
-    lineHeight: "32px"
+    lineHeight: '32px'
   h3:
-    fontFamily: "Lexend Deca"
-    fontSize: "20px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '20px'
     fontWeight: 600
-    lineHeight: "28px"
+    lineHeight: '28px'
   body:
-    fontFamily: "Lexend Deca"
-    fontSize: "16px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '16px'
     fontWeight: 400
-    lineHeight: "24px"
+    lineHeight: '24px'
   small:
-    fontFamily: "Lexend Deca"
-    fontSize: "14px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '14px'
     fontWeight: 400
-    lineHeight: "20px"
+    lineHeight: '20px'
   button:
-    fontFamily: "Lexend Deca"
-    fontSize: "19px"
+    fontFamily: 'Lexend Deca'
+    fontSize: '19px'
     fontWeight: 700
-    lineHeight: "24px"
+    lineHeight: '24px'
 rounded:
-  field: "12px"
-  accion: "16px"
-  card: "20px"
-  chip: "999px"
+  field: '12px'
+  accion: '16px'
+  card: '20px'
+  chip: '999px'
 spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "16px"
-  lg: "24px"
-  xl: "32px"
-  xxl: "48px"
-  xxxl: "64px"
+  xs: '4px'
+  sm: '8px'
+  md: '16px'
+  lg: '24px'
+  xl: '32px'
+  xxl: '48px'
+  xxxl: '64px'
 components:
   button-primary:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.blanco}"
-    typography: "{typography.button}"
-    rounded: "{rounded.chip}"
-    height: "48px"
+    backgroundColor: '{colors.accent}'
+    textColor: '{colors.blanco}'
+    typography: '{typography.button}'
+    rounded: '{rounded.chip}'
+    height: '48px'
   button-primary-pressed:
-    backgroundColor: "{colors.accent-oscuro}"
-    textColor: "{colors.blanco}"
+    backgroundColor: '{colors.accent-oscuro}'
+    textColor: '{colors.blanco}'
   button-secondary:
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.chip}"
-    height: "48px"
+    textColor: '{colors.ink}'
+    typography: '{typography.button}'
+    rounded: '{rounded.chip}'
+    height: '48px'
   action-square:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.blanco}"
-    rounded: "{rounded.accion}"
-    size: "48px"
+    backgroundColor: '{colors.accent}'
+    textColor: '{colors.blanco}'
+    rounded: '{rounded.accion}'
+    size: '48px'
   card-habit:
-    backgroundColor: "{colors.campo}"
-    rounded: "{rounded.card}"
+    backgroundColor: '{colors.campo}'
+    rounded: '{rounded.card}'
   field:
-    backgroundColor: "{colors.campo}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.field}"
-    height: "48px"
+    backgroundColor: '{colors.campo}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.field}'
+    height: '48px'
   chip-selected:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.blanco}"
-    rounded: "{rounded.chip}"
+    backgroundColor: '{colors.accent}'
+    textColor: '{colors.blanco}'
+    rounded: '{rounded.chip}'
   coin-balance:
-    backgroundColor: "{colors.moneda-fondo}"
-    textColor: "{colors.moneda-texto}"
-    rounded: "{rounded.chip}"
+    backgroundColor: '{colors.moneda-fondo}'
+    textColor: '{colors.moneda-texto}'
+    rounded: '{rounded.chip}'
 ---
 
 # Design System: Habit Green
@@ -245,6 +245,10 @@ Cálidos y táctiles: cada toque recibe respuesta en menos de 100 ms, con cambio
 ### Tarjeta de hábito
 
 Casilla redonda con zona táctil de 48 dp, título y «hora · duración». Hecho: casilla verde con ✓ blanca y título tachado con una línea de 2 px. En pausa: ⏸ en lugar de la casilla. No toca hoy: casilla punteada con el texto «No toca hoy».
+
+### Ruedas
+
+Fecha, duración del hábito y tiempo diario de Perfil se eligen con ruedas: tres opciones a la vista y la elegida en negritas entre dos líneas verde brote. En las de horas y minutos (duración y tiempo diario) se puede tocar el número del centro y escribirlo; el total va debajo en h3 y los botones «Cancelar» y «Aceptar» son los mismos en los dos diálogos.
 
 ### Saldo
 

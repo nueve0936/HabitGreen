@@ -17,6 +17,7 @@ import { ProfileErrorView } from '@/features/auth/components/profile-error-view'
 import { SessionProvider } from '@/features/auth/session-provider';
 import type { AppZone } from '@/features/auth/domain/session-route';
 import { useAppZone } from '@/features/auth/use-app-zone';
+import { prepararAvisos } from '@/features/reminders/avisos';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // En recargas rápidas la pantalla de carga ya puede estar oculta.
@@ -31,6 +32,12 @@ export default function RootLayout() {
   });
   // Si la fuente falla se sigue con la del sistema (definición 8: respaldo del sistema).
   const fontsReady = fontsLoaded || fontError !== null;
+
+  useEffect(() => {
+    prepararAvisos().catch(() => {
+      // Sin canal la app funciona igual; solo no llegarían los avisos.
+    });
+  }, []);
 
   return (
     <SafeAreaProvider>

@@ -8,6 +8,7 @@ import { Screen } from '@/components/ui/screen';
 import { Snackbar } from '@/components/ui/snackbar';
 import { avisarCambioLocal } from '@/db/db-version-store';
 import { leerHoy } from '@/db/habits-repository';
+import { leerSemanaApoyo } from '@/db/reminders-repository';
 import { leerJardin } from '@/db/rewards-repository';
 import { leerAjustesLocales } from '@/db/settings-repository';
 import { useLocalQuery } from '@/db/use-local-query';
@@ -26,7 +27,8 @@ import { colors } from '@/theme';
 // de los hábitos de hoy y sus tarjetas con casilla. De la barra hacia arriba queda fijo y solo se
 // desplazan los hábitos. Todo sale de SQLite, así que funciona sin conexión; la sincronización sube
 // los cambios después. Al completar: moneda animada, o un aviso flotante de por qué no dio monedas,
-// y la celebración si la planta cambió de fase (SDD 6.1).
+// y la celebración si la planta cambió de fase (SDD 6.1). En las semanas 3 y 4 del plan, quien suele
+// soltar los hábitos ve un mensaje de apoyo arriba de la lista (SDD 7.1).
 
 // Con letra muy grande o una pantalla baja, la parte fija dejaría sin espacio a la lista: entonces
 // se desplaza toda la pantalla (guía de UX/UI, sección 6).
@@ -44,6 +46,7 @@ export default function HoyScreen() {
   const hoy = useLocalQuery('hoy', leerHoy);
   const ajustes = useLocalQuery(`ajustes-${userId}`, () => leerAjustesLocales(userId));
   const jardin = useLocalQuery(`jardin-${userId}`, () => leerJardin(userId));
+  const semanaApoyo = useLocalQuery(`apoyo-${userId}`, () => leerSemanaApoyo(userId));
   const checkIn = useCheckIn(userId);
   const { height, fontScale } = useWindowDimensions();
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
@@ -111,8 +114,12 @@ export default function HoyScreen() {
     </>
   );
 
+  // Apoyo de las semanas 3 y 4 (SDD 7.1): arriba de la lista, para no mover la parte fija.
+  const apoyo = semanaApoyo.data ? es.avisos.apoyo[semanaApoyo.data] : null;
+
   const lista = (
     <>
+      {apoyo ? <Alert variant="info" message={apoyo.mensaje} /> : null}
       {items.length === 0 ? (
         <AppText tone="ink-soft">{t.vacio}</AppText>
       ) : (

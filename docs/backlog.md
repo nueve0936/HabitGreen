@@ -88,11 +88,11 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 5.1 | Permiso en contexto (revisión del plan) y canal de Android; verificar alarmas exactas | 7.1 | pendiente |
-| 5.2 | Ventana móvil de 7 días con tope de 60 y recálculo en cada evento | 7.1 | pendiente |
-| 5.3 | Estilos de la P7, precedencia P7/P6, segundo aviso, momento flexible y `notificar` («Avisarme») | 5.6, 7.1 | pendiente |
-| 5.4 | Textos: ánimo rotativo, resumen nocturno, apoyo de las semanas 3 y 4 | 7.1, `textos.md` | pendiente |
-| 5.5 | Ajustes en Perfil: tiempo diario (`presupuesto_min`), estilo de avisos, horas por momento y segundo aviso; funciona sin conexión vía la cola (`update` de `user_settings`) | 6.5, 7.1, 9.4 | pendiente |
+| 5.1 | Permiso en contexto (revisión del plan) y canal de Android; verificar alarmas exactas | 7.1 | hecho |
+| 5.2 | Ventana móvil de 7 días con tope de 60 y recálculo en cada evento | 7.1 | hecho |
+| 5.3 | Estilos de la P7, precedencia P7/P6, segundo aviso, momento flexible y `notificar` («Avisarme») | 5.6, 7.1 | hecho |
+| 5.4 | Textos: ánimo rotativo, resumen nocturno, apoyo de las semanas 3 y 4 | 7.1, `textos.md` | hecho |
+| 5.5 | Ajustes en Perfil: tiempo diario (`presupuesto_min`), estilo de avisos, horas por momento y segundo aviso; funciona sin conexión vía la cola (`update` de `user_settings`). El tiempo diario usa las ruedas de horas y minutos (1 min a 8 h) | 6.5, 7.1, 9.4 | hecho |
 
 **Criterio de prueba:** con un hábito programado 2 minutos en el futuro, llega el aviso. Al completarlo antes, el segundo aviso no llega. Cambiar el estilo a `minimo` deja de enviar avisos de hábitos sin «Avisarme». En Perfil cambias tu tiempo diario y el cambio llega a Supabase.
 

@@ -58,6 +58,25 @@ describe('filas que se guardan al pulsar «Empezar»', () => {
     expect(filas(flexible).schedules[0]).toMatchObject({ hora: null, flexible: true });
   });
 
+  it('sin permiso de avisos, los hábitos se guardan sin recordatorio', () => {
+    const conFlexible = {
+      ...BORRADOR,
+      habitos: [BORRADOR.habitos[0]!, habito({ hora: null, flexible: true })],
+    };
+    const sinPermiso = filasDelPlan({
+      userId: 'usuario-1',
+      borrador: conFlexible,
+      respuestas: RESPUESTAS,
+      ids: IDS,
+      categorias: CATEGORIAS,
+      hoy: '2026-11-01',
+      conRecordatorios: false,
+    });
+    for (const horario of sinPermiso.schedules) {
+      expect(horario).toMatchObject({ hora: null, flexible: false, notificar: false });
+    }
+  });
+
   it('guarda los ajustes y las respuestas con la versión del formulario', () => {
     const f = filas();
     expect(f.settings).toEqual({

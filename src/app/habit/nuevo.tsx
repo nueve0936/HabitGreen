@@ -8,6 +8,7 @@ import { leerAjustesLocales } from '@/db/settings-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { HabitWizard } from '@/features/habits/components/habit-wizard';
+import { textoDuracion } from '@/features/habits/domain/formato';
 import { valoresNuevos } from '@/features/habits/domain/valores-formulario';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
@@ -38,7 +39,7 @@ export default function NuevoHabitoScreen() {
       if (presupuestoNuevo !== null) {
         AlertNativo.alert(
           t.crearTitulo,
-          formatear(es.habitos.presupuestoSubio, { n: presupuestoNuevo }),
+          formatear(es.habitos.presupuestoSubio, { n: textoDuracion(presupuestoNuevo) }),
         );
       }
       // Desde Detalles de una planta se regresa ahí; si no, a la pestaña Hábitos, aunque se haya
@@ -49,7 +50,8 @@ export default function NuevoHabitoScreen() {
         router.dismissAll();
         router.navigate('/habitos');
       }
-    } catch {
+    } catch (causa) {
+      console.warn('No se pudo crear el hábito', causa);
       setError(true);
       setEnviando(false);
     }
@@ -69,13 +71,15 @@ export default function NuevoHabitoScreen() {
     <HabitWizard
       titulo={t.crearTitulo}
       textoFinal={t.crear}
-      valoresIniciales={valoresNuevos(ajustes.data?.estiloNotificaciones ?? null, hoy, area)}
+      valoresIniciales={valoresNuevos(hoy, area)}
+      horaInicial={ajustes.data?.horaManana}
+      permitirSinDuracion
       editando={false}
       hoy={hoy}
       inicioEditable
       enviando={enviando}
       error={error}
-      onEnviar={crear}
+      onEnviar={(valores) => void crear(valores)}
       onCerrar={() => router.back()}
     />
   );

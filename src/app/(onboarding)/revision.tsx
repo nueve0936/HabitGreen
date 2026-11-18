@@ -24,6 +24,7 @@ import {
   sugerenciasDisponibles,
 } from '@/features/plan/domain/plan-review';
 import { usePlanReviewStore } from '@/features/plan/plan-review-store';
+import { usePermisoAvisos } from '@/features/reminders/use-permiso-avisos';
 import { es, formatear } from '@/i18n/es';
 import type { HabitoPlan } from '@/schemas/plan';
 import { colors } from '@/theme';
@@ -31,7 +32,8 @@ import { colors } from '@/theme';
 // «Tu plan está listo» (SDD 5.8 y 9.4, mockups de la revisión del plan). El usuario edita, quita o
 // agrega hábitos (hasta 3) y al pulsar «Confirmar plan» se guarda todo. Si sale de aquí sin
 // confirmar, no queda nada guardado.
-// El permiso de notificaciones se pide aquí en la Entrega 5 (backlog 5.1).
+// Antes de guardar se explica y se pide el permiso de avisos (SDD 7.1). Si no se da, el plan se
+// guarda sin horas: sin permiso no hay recordatorios.
 
 export default function RevisionPlanScreen() {
   const t = es.onboarding.revision;
@@ -46,6 +48,7 @@ export default function RevisionPlanScreen() {
   const [editando, setEditando] = useState<HabitoPlan | null>(null);
   const [quitando, setQuitando] = useState<HabitoPlan | null>(null);
   const guardado = useRef(false);
+  const permiso = usePermisoAvisos();
 
   // Al confirmar, el layout raíz cambia a las pestañas y esta pantalla se desmonta: hasta
   // entonces no se borran el formulario ni el borrador, para no redirigir a mitad del cambio.
@@ -63,12 +66,12 @@ export default function RevisionPlanScreen() {
     return <Redirect href="/plan" />;
   }
 
-  const confirmar = async () => {
+  const confirmar = async (conRecordatorios: boolean) => {
     if (session === null) return;
     setGuardando(true);
     setError(false);
     try {
-      await guardarPlan(session.user.id, borrador, respuestas, ids);
+      await guardarPlan(session.user.id, borrador, respuestas, ids, conRecordatorios);
       guardado.current = true;
       // Guarda el modo y marca el onboarding como completo: el layout lleva a «Hoy».
       await chooseMode('guiado');
@@ -150,8 +153,14 @@ export default function RevisionPlanScreen() {
         <AppText variant="small" tone="ink-soft" className="text-center">
           {t.notaAjuste}
         </AppText>
-        <Button label={t.empezar} loading={guardando} onPress={confirmar} />
+        <Button
+          label={t.empezar}
+          loading={guardando}
+          onPress={() => void permiso.conPermiso((concedido) => void confirmar(concedido))}
+        />
       </View>
+
+      {permiso.dialogo}
 
       {editando ? (
         <EditPlanHabitSheet

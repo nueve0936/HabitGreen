@@ -20,6 +20,11 @@ export function sumarDias(fecha: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Días de `desde` a `hasta` (negativo si `hasta` es anterior). */
+export function diasEntre(desde: string, hasta: string): number {
+  return Math.round((aMediodiaUtc(hasta).getTime() - aMediodiaUtc(desde).getTime()) / 86_400_000);
+}
+
 /** Día de la semana ISO: 1 = lunes … 7 = domingo. */
 export function diaIso(fecha: string): number {
   return aMediodiaUtc(fecha).getUTCDay() || 7;

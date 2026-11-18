@@ -58,8 +58,11 @@ export function filasDelPlan(input: {
   categorias: Record<Area, string>;
   /** Fecha local de hoy, "YYYY-MM-DD": desde cuándo vale el horario. */
   hoy: string;
+  /** Sin permiso de avisos, los hábitos se guardan sin recordatorio (SDD 7.1). */
+  conRecordatorios?: boolean;
 }): FilasPlan {
   const { userId, borrador, ids } = input;
+  const conRecordatorios = input.conRecordatorios ?? true;
 
   const conIds = borrador.habitos.map((h) => {
     const habitIds = ids.habitos[h.objetivo];
@@ -86,9 +89,9 @@ export function filasDelPlan(input: {
       habit_id: habitId,
       user_id: userId,
       dias_semana: h.dias_semana,
-      hora: h.flexible ? null : h.hora,
-      flexible: h.flexible,
-      notificar: h.notificar,
+      hora: conRecordatorios && !h.flexible ? h.hora : null,
+      flexible: conRecordatorios && h.flexible,
+      notificar: conRecordatorios && h.notificar,
       vigente_desde: input.hoy,
     })),
     settings: {

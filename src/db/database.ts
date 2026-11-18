@@ -20,7 +20,8 @@ import {
 // no se borra, para no perder lo que se hizo sin conexión.
 
 const NOMBRE = 'habitgreen.db';
-const ESQUEMA_VERSION = 2;
+// 3: se agrega onboarding_answers (Entrega 5).
+const ESQUEMA_VERSION = 3;
 
 let abierta: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -30,13 +31,28 @@ async function prepararEsquema(db: SQLite.SQLiteDatabase): Promise<void> {
   if (version === ESQUEMA_VERSION) return;
 
   await db.execAsync("PRAGMA journal_mode = 'wal';");
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     for (const tabla of TABLAS) await db.execAsync(`DROP TABLE IF EXISTS ${tabla.nombre};`);
     await db.execAsync('DROP TABLE IF EXISTS sync_state;');
     await db.execAsync(sqlTablasEspejo());
     await db.execAsync(SQL_TABLAS_PROPIAS);
   });
   await db.execAsync(`PRAGMA user_version = ${ESQUEMA_VERSION}`);
+}
+
+// expo-sqlite no admite dos transacciones a la vez en la misma conexión: la segunda falla con
+// «cannot start a transaction within a transaction». Pasa al volver a la app, cuando la
+// sincronización escribe justo cuando la persona guarda un hábito. Por eso todas las transacciones
+// de la app esperan su turno aquí. Dentro de una transacción no se abre otra (se trabaría).
+let turno: Promise<unknown> = Promise.resolve();
+
+export function enTransaccion(
+  db: SQLite.SQLiteDatabase,
+  tarea: () => Promise<void>,
+): Promise<void> {
+  const esta = turno.then(() => db.withTransactionAsync(tarea));
+  turno = esta.catch(() => {});
+  return esta;
 }
 
 export function getDb(): Promise<SQLite.SQLiteDatabase> {
@@ -97,7 +113,7 @@ export async function leerFilas<T>(
 /** Borra todos los datos locales: al cerrar sesión o si entra otra cuenta en el teléfono. */
 export async function vaciarBaseLocal(): Promise<void> {
   const db = await getDb();
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     for (const tabla of TABLAS) await db.runAsync(`DELETE FROM ${tabla.nombre}`);
     await db.runAsync('DELETE FROM outbox');
     await db.runAsync('DELETE FROM sync_state');

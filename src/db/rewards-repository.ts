@@ -10,7 +10,7 @@ import { AREAS, type Area } from '@/schemas/onboarding';
 import { esRechazoDefinitivo } from '@/sync/domain/sync-rules';
 import { pedirSincronizacion, sincronizarAhora } from '@/sync/sync-engine';
 
-import { actualizarFila, getDb, leerFilas } from './database';
+import { actualizarFila, enTransaccion, getDb, leerFilas } from './database';
 import { avisarCambioLocal } from './db-version-store';
 import { encolar } from './outbox';
 
@@ -123,7 +123,7 @@ export async function equiparAccesorio(
   const actual = propios.find((p) => p.id === propioId);
   if (!actual) throw new Error('El accesorio no es del usuario');
 
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     const ahora = new Date().toISOString();
     for (const cambio of cambiosAlEquipar(actual, categoryId, propios)) {
       const datos = { categoria_equipada: cambio.categoria_equipada };

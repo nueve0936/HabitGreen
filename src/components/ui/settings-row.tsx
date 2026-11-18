@@ -37,7 +37,8 @@ export function SettingsRow({
         ultima ? '' : 'border-b border-divisor'
       }`}
     >
-      <AppText weight="semibold" tone={tono}>
+      {/* Con letra grande la etiqueta baja de línea en vez de empujar el valor fuera de la pantalla. */}
+      <AppText weight="semibold" tone={tono} className="flex-1">
         {label}
       </AppText>
       <View className="flex-row items-center gap-1">

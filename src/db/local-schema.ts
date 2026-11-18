@@ -44,6 +44,12 @@ export const TABLAS = [
     },
   },
   {
+    // Solo de bajada: el momento (P5) y el historial (P3) deciden algunos avisos (SDD 5.6 y 7.1).
+    nombre: 'onboarding_answers',
+    clave: ['id'],
+    columnas: { id: T, user_id: T, respuestas: J, version_formulario: N, updated_at: T },
+  },
+  {
     nombre: 'app_config',
     clave: ['clave'],
     columnas: { clave: T, valor: J, updated_at: T },

@@ -7,26 +7,21 @@ import { horaCorta } from './horario';
 // Valores iniciales del asistente de hábito, al crear y al editar.
 
 export const HORA_POR_DEFECTO = '08:00';
-export const DURACION_POR_DEFECTO = 10;
 
 /**
- * Al crear: todos los días, 10 min, desde hoy y sin fecha de fin. Con el estilo `minimo` solo
- * avisan los hábitos que el usuario elija (SDD 7.1), así que empieza sin recordatorio. Desde Detalles de una planta, llega con su área ya elegida.
+ * Al crear: todos los días, sin duración fija (0), desde hoy, sin fecha de fin y sin recordatorio. Los
+ * recordatorios necesitan el permiso de avisos, que se pide cuando la persona elige una hora
+ * (SDD 7.1). Desde Detalles de una planta, llega con su área ya elegida.
  */
-export function valoresNuevos(
-  estiloNotificaciones: string | null,
-  hoy: string,
-  categoria: Area | null = null,
-): HabitoFormInput {
-  const avisa = estiloNotificaciones !== 'minimo';
+export function valoresNuevos(hoy: string, categoria: Area | null = null): HabitoFormInput {
   return {
     nombre: '',
     descripcion: '',
     categoria,
     dias: [...TODOS_LOS_DIAS],
-    duracion: DURACION_POR_DEFECTO,
-    hora: avisa ? HORA_POR_DEFECTO : null,
-    notificar: avisa,
+    duracion: 0,
+    hora: null,
+    notificar: false,
     flexible: false,
     fecha_inicio: hoy,
     fecha_fin: null,

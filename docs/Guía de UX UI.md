@@ -149,7 +149,8 @@ Lexend Deca (`@expo-google-fonts/lexend-deca`), con la del sistema como respaldo
 | `OptionChip` | Opción grande con icono opcional y sombra. Sin elegir: `campo` con borde 2 px `divisor` y círculo con borde `borde`. Elegida: relleno `accent-claro`, borde 2 px `accent`, círculo `accent` con ✓ blanca y texto en negritas. |
 | `ChoicePill` | Píldora de elección. Elegida: relleno `accent` con texto blanco en negritas. Sin elegir: borde `borde`. |
 | `DaySquares` | Cuadros L M M J V S D. Elegido: relleno `accent`, texto blanco en negritas. Sin elegir: borde `borde`. La zona táctil se amplía con `hitSlop`. |
-| `SettingsRow` | Fila «Etiqueta — valor >» de al menos 48 dp. Sin acción, se muestra sin flecha. |
+| `SettingsRow` | Fila «Etiqueta — valor >» de al menos 48 dp. Sin acción, se muestra sin flecha. Con letra grande, la etiqueta baja de línea. |
+| `WheelColumn` | Rueda de 3 opciones de 48 dp; la elegida va en negritas entre dos líneas `accent`. Tocar otra opción la elige. Con `escribible` (números), tocar la del centro abre un campo numérico que se ajusta al rango. Con TalkBack se ajusta deslizando arriba o abajo. La usan la fecha, la duración del hábito y el tiempo diario de Perfil (las dos últimas con `DurationWheels` y `DialogActions`). |
 | `ProgressSteps` | Barra «1/3» dentro de una píldora: pista `divisor`, relleno `accent` y texto blanco. |
 | `Dialog` / `ConfirmDialog` | Tarjeta `campo` sobre fondo `ink` al 40%. Botones de 48 dp: «Cancelar» con borde `borde` y la acción en `accent`, `peligro` o `confirmar`. Se cierra con el botón «atrás». |
 | Globo de menú (`HabitMenu`) | `campo` con sombra, anclado al ⋮. Se abre hacia arriba si no cabe abajo y crece con la letra del sistema. Filas de 48 dp con icono, texto y `>`; «Eliminar» va en `peligro`. |

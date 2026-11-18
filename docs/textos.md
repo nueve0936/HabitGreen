@@ -11,15 +11,16 @@ Al implementar, estos textos pasan a `src/i18n/es.ts` (interfaz) y a `supabase/f
 
 | Estilo | Título | Cuerpo |
 | --- | --- | --- |
-| `recordatorio_suave` | {hábito} | Es un buen momento para tus {duración} min. |
+| `recordatorio_suave` | {hábito} | Es un buen momento para tus {duración}. («10 min», «1 h 25 min»). Sin duración definida: Es un buen momento para tu hábito. |
 | `recordatorio_y_animo` | {hábito} | {mensaje de ánimo} |
 | `resumen_nocturno` | Mañana te esperan {n} hábitos | {hábito 1}, {hábito 2} y {hábito 3}. Descansa bien. |
 | `resumen_nocturno` (1 hábito) | Mañana te espera un hábito | {hábito}. Descansa bien. |
 | Segundo aviso (`olvido`) | ¿Un momento para {hábito}? | Todavía estás a tiempo hoy. |
 | Momento flexible, 17:00 | {hábito} | Cuando encuentres un hueco esta tarde. |
-| Momento flexible, 20:00 | {hábito} | Si aún te queda energía, son solo {duración} min. |
-| Con `distraccion` + ánimo (una línea) | {hábito} | {duración} min y listo. {mensaje de ánimo corto} |
+| Momento flexible, 20:00 | {hábito} | Si aún te queda energía, son solo {duración}. Sin duración definida: Si aún te queda energía, todavía estás a tiempo. |
+| Con `distraccion` + ánimo (una línea) | {hábito} | {duración} y listo. {mensaje de ánimo corto} (sin duración definida, solo el mensaje corto) |
 | Fin de la ventana (día 7) | Tus hábitos te esperan | Abre Habit Green para seguir recibiendo tus avisos. |
+| Con `olvido` + `resumen_nocturno` (uno al día, a la hora del momento) | ¿Un momento para tus hábitos de hoy? | {hábito 1}, {hábito 2} y {hábito 3}. Todavía estás a tiempo. |
 | Geofencing | Estás en {lugar} | Buen momento para {hábito}. |
 
 ### Mensajes de ánimo rotativos
@@ -46,11 +47,15 @@ Versiones cortas (para `distraccion`): «Tú puedes.», «Paso a paso.», «A tu
 | 3 | Llevas dos semanas | Esta es la etapa en la que muchos lo sueltan. Si hoy cuesta, la versión corta también vale. |
 | 4 | Ya casi es parte de tu rutina | Un mes de pequeños pasos. Sigue a tu ritmo; no hace falta hacer más. |
 
+La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo mensaje de Hoy.
+
 ## 2. Permisos
 
 | Momento | Texto |
 | --- | --- |
-| Antes de pedir notificaciones (revisión del plan) | Te avisaremos a la hora de cada hábito, de forma suave. Puedes cambiarlo cuando quieras en Perfil. |
+| Antes de pedir notificaciones (revisión del plan o al elegir la hora de un recordatorio) | Te avisaremos a la hora de cada hábito, de forma suave. Puedes cambiarlo cuando quieras en Perfil. Botones: «Ahora no» y «Activar avisos». |
+| Android ya no deja preguntar | Los avisos están apagados en tu teléfono. Para usar recordatorios, actívalos en Ajustes. Botones: «Ahora no» y «Abrir ajustes». |
+| Hábito con recordatorio y avisos apagados (formulario) | Los avisos están apagados en tu teléfono: este recordatorio no sonará hasta que los actives. Botón: «Activar avisos». |
 | Antes de pedir ubicación (detalle del hábito) | Para avisarte al llegar a este lugar, Habit Green necesita tu ubicación, también en segundo plano. Solo se usa para estos avisos y no se comparte. |
 | Permiso negado | Sin problema: tu hábito seguirá avisándote por hora. |
 
@@ -95,7 +100,7 @@ Versiones cortas (para `distraccion`): «Tú puedes.», «Paso a paso.», «A tu
 | Bajar nivel | Vamos a hacerlo más ligero por ahora: «{nuevo título}». Lo importante es mantener el ritmo. |
 | Nivel 1 → duración reducida | Probemos una versión más corta: {duración} min. |
 | No cabe en el presupuesto | Tu día está completo. Si quieres sumar algo, puedes subir tu tiempo diario en Perfil. |
-| Presupuesto superado (manual) | Con este hábito tu día suma {n} min. Ajustamos tu tiempo diario a {n} min. |
+| Presupuesto superado (manual) | Con este hábito, algunos días suman {n}. Subimos tu tiempo diario a {n}; puedes cambiarlo en Perfil. ({n} en horas y minutos, por ejemplo «1 h 10 min») |
 
 ## 6. Estados de pantalla
 
@@ -161,3 +166,32 @@ Devuelve solo JSON: {"titulo": string, "descripcion": string, "mensaje": string}
 - "mensaje": hasta 140 caracteres, celebra el avance (si sube) o normaliza el ajuste (si baja), sin culpa.
 - No cambies números. Mismas prohibiciones: nada médico, de dietas, de cantidades sensibles ni de inversión.
 ```
+
+## Perfil
+
+| Elemento | Texto |
+| --- | --- |
+| Secciones | Avisos · Horas · Tiempo diario · Cuenta |
+| Avisos apagados en Android | Los avisos están apagados en tu teléfono. Actívalos para recibir tus recordatorios. Botón: «Abrir ajustes». |
+| Estilo (fila) | Resumen nocturno · Aviso suave · Aviso con ánimo · Lo mínimo |
+| Estilo (diálogo) | ¿Cómo te acompañamos? Opciones: los textos de la pregunta 7. |
+| Nota de horas | Se usan para tus hábitos nuevos, el resumen y el horario flexible. Cada hábito conserva su hora. |
+| Tiempo diario (diálogo) | ¿Cuánto tiempo al día quieres dedicarle? Ruedas «Horas» y «Minutos»; con total 0: «Elige tu tiempo al día.» Botones: «Cancelar», «Aceptar». |
+| Tiempo diario: referencia | Tu día con más hábitos suma {n}. |
+| Tiempo diario: por debajo (diálogo) | Tu día con más hábitos suma {n}. Puedes guardarlo igual; tus hábitos no cambian. |
+| Tiempo diario: máximo | Puedes elegir hasta {n} al día. |
+| Tiempo diario por debajo de los hábitos (Perfil) | Algunos días tus hábitos suman {n}. Puedes ajustarlos cuando quieras. |
+| Sin ajustes todavía | Tus ajustes llegarán en cuanto te conectes. |
+| Error al guardar | No pudimos guardar el cambio. Inténtalo de nuevo. |
+
+## Duración del hábito
+
+| Elemento | Texto |
+| --- | --- |
+| Título del diálogo | ¿Cuánto dura? |
+| Columnas | Horas · Minutos |
+| Ayuda | Desliza o toca un número para escribirlo. |
+| Sin elegir (0 h 0 min) | Elige cuánto dura. |
+| Formato | «25 min», «1 h», «1 h 25 min» |
+| Sin duración (solo hábitos propios; valor inicial al crear y al dejar 0 h 0 min) | Sin duración fija |
+| Límite de un hábito del plan | Tu plan permite hasta {n} por hábito, según tu tiempo diario. |

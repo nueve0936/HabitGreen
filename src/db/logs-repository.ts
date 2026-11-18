@@ -14,7 +14,7 @@ import {
 import { fechaLocal } from '@/lib/dates';
 import { pedirSincronizacion } from '@/sync/sync-engine';
 
-import { actualizarFila, getDb, guardarFilas, leerFilas } from './database';
+import { actualizarFila, enTransaccion, getDb, guardarFilas, leerFilas } from './database';
 import { avisarCambioLocal } from './db-version-store';
 import { encolar } from './outbox';
 
@@ -104,7 +104,7 @@ export async function completarHabito(
   const db = await getDb();
   // null: ya estaba completado (por ejemplo, un doble toque) y no cambió nada.
   let resultado: ResultadoCheckIn | null = null;
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     const estado = await leerEstado(db, userId, habito.category_id, fecha);
     if (estado.logs.some((l) => l.habit_id === habito.id)) return;
 
@@ -168,7 +168,7 @@ export async function deshacerHabito(
 ): Promise<void> {
   revisarQueSeaHoy(fecha);
   const db = await getDb();
-  await db.withTransactionAsync(async () => {
+  await enTransaccion(db, async () => {
     const estado = await leerEstado(db, userId, habito.category_id, fecha);
     const r = aplicarDeshacer(estado, habito.id, await leerConfig(db));
     const ahora = new Date().toISOString();
