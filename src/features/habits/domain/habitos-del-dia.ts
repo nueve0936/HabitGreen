@@ -7,6 +7,12 @@ export type Habito = {
   id: string;
   category_id: string;
   plan_id: string | null;
+  /** Hábito del plan (SDD 6.3): objetivo y nivel 1–3; null en los manuales. */
+  objetivo?: string | null;
+  nivel?: number | null;
+  usa_duracion_reducida?: boolean;
+  /** Fecha del último cambio de nivel (progresión); null si nunca cambió. */
+  nivel_desde?: string | null;
   titulo: string;
   descripcion: string | null;
   duracion_min: number;

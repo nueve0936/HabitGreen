@@ -12,7 +12,7 @@ import {
   type Ocurrencia,
   type Registro,
 } from '@/features/habits/domain/habitos-del-dia';
-import { nuevaVersionHorario } from '@/features/habits/domain/horario';
+import { nuevaVersionHorario, type VersionHorario } from '@/features/habits/domain/horario';
 import { ajustePresupuesto, minutosPorDia } from '@/features/habits/domain/presupuesto';
 import { aplicarArchivar } from '@/features/rewards/domain/recompensas';
 import { fechaLocal } from '@/lib/dates';
@@ -58,7 +58,7 @@ export async function categoriasPorId(db: SQLiteDatabase): Promise<Map<string, A
   );
 }
 
-async function idCategoria(db: SQLiteDatabase, area: Area): Promise<string> {
+export async function idCategoria(db: SQLiteDatabase, area: Area): Promise<string> {
   const fila = await db.getFirstAsync<{ id: string }>(
     'SELECT id FROM categories WHERE clave = ? AND user_id IS NULL',
     [area],
@@ -189,6 +189,38 @@ async function leerHabitosEn(db: SQLiteDatabase): Promise<{ habito: Habito; hora
   }));
 }
 
+/**
+ * Guarda una versión nueva del horario (`nuevaVersionHorario`): cierra la anterior si hace falta y
+ * guarda la vigente. Devuelve sus operaciones de la cola; nada si el horario no cambió.
+ */
+export async function guardarVersionHorario(
+  db: SQLiteDatabase,
+  userId: string,
+  version: VersionHorario | null,
+): Promise<OperacionOutbox[]> {
+  if (!version) return [];
+  const operaciones: OperacionOutbox[] = [];
+  if (version.cerrar) {
+    const { id: cerrarId, vigente_hasta } = version.cerrar;
+    await actualizarFila(db, 'habit_schedules', { id: cerrarId }, { vigente_hasta });
+    operaciones.push({
+      operacion: 'update',
+      tabla: 'habit_schedules',
+      clave: cerrarId,
+      payload: { vigente_hasta },
+    });
+  }
+  const horario = { ...version.guardar, user_id: userId };
+  await guardarFilas(db, 'habit_schedules', [{ ...horario, updated_at: new Date().toISOString() }]);
+  operaciones.push({
+    operacion: 'upsert',
+    tabla: 'habit_schedules',
+    clave: horario.id,
+    payload: horario,
+  });
+  return operaciones;
+}
+
 export type ResultadoGuardar = { presupuestoNuevo: number | null };
 
 /** Crea un hábito manual (sin plan ni progresión, SDD 6.5) con su primer horario. */
@@ -281,26 +313,7 @@ export async function editarHabito(
         fechaLocal(),
         randomUUID(),
       );
-      if (version?.cerrar) {
-        const { id: cerrarId, vigente_hasta } = version.cerrar;
-        await actualizarFila(db, 'habit_schedules', { id: cerrarId }, { vigente_hasta });
-        operaciones.push({
-          operacion: 'update',
-          tabla: 'habit_schedules',
-          clave: cerrarId,
-          payload: { vigente_hasta },
-        });
-      }
-      if (version) {
-        const horario = { ...version.guardar, user_id: userId };
-        await guardarFilas(db, 'habit_schedules', [{ ...horario, updated_at: ahora }]);
-        operaciones.push({
-          operacion: 'upsert',
-          tabla: 'habit_schedules',
-          clave: horario.id,
-          payload: horario,
-        });
-      }
+      operaciones.push(...(await guardarVersionHorario(db, userId, version)));
     }
 
     // Las movidas que ahora caen en un día de su patrón ya no hacen falta (SDD 6.2).

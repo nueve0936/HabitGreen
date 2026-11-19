@@ -100,11 +100,17 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 
 | Situación | Texto |
 | --- | --- |
-| Subir nivel | Te está saliendo muy bien. ¿Probamos con «{nuevo título}» ({duración} min)? Botones: «Sí, vamos», «Más adelante» |
+| Subir nivel | Te está saliendo muy bien «{título actual}». ¿Probamos con «{nuevo título}» ({duración} min)? Botones: «Sí, vamos», «Más adelante» (nombra el hábito actual: decisión del usuario, Entrega 8) |
 | Hábito nuevo | Ya tienes esto dominado. ¿Sumamos «{hábito nuevo}»? |
-| Bajar nivel | Vamos a hacerlo más ligero por ahora: «{nuevo título}». Lo importante es mantener el ritmo. |
-| Nivel 1 → duración reducida | Probemos una versión más corta: {duración} min. |
-| No cabe en el presupuesto | Tu día está completo. Si quieres sumar algo, puedes subir tu tiempo diario en Perfil. |
+| Bajar nivel | Vamos a hacer «{título actual}» más ligero por ahora: «{nuevo título}». Lo importante es mantener el ritmo. (decisión del usuario, Entrega 8) |
+| Nivel 1 → duración reducida | Probemos una versión más corta de «{título}»: {duración} min. |
+| No cabe en el presupuesto | Tu día está completo. Si quieres sumar algo, puedes subir tu tiempo diario en Perfil. Botones: «Ir a Perfil», «Entendido» |
+| Volver a la duración normal (nuevo, por validar) | Te está saliendo muy bien con «{título}». ¿Volvemos a {duración} min? |
+| Bajar: botones (nuevo, por validar) | «Entendido», «Mantenerlo como estaba» |
+| Ya en la versión corta, menos del 50 % (nuevo, por validar) | Lo importante es seguir con «{título}», aunque sea poquito. Aquí seguimos contigo. Botón: «Entendido» |
+| Al aceptar subir (nuevo, por validar) | ¡Listo! Ahora es «{título}». |
+| Al aceptar un hábito nuevo (nuevo, por validar) | Sumamos «{título}» a tu plan. |
+| Ya no hay lugar en el plan (nuevo, por validar) | Tu plan ya tiene todos los hábitos que caben por ahora. |
 | Presupuesto superado (manual) | Con este hábito, algunos días suman {n}. Subimos tu tiempo diario a {n}; puedes cambiarlo en Perfil. ({n} en horas y minutos, por ejemplo «1 h 10 min») |
 
 ## 6. Estados de pantalla
@@ -166,12 +172,25 @@ Reglas:
 ### `adjust-plan` (instrucciones de sistema)
 
 ```
-Eres el redactor de Habit Green. Un hábito cambió de nivel o se agrega uno nuevo.
-Recibes el objetivo, el nivel nuevo, la duración y el título base del catálogo.
-Devuelve solo JSON: {"titulo": string, "descripcion": string, "mensaje": string}.
-- "titulo" y "descripcion" siguen las mismas reglas que en el plan inicial.
-- "mensaje": hasta 140 caracteres, celebra el avance (si sube) o normaliza el ajuste (si baja), sin culpa.
-- No cambies números. Mismas prohibiciones: nada médico, de dietas, de cantidades sensibles ni de inversión.
+Eres el redactor de Habit Green, una app de hábitos en español (tuteo) para personas de 22 a 45 años.
+Un hábito cambió de nivel o se agrega uno nuevo. Recibes la dirección del cambio ("subir", "bajar" o "nuevo"), el objetivo, el nivel, la duración en minutos, los días, el título base del catálogo y el obstáculo principal de la persona.
+Tu única tarea es redactar el título y la descripción. No cambies números, días ni niveles.
+
+Reglas:
+- Devuelve solo JSON con esta forma: {"titulo": string, "descripcion": string}.
+- "titulo": de 3 a 60 caracteres, empieza con un verbo, conserva la idea del título base y menciona la duración si el título base la menciona.
+- "descripcion": hasta 200 caracteres, concreta y amable.
+- Si la dirección es "bajar", el tono normaliza el ajuste: hacerlo más ligero también es avanzar. Nunca hables de fallar.
+- Tono cercano y sin culpa. No menciones rachas.
+- Prohibido: consejos médicos, diagnósticos, dietas, cantidades de comida o agua, horas de sueño, montos de dinero o consejos de inversión.
+```
+
+Se quitó el campo `mensaje` del borrador (Entrega 8): los mensajes de la tarjeta son fijos (sección 5).
+
+**Mensaje de usuario (ejemplo):**
+
+```
+{"direccion":"subir","objetivo":"dormir_mejor","nivel":2,"titulo_base":"…","duracion_min":10,"dias_semana":[1,2,3,4,5],"historial":"empieza_y_deja","obstaculo":"olvido"}
 ```
 
 ## Perfil

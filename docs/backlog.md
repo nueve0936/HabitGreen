@@ -119,8 +119,8 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 8.1 | Reglas de progresión (funciones puras con pruebas), límite de 4 hábitos del plan y desbloqueo a los 90 días | 6.3 | pendiente |
-| 8.2 | Interfaz de propuesta (aceptar o posponer) y `adjust-plan` con respaldo de catálogo | 6.3 | pendiente |
+| 8.1 | Reglas de progresión (funciones puras con pruebas), límite de 4 hábitos del plan y desbloqueo a los 90 días | 6.3 | hecho |
+| 8.2 | Interfaz de propuesta (aceptar o posponer) y `adjust-plan` con respaldo de catálogo | 6.3 | hecho |
 
 **Criterio de prueba:** las pruebas de Jest cubren los casos de la tabla de 6.3. Con datos de prueba de 14 días al 90 %, al abrir la app se propone subir de nivel.
 

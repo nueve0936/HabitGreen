@@ -561,6 +561,24 @@ Al llegar al nivel 3 con ≥ 85 % se propone un hábito nuevo (por ejemplo, la r
 
 La IA (`adjust-plan`) solo redacta textos cuando se agrega un hábito o se cambia de nivel; la decisión es código. Sin conexión, o si la IA falla, se usan los textos del catálogo. Al cambiar de nivel, el título personalizado se reemplaza por el del nuevo nivel. Los umbrales viven en `app_config`.
 
+**Decisiones del usuario (Entrega 8).**
+
+- **Dónde:** tarjetas en Hoy, como la reprogramación (una a la vez, «1 de N», después de las de reprogramación; nunca las dos a la vez).
+- **Bajar es automático** y su tarjeta ofrece «Entendido» y «Mantenerlo como estaba» (deshace el cambio). Subir y el hábito nuevo se proponen con «Sí, vamos» y «Más adelante».
+- **Hábito nuevo:** se propone uno solo, el nivel 1 del primer objetivo que el usuario no tiene en el plan (sin contar archivados), primero de sus áreas, que quepa en el presupuesto.
+- **Ventana:** se mide desde el último cambio de nivel (`habits.nivel_desde`), como mucho los 14 o 28 días, hasta ayer (hoy no cuenta). Con menos de 4 ocurrencias el hábito espera a la siguiente revisión.
+
+**Detalles de implementación.**
+
+- «Más adelante» solo cierra la tarjeta: la propuesta vuelve en la siguiente revisión si el cumplimiento sigue igual.
+- Como mucho una tarjeta de hábito nuevo (o de «día completo») por revisión. Con el límite de hábitos del plan alcanzado y sin desbloquear no se propone ninguno ni se muestra nada.
+- Desde la versión corta, subir primero vuelve a la duración normal del mismo nivel; con `poco_tiempo` la corta es la normal y sube de nivel.
+- En el nivel 1 corto con menos del 50 % no hay cambio: solo una tarjeta de apoyo.
+- Al cambiar de nivel se conservan la hora y los avisos del hábito; título, descripción, duración y días salen del catálogo (si cambian los días, se crea una versión nueva del horario desde hoy).
+- El desbloqueo de los 90 días se guarda en silencio (`user_settings.limite_plan_desbloqueado`).
+- La revisión escribe todo en SQLite y lo sube con la cola: las bajadas, `ultima_evaluacion` y el desbloqueo. Espera a que termine la sincronización en curso. Las tarjetas pendientes viven solo en el teléfono (tabla local `progresion_tarjetas`), para no perderse si se cierra la app; no se sincronizan.
+- `adjust-plan` recibe solo claves y números (objetivo, nivel, dirección, duración, días, historial, obstáculo); el título base lo toma del catálogo. Devuelve `{titulo, descripcion}`, validado con Zod; la app lo guarda solo si el hábito sigue en ese nivel con el título del catálogo. La lógica está en `src/features/progression/domain/progresion.ts`.
+
 ### 6.4 Tienda y precios
 
 | Orden | Precio (monedas) |
@@ -736,7 +754,7 @@ Tipografía (Lexend Deca, como en los mockups): H1 32/700, H2 24/700, H3 20/600,
 
 **Cambiar de pestaña.** Se toca la barra inferior o se desliza en horizontal entre pantallas (`TopTabs` de `expo-router/js-top-tabs`, con la barra abajo). Las pantallas fuera de las pestañas no se deslizan.
 
-**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; la planta más avanzada del usuario, con sus objetos (fase más alta; en un empate, una con hábitos y después el orden de las áreas), de 160 dp o de 120 dp si la pantalla mide menos de 760 dp de alto, con «Tu planta crece con cada paso» (ajuste al texto del mockup, decisión del usuario); «Pendientes de hoy», que cambia a «¡Todo listo por hoy!» cuando todo está hecho, con una barra de avance y «N de M hechos»; tarjetas claras con casilla redonda. Al marcar: casilla rellena de `accent` con ✓ blanca, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los avisos del check-in (tope de monedas, pago ya recibido, error) son flotantes y temporales (`Snackbar`), para no mover las tarjetas mientras se marcan. Arriba de la lista va la tarjeta de reprogramación (6.2), y un hábito que llegó movido muestra «Reprogramado para hoy» bajo su hora.
+**Hoy** (mockup «Pantalla Dashboard»). De la barra de avance hacia arriba queda fijo y solo se desplazan los hábitos; con letra del sistema de 1.5× o más, o una pantalla muy baja, se desplaza toda la pantalla para no dejar la lista sin espacio. Título «Hoy» y saldo de monedas arriba; la planta más avanzada del usuario, con sus objetos (fase más alta; en un empate, una con hábitos y después el orden de las áreas), de 160 dp o de 120 dp si la pantalla mide menos de 760 dp de alto, con «Tu planta crece con cada paso» (ajuste al texto del mockup, decisión del usuario); «Pendientes de hoy», que cambia a «¡Todo listo por hoy!» cuando todo está hecho, con una barra de avance y «N de M hechos»; tarjetas claras con casilla redonda. Al marcar: casilla rellena de `accent` con ✓ blanca, título tachado y la moneda animada; tocar la casilla otra vez lo deshace. Los avisos del check-in (tope de monedas, pago ya recibido, error) son flotantes y temporales (`Snackbar`), para no mover las tarjetas mientras se marcan. Arriba de la lista va la tarjeta de reprogramación (6.2), y un hábito que llegó movido muestra «Reprogramado para hoy» bajo su hora. Cuando no hay reprogramación pendiente, ahí mismo van las tarjetas de progresión (6.3).
 
 **Hábitos** (mockups «Hábitos #1–#2»). Título y botón «+» (acción principal única), fijos arriba; solo se desplaza la lista. Una sección por categoría con hábitos (icono sobre el tinte del área y nombre), sin filtros por ahora. Cada tarjeta tiene la misma casilla que en Hoy, activa solo si el hábito toca hoy (si no, «No toca hoy»), y el menú ⋮ con Editar, Pausar o Reanudar y Eliminar.
 

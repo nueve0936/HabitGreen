@@ -215,6 +215,7 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 - Si el siguiente nivel no cabe en el presupuesto: mantener y proponer un hábito nuevo de nivel 1; si tampoco cabe, sugerir subir el tiempo diario en Perfil, sin presión.
 - **Límite:** máximo 4 hábitos activos del plan. A los 90 días del plan, con ≥ 85 % en los últimos 28 días, se desbloquea y solo limita el presupuesto. Los manuales no tienen límite.
 - La IA interviene en el plan inicial y al redactar niveles nuevos. Las reglas de progresión son código propio.
+- Decisiones de la Entrega 8 (detalle en SDD 6.3): tarjetas en Hoy; bajar es automático con «Mantenerlo como estaba»; se propone un solo hábito nuevo sugerido; la ventana cuenta desde el último cambio de nivel.
 
 ### Plan
 

@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-import { ACOMPANAMIENTOS, AREAS, OBJETIVOS, OBSTACULOS, objetivoSchema } from './onboarding';
+import {
+  ACOMPANAMIENTOS,
+  AREAS,
+  HISTORIALES,
+  OBJETIVOS,
+  OBSTACULOS,
+  objetivoSchema,
+} from './onboarding';
 
 // Esquemas del plan (SDD 5.8–5.9). Los comparten la app y la Edge Function generate-plan: la
 // función valida con ellos lo que devuelve la IA y la app valida el borrador que recibe. Igual que
@@ -88,3 +95,27 @@ export function leerRespuestaIa(json: unknown, objetivos: readonly string[]): Re
     recibidos.every((o) => objetivos.includes(o));
   return iguales ? resultado.data : null;
 }
+
+// ---------------------------------------------------------------------------
+// adjust-plan (SDD 6.3): la IA solo redacta el título y la descripción de un nivel nuevo o de un
+// hábito que se agrega. El título base sale del catálogo en la Edge Function, no de la app.
+// ---------------------------------------------------------------------------
+
+export const peticionAjusteSchema = z.object({
+  objetivo: objetivoSchema,
+  nivel: nivelSchema,
+  direccion: z.enum(['subir', 'bajar', 'nuevo']),
+  /** Variante sin equipo ni espacio especial (P6 `recursos`). */
+  sin_recursos: z.boolean(),
+  duracion_min: z.number().int().positive(),
+  dias_semana: z.array(z.number().int().min(1).max(7)).min(1),
+  historial: z.enum(HISTORIALES),
+  obstaculo: z.enum(OBSTACULOS),
+});
+export type PeticionAjuste = z.infer<typeof peticionAjusteSchema>;
+
+export const respuestaAjusteSchema = z.object({
+  titulo: z.string().min(3).max(60),
+  descripcion: z.string().max(200),
+});
+export type RespuestaAjuste = z.infer<typeof respuestaAjusteSchema>;

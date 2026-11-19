@@ -94,6 +94,7 @@ export const TABLAS = [
       objetivo: T,
       nivel: N,
       usa_duracion_reducida: B,
+      nivel_desde: T,
       titulo: T,
       descripcion: T,
       duracion_min: N,
@@ -204,7 +205,10 @@ export function sqlTablasEspejo(): string {
   }).join('\n');
 }
 
-/** Tablas propias de la app: cola de salida y cursores de sincronización. */
+/**
+ * Tablas propias de la app: cola de salida, cursores de sincronización y las tarjetas pendientes
+ * de la progresión (SDD 6.3; solo viven en este teléfono, no se sincronizan).
+ */
 export const SQL_TABLAS_PROPIAS = `
 CREATE TABLE IF NOT EXISTS outbox (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -216,6 +220,13 @@ CREATE TABLE IF NOT EXISTS outbox (
   intentos INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS sync_state (tabla TEXT PRIMARY KEY, cursor TEXT);
+CREATE TABLE IF NOT EXISTS progresion_tarjetas (
+  user_id TEXT NOT NULL,
+  id TEXT NOT NULL,
+  orden INTEGER NOT NULL,
+  json TEXT NOT NULL,
+  PRIMARY KEY (user_id, id)
+);
 CREATE INDEX IF NOT EXISTS habit_logs_fecha_idx ON habit_logs (fecha);
 CREATE INDEX IF NOT EXISTS habit_schedules_habit_idx ON habit_schedules (habit_id);
 `;

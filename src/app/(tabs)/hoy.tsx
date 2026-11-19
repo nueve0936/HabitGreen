@@ -18,6 +18,8 @@ import { useCheckIn } from '@/features/habits/use-check-in';
 import { CoinBalance } from '@/features/rewards/components/coin-balance';
 import { CoinBurst } from '@/features/rewards/components/coin-burst';
 import { PhaseCelebration } from '@/features/rewards/components/phase-celebration';
+import { ProgressionCard } from '@/features/progression/components/progression-card';
+import { useProgresion } from '@/features/progression/use-progresion';
 import { DayDialog } from '@/features/reschedule/components/day-dialog';
 import { RescheduleCard } from '@/features/reschedule/components/reschedule-card';
 import { useReprogramacion } from '@/features/reschedule/use-reprogramacion';
@@ -31,7 +33,8 @@ import { colors } from '@/theme';
 // desplazan los hábitos. Todo sale de SQLite, así que funciona sin conexión; la sincronización sube
 // los cambios después. Al completar: moneda animada, o un aviso flotante de por qué no dio monedas,
 // y la celebración si la planta cambió de fase (SDD 6.1). En las semanas 3 y 4 del plan, quien suele
-// soltar los hábitos ve un mensaje de apoyo arriba de la lista (SDD 7.1).
+// soltar los hábitos ve un mensaje de apoyo arriba de la lista (SDD 7.1). Cada 7 días, las
+// tarjetas de la progresión proponen subir de nivel o sumar un hábito (SDD 6.3).
 
 // Con letra muy grande o una pantalla baja, la parte fija dejaría sin espacio a la lista: entonces
 // se desplaza toda la pantalla (guía de UX/UI, sección 6).
@@ -52,6 +55,7 @@ export default function HoyScreen() {
   const semanaApoyo = useLocalQuery(`apoyo-${userId}`, () => leerSemanaApoyo(userId));
   const checkIn = useCheckIn(userId);
   const reprogramar = useReprogramacion(userId);
+  const progresion = useProgresion(userId);
   const { height, fontScale } = useWindowDimensions();
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
 
@@ -136,6 +140,19 @@ export default function HoyScreen() {
           onDejar={reprogramar.dejar}
         />
       ) : null}
+      {/* Progresión (SDD 6.3): después de la reprogramación, nunca las dos a la vez. */}
+      {!reprogramar.actual && progresion.actual ? (
+        <ProgressionCard
+          tarjeta={progresion.actual}
+          indice={progresion.indice}
+          total={progresion.total}
+          ocupado={progresion.ocupado}
+          onAceptar={progresion.aceptar}
+          onCerrar={progresion.cerrar}
+          onMantener={progresion.mantener}
+          onIrAPerfil={progresion.irAPerfil}
+        />
+      ) : null}
       {apoyo ? <Alert variant="info" message={apoyo.mensaje} /> : null}
       {items.length === 0 ? (
         <AppText tone="ink-soft">{t.vacio}</AppText>
@@ -173,15 +190,16 @@ export default function HoyScreen() {
     </>
   );
 
-  // Un solo aviso flotante para el check-in y la reprogramación: los errores van primero.
-  const error = checkIn.error ?? reprogramar.error;
+  // Un solo aviso flotante para el check-in, la reprogramación y la progresión: los errores primero.
+  const error = checkIn.error ?? reprogramar.error ?? progresion.error;
   const avisoFlotante = (
     <Snackbar
-      mensaje={error ?? checkIn.aviso ?? reprogramar.aviso}
+      mensaje={error ?? checkIn.aviso ?? reprogramar.aviso ?? progresion.aviso}
       variant={error ? 'error' : 'exito'}
       onCerrar={() => {
         checkIn.cerrarAvisos();
         reprogramar.cerrarAvisos();
+        progresion.cerrarAvisos();
       }}
     />
   );

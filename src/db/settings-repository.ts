@@ -9,12 +9,18 @@ import {
   type HorasAvisos,
   type MomentoAviso,
 } from '@/features/reminders/domain/planificar-avisos';
+import {
+  PROGRESION_POR_DEFECTO,
+  type ConfigProgresion,
+} from '@/features/progression/domain/progresion';
 import { supabase } from '@/lib/supabase';
 import {
   ACOMPANAMIENTOS,
   OBSTACULOS,
+  TIEMPOS,
   type Acompanamiento,
   type Obstaculo,
+  type Tiempo,
 } from '@/schemas/onboarding';
 import { pedirSincronizacion } from '@/sync/sync-engine';
 
@@ -66,6 +72,39 @@ export async function leerConfigAvisos(db: SQLiteDatabase): Promise<ConfigAvisos
   const fuente =
     typeof valor === 'object' && valor !== null ? (valor as Partial<ConfigAvisos>) : {};
   return { ...AVISOS_POR_DEFECTO, ...fuente };
+}
+
+/** `app_config.progresion` (SDD 6.3), con valores por defecto si aún no se descarga. */
+export async function leerConfigProgresion(db: SQLiteDatabase): Promise<ConfigProgresion> {
+  const valor = await leerValorConfig(db, 'progresion');
+  const fuente = (typeof valor === 'object' && valor !== null ? valor : {}) as Record<
+    string,
+    unknown
+  >;
+  const config = { ...PROGRESION_POR_DEFECTO };
+  for (const clave of Object.keys(config) as (keyof ConfigProgresion)[]) {
+    if (typeof fuente[clave] === 'number') config[clave] = fuente[clave];
+  }
+  return config;
+}
+
+/** `app_config.presupuestos` (minutos por respuesta de la P4), o los del SDD. */
+export async function leerPresupuestos(db: SQLiteDatabase): Promise<Record<Tiempo, number>> {
+  const valor = await leerValorConfig(db, 'presupuestos');
+  const fuente = (typeof valor === 'object' && valor !== null ? valor : {}) as Record<
+    string,
+    unknown
+  >;
+  const presupuestos: Record<Tiempo, number> = {
+    menos_10: 10,
+    '10_20': 20,
+    '20_40': 40,
+    mas_40: 60,
+  };
+  for (const clave of TIEMPOS) {
+    if (typeof fuente[clave] === 'number') presupuestos[clave] = fuente[clave];
+  }
+  return presupuestos;
 }
 
 export type Ajustes = {

@@ -704,6 +704,28 @@ export const es = {
     reprogramadoHoy: 'Reprogramado para hoy',
     error: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
   },
+  // Progresión (SDD 6.3, docs/textos.md 5): tarjetas en Hoy cada 7 días.
+  progresion: {
+    subir: 'Te está saliendo muy bien «{actual}». ¿Probamos con «{titulo}» ({min} min)?',
+    subirCompleta: 'Te está saliendo muy bien con «{titulo}». ¿Volvemos a {min} min?',
+    nuevo: 'Ya tienes esto dominado. ¿Sumamos «{titulo}»?',
+    sinEspacio:
+      'Tu día está completo. Si quieres sumar algo, puedes subir tu tiempo diario en Perfil.',
+    bajar:
+      'Vamos a hacer «{actual}» más ligero por ahora: «{titulo}». Lo importante es mantener el ritmo.',
+    bajarCorta: 'Probemos una versión más corta de «{titulo}»: {min} min.',
+    apoyo: 'Lo importante es seguir con «{titulo}», aunque sea poquito. Aquí seguimos contigo.',
+    siVamos: 'Sí, vamos',
+    masAdelante: 'Más adelante',
+    irAPerfil: 'Ir a Perfil',
+    entendido: 'Entendido',
+    mantener: 'Mantenerlo como estaba',
+    contador: '{n} de {total}',
+    listoSubir: '¡Listo! Ahora es «{titulo}».',
+    listoNuevo: 'Sumamos «{titulo}» a tu plan.',
+    sinLugar: 'Tu plan ya tiene todos los hábitos que caben por ahora.',
+    error: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
+  },
   sesion: {
     errorPerfil: 'No pudimos cargar tu perfil.',
   },

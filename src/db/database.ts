@@ -20,8 +20,8 @@ import {
 // no se borra, para no perder lo que se hizo sin conexión.
 
 const NOMBRE = 'habitgreen.db';
-// 3: se agrega onboarding_answers (Entrega 5).
-const ESQUEMA_VERSION = 3;
+// 3: se agrega onboarding_answers (Entrega 5). 4: habits.nivel_desde (Entrega 8).
+const ESQUEMA_VERSION = 4;
 
 let abierta: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -117,5 +117,6 @@ export async function vaciarBaseLocal(): Promise<void> {
     for (const tabla of TABLAS) await db.runAsync(`DELETE FROM ${tabla.nombre}`);
     await db.runAsync('DELETE FROM outbox');
     await db.runAsync('DELETE FROM sync_state');
+    await db.runAsync('DELETE FROM progresion_tarjetas');
   });
 }

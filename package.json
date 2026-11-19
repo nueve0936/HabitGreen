@@ -70,7 +70,7 @@
     "format": "prettier --write .",
     "functions:sync": "node scripts/sync-shared.mjs",
     "functions:serve": "npm run functions:sync && supabase functions serve",
-    "functions:deploy": "npm run functions:sync && supabase functions deploy generate-plan",
+    "functions:deploy": "npm run functions:sync && supabase functions deploy generate-plan && supabase functions deploy adjust-plan",
     "build:dev": "npx eas-cli@latest build --profile development --platform android",
     "start:dev": "expo start --dev-client",
     "start:usb": "expo start --dev-client --localhost",
