@@ -48,7 +48,7 @@ export type HoyLocal = {
   tieneHabitos: boolean;
 };
 
-async function categoriasPorId(db: SQLiteDatabase): Promise<Map<string, Area>> {
+export async function categoriasPorId(db: SQLiteDatabase): Promise<Map<string, Area>> {
   const filas = await db.getAllAsync<{ id: string; clave: string }>(
     'SELECT id, clave FROM categories',
   );

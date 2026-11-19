@@ -119,7 +119,9 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Generando plan | Estamos preparando tu plan… (a los 10 s: «Sigue en proceso…») | Necesitas conexión para crear tu plan. Reintentar |
 | Sin conexión (banner) | Sin conexión. Tus cambios se guardan y se sincronizan después. | — |
 
-**Rachas:** «Racha actual: {n}» y «Tu mejor racha: {n}». Al romperse: «Tu mejor racha fue de {n}. ¿Empezamos otra?». Con `desanimo`, solo la mejor racha.
+**Rachas:** «Racha actual: {n}» y «Tu mejor racha: {n}» (juntas solo si la mejor es mayor, separadas por «·»). Al romperse: «Tu mejor racha fue de {n}. ¿Empezamos otra?». Con `desanimo`, solo la mejor racha. Sin ninguna racha todavía, no se dice nada.
+
+**Progreso:** pestañas «Diario», «Semanal» y «Mensual»; en Mensual, «Mes» y «Año». «Cumpliste {n} de {total} esta semana / este mes / este año» («esa semana / ese mes / ese año» en periodos pasados). Sin nada que contar: «Todavía no hay nada que contar esta semana.» o «No tenías hábitos esa semana.». Diario: «Llevas {n} de {total} hoy», «Hiciste {n} de {total} el lunes 16», «El jueves 19 te tocan {total} hábitos» («te toca 1 hábito»), «Hoy no tienes hábitos.», «Este día no tenías hábitos.», «Este día no te toca ningún hábito.». Estados: «Hecho», «Sin marcar», «Pendiente», «Te toca», «Reprogramado», «No toca». Racha corta: «Mejor: {n}». Botón «Hoy» (TalkBack: «Volver a hoy»). Por hábito: «{n} de {total}» y «Sin días en este periodo». Flechas: «Semana anterior» y «Semana siguiente» (o mes y año). Filtro por área: «Todos» y el nombre de cada área; hoja «Mostrar»; TalkBack: «Filtrar por área: {área}» y, al tocar fuera, «Cerrar sin cambiar el filtro».
 
 **Nota de apoyo profesional** (revisión del plan, con `manejar_estres`): «Estos hábitos ayudan a sentirte mejor día a día. Si el malestar es intenso o no mejora, hablar con un profesional de la salud puede ayudarte.»
 

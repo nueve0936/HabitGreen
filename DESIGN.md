@@ -250,6 +250,10 @@ Casilla redonda con zona táctil de 48 dp, título y «hora · duración». Hech
 
 Tarjeta blanca arriba de la lista de Hoy, con un calendario verde en un círculo verde claro: «Movimos «Caminar» al jueves 19. Puedes cambiarlo.». Dos botones con borde lado a lado («Elegir otro día», «Está bien») y «Dejarlo» como enlace. Tono neutro, nunca de reproche. Un hábito que llegó movido dice «Reprogramado para hoy» en su tarjeta.
 
+### Progreso
+
+Como la pantalla vieja «Calendario» de Figma, con los colores de hoy. Pestañas Diario / Semanal / Mensual en una píldora con borde: la activa sobre verde rocío, con ✓ y negritas. Arriba a la derecha, un botón «Hoy» con calendario aparece solo cuando te alejaste de hoy. **Diario:** «‹ 16–22 nov ›» y debajo 7 fichas blancas fijas, de lunes a domingo; las flechas cambian de semana; la elegida con borde verde brote y fondo verde rocío, y la de hoy dice «Hoy». Debajo, «Llevas 1 de 2 hoy» con su barra y los hábitos del día (los de hoy se marcan como en Hoy). **Semanal:** «‹ 16–22 nov ›», la frase con barras redondeadas y, por área, una tarjeta por hábito con sus 7 celdas bajo «L 16 · M 17…». En Semanal y Mensual, un campo «Todos ▾» bajo las flechas abre una hoja inferior para ver una sola área, con su icono sobre su tinte. **Mensual:** lista de tarjetas con el nombre y la racha a la izquierda y el mini calendario a la derecha; «Año» cambia a una cuadrícula de puntos del año. Las celdas hechas van rellenas de verde y las demás se distinguen por su forma (contorno, punteado o punto). La racha es un cuadro verde rocío con el número y una llama.
+
 ### Ruedas
 
 Fecha, duración del hábito y tiempo diario de Perfil se eligen con ruedas: tres opciones a la vista y la elegida en negritas entre dos líneas verde brote. En las de horas y minutos (duración y tiempo diario) se puede tocar el número del centro y escribirlo; el total va debajo en h3 y los botones «Cancelar» y «Aceptar» son los mismos en los dos diálogos.

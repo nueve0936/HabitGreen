@@ -71,12 +71,17 @@ export function horarioDeReferencia(
   return ordenados.find((h) => h.vigente_desde > fecha) ?? ordenados.at(-1);
 }
 
+/**
+ * `incluir` decide si un hábito cuenta en esa fecha. Por defecto, solo los visibles (Hoy, Hábitos,
+ * reprogramación); las estadísticas pasan su propia regla para archivados y pausados (SDD 8).
+ */
 export function habitosDelDia(
   fecha: string,
   habitos: readonly Habito[],
   horarios: readonly Horario[],
   ocurrencias: readonly Ocurrencia[],
   registros: readonly Registro[],
+  incluir: (habito: Habito, fecha: string) => boolean = estaVisible,
 ): HabitoDelDia[] {
   const dia = diaIso(fecha);
   const hechos = new Set(
@@ -94,7 +99,7 @@ export function habitosDelDia(
 
   const resultado: HabitoDelDia[] = [];
   for (const habito of habitos) {
-    if (!estaVisible(habito)) continue;
+    if (!incluir(habito, fecha)) continue;
     const horario = horarioVigente(
       horarios.filter((h) => h.habit_id === habito.id),
       fecha,

@@ -66,7 +66,7 @@ Público: personas de 22 a 45 años, incluidas quienes les cuesta empezar o sost
 | IA | Interfaz `AiProvider`: Gemini con nivel gratuito (por defecto), Claude u OpenAI. Solo desde Edge Functions, salida JSON validada con Zod |
 | Notificaciones | expo-notifications (locales) |
 | Ubicación | expo-location + expo-task-manager (geofencing) |
-| Gráficas | react-native-gifted-charts |
+| Gráficas | Propias: barras con `View` y la línea del año con `react-native-svg` (sin librería de gráficas) |
 | Calidad | ESLint, Prettier, Jest (Sentry antes de publicar) |
 | Entrega | EAS Build: development build de Android y APK de preview (GitHub Actions y EAS Submit antes de publicar) |
 

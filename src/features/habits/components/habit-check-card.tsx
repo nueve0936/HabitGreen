@@ -1,5 +1,5 @@
 import { Check, EllipsisVertical, Pause } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, View, type HostInstance } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
@@ -33,6 +33,8 @@ export type HabitCheckCardProps = {
   /** El globo de este hábito está abierto: el ⋮ se marca. */
   menuAbierto?: boolean;
   onPress?: () => void;
+  /** Algo pequeño junto al ⋮, como la racha en Progreso. Hoy y Hábitos no lo usan. */
+  accesorio?: ReactNode;
 };
 
 export function HabitCheckCard({
@@ -48,6 +50,7 @@ export function HabitCheckCard({
   onOpciones,
   menuAbierto = false,
   onPress,
+  accesorio,
 }: HabitCheckCardProps) {
   const t = es.habitos;
   const [unRenglon, setUnRenglon] = useState(true);
@@ -141,6 +144,8 @@ export function HabitCheckCard({
           </AppText>
         ) : null}
       </View>
+
+      {accesorio}
 
       {onOpciones ? (
         <Pressable

@@ -109,9 +109,9 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 7.1 | Agregaciones desde SQLite con las reglas de ocurrencias y hábitos archivados | 8 | pendiente |
-| 7.2 | Gráficas de semana, mes y año con resumen en texto; filtros | 8 | pendiente |
-| 7.3 | Rachas por hábito (actual y mejor) | 8 | pendiente |
+| 7.1 | Agregaciones desde SQLite con las reglas de ocurrencias y hábitos archivados | 8 | hecho |
+| 7.2 | Gráficas de semana, mes y año con resumen en texto; filtro por área (hoja inferior) | 8 | hecho |
+| 7.3 | Rachas por hábito (actual y mejor) | 8 | hecho |
 
 **Criterio de prueba:** después de unos días de uso, las gráficas coinciden con lo que marcaste, y con el modo avión siguen funcionando.
 
@@ -143,3 +143,9 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 **Criterio de prueba:** al llegar a un lugar guardado, llega un aviso del hábito si está programado para hoy y no está hecho.
 Si al terminar la entrega 9 no quedan al menos 2 días, esta entrega se marca `recortado` y esos días son margen.
+
+## Pendientes para el refinamiento final (después de todas las entregas)
+
+- Revertir los datos de prueba del historial de la Entrega 7 (206 registros desde el 1 de agosto y 2 hábitos de prueba). Por decisión del usuario se quedan para seguir probando. Script fuera del repositorio: `AppMovil/datos-prueba-habitgreen/datos-prueba-e7.cjs <proyecto> revertir`.
+- Zonas táctiles de 42 dp: en NativeWind, `h-12` / `w-12` miden 42 dp (1 rem = 14 dp en nativo). Afecta a los botones, el botón «atrás», la casilla y el ⋮ de las tarjetas, diálogos y campos (medido en la revisión de la Entrega 7). Hay que decidir entre subir la base de NativeWind (todo crece un 14 %) o fijar 48 dp en cada pieza.
+- Leyenda de Progreso: considerar agregar «Pendiente» (contorno punteado verde de hoy).
