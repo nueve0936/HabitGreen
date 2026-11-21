@@ -49,8 +49,7 @@ function datos(cambios: Partial<DatosAvisos> = {}): DatosAvisos {
     horas: HORAS_POR_DEFECTO,
     config: AVISOS_POR_DEFECTO,
     momento: null,
-    historial: null,
-    inicioPlan: null,
+    planes: [],
     habitos: [habito('a')],
     horarios: [horario('a')],
     ocurrencias: [],
@@ -279,7 +278,10 @@ describe('planificarAvisos', () => {
 
   it('apoyo de la semana 3: el lunes, a la hora del momento', () => {
     const apoyo = planificarAvisos(
-      datos({ historial: 'semanas_y_suelta', inicioPlan: '2026-11-02', momento: 'manana' }),
+      datos({
+        planes: [{ historial: 'semanas_y_suelta', inicioPlan: '2026-11-02' }],
+        momento: 'manana',
+      }),
       AHORA,
     ).filter((a) => a.id.startsWith('apoyo'));
     expect(apoyo).toHaveLength(1);
@@ -289,7 +291,10 @@ describe('planificarAvisos', () => {
 
   it('sin apoyo con el estilo mínimo', () => {
     const avisos = planificarAvisos(
-      datos({ estilo: 'minimo', historial: 'semanas_y_suelta', inicioPlan: '2026-11-02' }),
+      datos({
+        estilo: 'minimo',
+        planes: [{ historial: 'semanas_y_suelta', inicioPlan: '2026-11-02' }],
+      }),
       AHORA,
     );
     expect(avisos.some((a) => a.id.startsWith('apoyo'))).toBe(false);

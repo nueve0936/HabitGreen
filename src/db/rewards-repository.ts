@@ -25,8 +25,8 @@ export type Accesorio = {
   orden: number;
   /** id de user_accessories si ya es del usuario. */
   propioId: string | null;
-  /** category_id de la planta que lo lleva puesto. */
-  categoriaEquipada: string | null;
+  /** category_id de las plantas que lo llevan puesto (puede ser más de una). */
+  categoriasEquipadas: string[];
 };
 
 export type PlantaJardin = {
@@ -42,7 +42,7 @@ export type Jardin = { plantas: PlantaJardin[]; accesorios: Accesorio[]; saldo: 
 const ORDEN_TIPOS: TipoAccesorio[] = ['maceta', 'lentes', 'sombrero'];
 
 async function leerAccesorios(db: SQLiteDatabase, userId: string): Promise<Accesorio[]> {
-  const catalogo = await leerFilas<Omit<Accesorio, 'propioId' | 'categoriaEquipada'>>(
+  const catalogo = await leerFilas<Omit<Accesorio, 'propioId' | 'categoriasEquipadas'>>(
     db,
     'accessories',
     '1 = 1 ORDER BY tipo, orden',
@@ -50,14 +50,14 @@ async function leerAccesorios(db: SQLiteDatabase, userId: string): Promise<Acces
   const propios = await leerFilas<{
     id: string;
     accessory_id: string;
-    categoria_equipada: string | null;
+    categorias_equipadas: string[] | null;
   }>(db, 'user_accessories', 'user_id = ? AND eliminado_en IS NULL', [userId]);
   return catalogo.map((a) => {
     const propio = propios.find((p) => p.accessory_id === a.id);
     return {
       ...a,
       propioId: propio?.id ?? null,
-      categoriaEquipada: propio?.categoria_equipada ?? null,
+      categoriasEquipadas: propio?.categorias_equipadas ?? [],
     };
   });
 }
@@ -95,7 +95,7 @@ export async function leerJardin(userId: string): Promise<Jardin> {
         fase: progreso.find((p) => p.category_id === categoria.id)?.fase ?? 1,
         tieneHabitos: conHabitos.some((h) => h.category_id === categoria.id),
         equipados: accesorios
-          .filter((a) => a.categoriaEquipada === categoria.id)
+          .filter((a) => a.categoriasEquipadas.includes(categoria.id))
           .sort((a, b) => ORDEN_TIPOS.indexOf(a.tipo) - ORDEN_TIPOS.indexOf(b.tipo)),
       },
     ];
@@ -104,29 +104,30 @@ export async function leerJardin(userId: string): Promise<Jardin> {
 }
 
 /**
- * Pone el accesorio en la planta (o lo quita con null). Si estaba en otra planta, devuelve esa
- * categoría para avisar «Lo movimos…».
+ * Pone el accesorio en la planta (`poner` = true) o se lo quita solo a ella. Las demás plantas que
+ * lo llevan no cambian.
  */
 export async function equiparAccesorio(
   userId: string,
   accesorio: Accesorio,
-  categoryId: string | null,
-): Promise<{ movidoDe: string | null }> {
+  categoryId: string,
+  poner: boolean,
+): Promise<void> {
   if (accesorio.propioId === null) throw new Error('El accesorio no es del usuario');
   const propioId = accesorio.propioId;
   const db = await getDb();
   const propios = (await leerAccesorios(db, userId)).flatMap((a) =>
     a.propioId === null
       ? []
-      : [{ id: a.propioId, tipo: a.tipo, categoria_equipada: a.categoriaEquipada }],
+      : [{ id: a.propioId, tipo: a.tipo, categorias_equipadas: a.categoriasEquipadas }],
   );
   const actual = propios.find((p) => p.id === propioId);
   if (!actual) throw new Error('El accesorio no es del usuario');
 
   await enTransaccion(db, async () => {
     const ahora = new Date().toISOString();
-    for (const cambio of cambiosAlEquipar(actual, categoryId, propios)) {
-      const datos = { categoria_equipada: cambio.categoria_equipada };
+    for (const cambio of cambiosAlEquipar(actual, categoryId, poner, propios)) {
+      const datos = { categorias_equipadas: cambio.categorias_equipadas };
       await actualizarFila(
         db,
         'user_accessories',
@@ -143,22 +144,18 @@ export async function equiparAccesorio(
   });
   avisarCambioLocal();
   pedirSincronizacion();
-  const anterior = actual.categoria_equipada;
-  return {
-    movidoDe: categoryId !== null && anterior !== null && anterior !== categoryId ? anterior : null,
-  };
 }
 
 /**
  * «Equipar ahora» en la Tienda (SDD 9.4). Con `origen`, lo pone en la planta desde la que se abrió
- * la Tienda; si ya lo lleva una planta, no lo mueve; si no, la app elige. Devuelve dónde quedó, o
+ * la Tienda; si no, la app elige una que todavía no lo lleve. Devuelve dónde quedó, o
  * null si el objeto todavía no llega a este teléfono, para que el usuario pueda reintentar.
  */
 export async function equiparDesdeTienda(
   userId: string,
   accessoryId: string,
   origen: Area | null,
-): Promise<{ area: Area; tipo: TipoAccesorio } | null> {
+): Promise<{ area: Area; tipo: TipoAccesorio; puesto: string; quitado: string | null } | null> {
   let jardin = await leerJardin(userId);
   let accesorio = jardin.accesorios.find((a) => a.id === accessoryId);
   if (accesorio?.propioId == null) {
@@ -169,13 +166,29 @@ export async function equiparDesdeTienda(
   if (!accesorio || accesorio.propioId === null) return null;
 
   const origenId = jardin.plantas.find((p) => p.area === origen)?.categoryId ?? null;
-  const destino =
-    origenId ?? accesorio.categoriaEquipada ?? plantaParaEquipar(accesorio.tipo, jardin.plantas);
+  const destino = plantaParaEquipar(
+    accesorio.tipo,
+    jardin.plantas,
+    origenId,
+    accesorio.categoriasEquipadas,
+  );
   const planta = jardin.plantas.find((p) => p.categoryId === destino);
   if (!planta) return null;
 
-  await equiparAccesorio(userId, accesorio, planta.categoryId);
-  return { area: planta.area, tipo: accesorio.tipo };
+  // Si la planta ya llevaba otro del mismo tipo, se reemplaza: se avisa al llegar a sus detalles.
+  const quitado = jardin.accesorios.find(
+    (a) =>
+      a.id !== accesorio.id &&
+      a.tipo === accesorio.tipo &&
+      a.categoriasEquipadas.includes(planta.categoryId),
+  );
+  await equiparAccesorio(userId, accesorio, planta.categoryId, true);
+  return {
+    area: planta.area,
+    tipo: accesorio.tipo,
+    puesto: accesorio.nombre,
+    quitado: quitado?.nombre ?? null,
+  };
 }
 
 export type ResultadoCompra = 'comprado' | 'sin_conexion' | 'saldo_insuficiente' | 'error';

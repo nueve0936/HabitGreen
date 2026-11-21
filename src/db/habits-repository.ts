@@ -13,6 +13,7 @@ import {
   type Registro,
 } from '@/features/habits/domain/habitos-del-dia';
 import { nuevaVersionHorario, type VersionHorario } from '@/features/habits/domain/horario';
+import { alcanzoLimiteHabitos, limiteHabitos } from '@/features/habits/domain/limite-habitos';
 import { ajustePresupuesto, minutosPorDia } from '@/features/habits/domain/presupuesto';
 import { aplicarArchivar } from '@/features/rewards/domain/recompensas';
 import { fechaLocal } from '@/lib/dates';
@@ -388,4 +389,38 @@ export async function archivarHabito(
       },
     ];
   });
+}
+
+export type CupoHabitos = { limite: number | null; alcanzado: boolean };
+
+/** Hábitos activos (del plan y propios), sin pausados ni archivados: los que cuenta el límite. */
+export async function contarHabitosActivos(db: SQLiteDatabase): Promise<number> {
+  const fila = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM habits WHERE archivado_en IS NULL AND activo = 1',
+  );
+  return fila?.n ?? 0;
+}
+
+/**
+ * ¿Puede crear otro hábito? Para el usuario guiado hay un límite que cuenta los del plan y los
+ * propios y crece con las subidas de nivel de su plan (ver `limite-habitos`).
+ */
+export async function leerCupoHabitos(
+  userId: string,
+  modo: 'guiado' | 'tradicional' | null,
+): Promise<CupoHabitos> {
+  const db = await getDb();
+  const ajustes = await db.getFirstAsync<{
+    subidas_plan: number | null;
+    limite_plan_desbloqueado: number | null;
+  }>('SELECT subidas_plan, limite_plan_desbloqueado FROM user_settings WHERE user_id = ?', [
+    userId,
+  ]);
+  const limite = limiteHabitos({
+    modo,
+    subidas: ajustes?.subidas_plan ?? 0,
+    desbloqueado: ajustes?.limite_plan_desbloqueado === 1,
+  });
+  if (limite === null) return { limite, alcanzado: false };
+  return { limite, alcanzado: alcanzoLimiteHabitos(await contarHabitosActivos(db), limite) };
 }

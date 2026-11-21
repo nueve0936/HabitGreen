@@ -81,7 +81,8 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Objeto que ya era tuyo | Este objeto ya está en tu colección. |
 | Fase bloqueada | Sigue cuidando tu planta para descubrirla. |
 | Objetos, sin compras | Todavía no tienes {tipo}. Consíguelos en la Tienda. |
-| Equipar en otra planta | Lo movimos a tu planta de {categoría}. |
+| Objeto que también lleva otra planta (TalkBack) | {nombre}, también lo lleva tu planta de {categorías}. Toca para ponérselo. |
+| «Equipar ahora» reemplazó otro objeto | Le pusimos {nuevo} en lugar de {anterior}. |
 
 ## 4. Reprogramación
 
@@ -91,10 +92,31 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Varias propuestas | {n} de {total} |
 | Sin día disponible | Esta semana está completa para «{hábito}». La dejamos para la próxima. Botón: «Entendido» |
 | Elegir otro día (diálogo) | ¿Qué día te queda mejor? Opciones: «Hoy», «Mañana», «Jue 19». Enlace: «Cancelar» |
+| Al mover (aviso de éxito) | Listo: «{hábito}» quedó {destino}. ({destino}: «para hoy», «para mañana» o «para el jueves 19».) Al dejarla no hay aviso. |
 | Con `desanimo`, uno (aviso suave) | Movimos «{hábito}» {destino}. |
 | Con `desanimo`, varios (aviso suave) | Acomodamos {n} hábitos en días libres. |
 | Hábito movido, en su tarjeta | Reprogramado para hoy |
 | Error al guardar | No pudimos guardar el cambio. Inténtalo de nuevo. |
+
+## Asistente de hábito: salir y límites (pulidos antes del APK)
+
+| Situación | Texto |
+| --- | --- |
+| Salir con cambios | ¿Guardar los cambios? · Si sales ahora, se pierde lo que cambiaste. · Botones: «Guardar», «Descartar», «Cancelar» |
+| Nombre largo | Usa {n} caracteres o menos. (30; al editar, el largo actual si era mayor) |
+| Descripción larga | Usa {n} caracteres o menos. (100) |
+| Contador (TalkBack) | {n} de {max} caracteres |
+| Correo largo | El correo puede tener hasta {n} caracteres. (50) |
+
+## Estados de inactividad (pulidos antes del APK)
+
+| Situación | Texto |
+| --- | --- |
+| Casilla de una lista de ayer | Cambió el día. Ya actualizamos tu lista. |
+| Borrador al crear un hábito | Tienes un hábito sin terminar. ¿Seguimos? · Botones: «Cancelar», «Seguir» |
+| Límite al reanudar un hábito en pausa | Ya tienes {n} hábitos activos. · Para reanudar este, pausa o elimina otro. Conforme avances en tu plan podrás tener más. · Botón: «Entendido» |
+| Límite de hábitos (guiado, plan y propios) | Ya tienes {n} hábitos. · Para sumar otro, pausa o elimina uno. Conforme avances en tu plan podrás agregar más. · Botón: «Entendido» |
+| Sesión cerrada sola (bienvenida e inicio de sesión; se ve una vez y se quita a los 10 s) | Tu sesión caducó. Vuelve a iniciar sesión. |
 
 ## 5. Progresión
 
@@ -117,7 +139,7 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 
 | Pantalla | Vacío | Error |
 | --- | --- | --- |
-| Hoy | Hoy no tienes hábitos programados. Disfruta el día. | No pudimos cargar tus hábitos. Reintentar |
+| Hoy | Hoy no tienes pendientes · Disfruta el día. Tus hábitos vuelven pronto. · Botón: «Ver mis hábitos» | No pudimos cargar tus hábitos. Reintentar |
 | Hábitos | Todavía no tienes hábitos. Crea el primero. | No pudimos cargar tus hábitos. Reintentar |
 | Estadísticas | Cuando completes tus primeros hábitos, aquí verás tu avance. | No pudimos calcular tus estadísticas. Reintentar |
 | Jardín | (siempre hay 5 plantas) | No pudimos cargar tu jardín. Reintentar |
@@ -155,7 +177,7 @@ Tu única tarea es redactar textos. No cambies números, días, horarios ni nive
 Reglas:
 - Devuelve solo JSON con esta forma: {"resumen": string, "habitos": [{"objetivo": string, "titulo": string, "descripcion": string}]}.
 - Un elemento en "habitos" por cada objetivo recibido, con la misma clave "objetivo".
-- "titulo": de 3 a 60 caracteres, empieza con un verbo y menciona la duración si aplica.
+- "titulo": de 3 a 30 caracteres, empieza con un verbo y menciona la duración si aplica.
 - "descripcion": hasta 200 caracteres, concreta y amable.
 - "resumen": hasta 300 caracteres, explica por qué el plan empieza pequeño.
 - Tono cercano y sin culpa. No menciones fallos ni rachas.
@@ -178,7 +200,7 @@ Tu única tarea es redactar el título y la descripción. No cambies números, d
 
 Reglas:
 - Devuelve solo JSON con esta forma: {"titulo": string, "descripcion": string}.
-- "titulo": de 3 a 60 caracteres, empieza con un verbo, conserva la idea del título base y menciona la duración si el título base la menciona.
+- "titulo": de 3 a 30 caracteres, empieza con un verbo, conserva la idea del título base y menciona la duración si el título base la menciona.
 - "descripcion": hasta 200 caracteres, concreta y amable.
 - Si la dirección es "bajar", el tono normaliza el ajuste: hacerlo más ligero también es avanzar. Nunca hables de fallar.
 - Tono cercano y sin culpa. No menciones rachas.

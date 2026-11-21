@@ -124,15 +124,38 @@ Tareas de la demo de 3 semanas, ordenadas en **entregas verticales**. Al termina
 
 **Criterio de prueba:** las pruebas de Jest cubren los casos de la tabla de 6.3. Con datos de prueba de 14 días al 90 %, al abrir la app se propone subir de nivel.
 
+## Pulidos antes del APK (lista del usuario)
+
+Antes de la Entrega 9. Se hacen por bloques; cada uno se confirma con el usuario antes de empezar.
+
+| # | Bloque | Estado |
+| --- | --- | --- |
+| P.A | Formulario con barra y botón fijos; salir del asistente con «Guardar / Descartar / Cancelar»; nombre 30 y descripción 100 con contador; correo hasta 50; títulos de la IA hasta 30 | hecho |
+| P.B | Hoy sin pendientes con «Ver mis hábitos»; aviso de éxito al mover una reprogramación (la pestaña activa ya estaba resuelta, según el usuario). En la revisión de Impeccable: el número del día ya no queda solo en otra línea, y todo lo tocable de la app pasa de 42 a 48 dp | hecho |
+| P.C | Estados de inactividad: cambio de día en silencio (listas, Progreso, diálogos y casilla de ayer), sesión que solo caduca tras 60 días sin conexión con «Tu sesión caducó…», borrador al crear un hábito con «¿Seguimos?», y el formulario y la revisión del plan se retoman donde te quedaste | hecho |
+| P.D | Límite total de hábitos del usuario guiado, del plan y propios (3, más 1 por subida de nivel del plan, libre tras el desbloqueo; también frena las propuestas de la progresión y «Reanudar») con diálogo; un objeto puede estar en varias plantas; aviso «Le pusimos … en lugar de …» al reemplazar desde la Tienda. Cuenta lista, diálogo de «Empezar» y año de la fecha: descartados por el usuario. En la revisión de Impeccable: el fondo de los diálogos ya no se anuncia en TalkBack | hecho |
+
+## Varios planes por usuario (decisión del usuario, 20 nov)
+
+Un plan por área (hasta 5), cada uno con hasta 3 hábitos; el modo deja de ser una restricción. Se hace por fases; cada una termina con la prueba del usuario.
+
+| # | Fase | Estado |
+| --- | --- | --- |
+| V.1 | Base de datos y progresión por plan: `plans` con área, respuestas, revisión y desbloqueo propios (el plan actual se partió por área); la progresión y el apoyo de las semanas 3 y 4 funcionan plan por plan; al confirmar, un plan por área | hecho |
+| V.2 | Hábitos sin duración (tipo recordatorio) y tiempo diario global: el plan se acomoda en el tiempo libre | pendiente |
+| V.3 | Formulario por plan: P1 de una sola área, 3 pasos para los planes siguientes; P2 (objetivos) y las sugerencias de la revisión solo muestran el área elegida (confirmado por el usuario) | pendiente |
+| V.4 | «Mis planes» en Perfil (crear y terminar plan) y quitar el modo | pendiente |
+| V.5 | Límites: 3 hábitos por plan y planes que se ganan con las subidas; los propios cuentan solo propios y sin límite si no hay planes | pendiente |
+
 ## Entrega 9: Cierre (días 18–19, ~6 h)
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
 | 9.1 | Recorrido completo en el teléfono, lista 9.7 con TalkBack y texto al 130 % | 9.7 | pendiente |
 | 9.2 | Corrección de errores | — | pendiente |
-| 9.3 | APK de preview con EAS | 11 | pendiente |
+| 9.3 | ~~APK de preview con EAS~~ | 11 | descartado (decisión del usuario, 20 nov) |
 
-**Criterio de prueba:** instalas el APK en un teléfono limpio y haces el flujo completo de la definición de terminado sin errores.
+**Criterio de prueba:** en tu teléfono haces el flujo completo de la definición de terminado sin errores. El APK de preview quedó fuera por decisión del usuario.
 
 ## Entrega 10: Geofencing básico (días 20–21, ~6 h) — primer recorte
 

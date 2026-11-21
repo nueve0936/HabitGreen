@@ -84,6 +84,9 @@ async function tunelActivo(serie, puerto) {
 
 async function abrirEnTelefono(serie, puerto) {
   const url = `${esquema}://expo-development-client/?url=http%3A%2F%2Flocalhost%3A${puerto}`;
+  // Si la app ya estaba abierta, el enlace monta una segunda copia de la app encima de la primera
+  // y React Navigation avisa «configured linking in multiple places». Se cierra antes de abrirla.
+  await ejecutar(adb, ['-s', serie, 'shell', 'am', 'force-stop', paquete]);
   await ejecutar(adb, [
     '-s',
     serie,

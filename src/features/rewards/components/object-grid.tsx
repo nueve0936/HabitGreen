@@ -56,15 +56,14 @@ export function ObjectGrid({
   const delTipo = accesorios.filter((a) => a.tipo === tipo && a.propioId !== null);
 
   const etiqueta = (a: Accesorio) => {
-    if (a.categoriaEquipada === planta.categoryId) {
+    if (a.categoriasEquipadas.includes(planta.categoryId)) {
       return formatear(t.objetoPuesto, { nombre: a.nombre });
     }
-    const otra = plantas.find((p) => p.categoryId === a.categoriaEquipada);
-    return otra
-      ? formatear(t.objetoEnOtra, {
-          nombre: a.nombre,
-          categoria: es.onboarding.formulario.areas[otra.area],
-        })
+    const otras = plantas
+      .filter((p) => a.categoriasEquipadas.includes(p.categoryId))
+      .map((p) => es.onboarding.formulario.areas[p.area]);
+    return otras.length > 0
+      ? formatear(t.objetoEnOtra, { nombre: a.nombre, categorias: otras.join(', ') })
       : formatear(t.objetoLibre, { nombre: a.nombre });
   };
 
@@ -85,7 +84,7 @@ export function ObjectGrid({
         ) : (
           <View style={{ gap: SEPARACION }} className="flex-row flex-wrap">
             {delTipo.map((a) => {
-              const puesto = a.categoriaEquipada === planta.categoryId;
+              const puesto = a.categoriasEquipadas.includes(planta.categoryId);
               return (
                 <Pressable
                   key={a.id}

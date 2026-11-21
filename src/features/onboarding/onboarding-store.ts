@@ -5,10 +5,12 @@ import { createJSONStorage, persist, type StateStorage } from 'zustand/middlewar
 import type { Area, Objetivo } from '@/schemas/onboarding';
 
 import { alternarArea, alternarObjetivo, BORRADOR_VACIO, type Borrador } from './domain/form-rules';
+import type { Retomar } from './domain/retomar';
 
 // Avance del formulario inicial (SDD 5.3). Vive en Zustand y se guarda en el almacén clave-valor
 // de expo-sqlite, así que si se cierra la app las respuestas siguen ahí. Se usa la versión
 // síncrona del almacén para que las respuestas ya estén cargadas al abrir la primera pantalla.
+// También se guarda en qué pantalla va (`retomar`), para volver ahí si se cierra la app.
 
 type PreguntaUnica = Exclude<keyof Borrador, 'areas' | 'objetivos'>;
 
@@ -16,6 +18,9 @@ type OnboardingState = {
   /** Dueño de las respuestas: si entra otra cuenta en el mismo teléfono, se empieza de cero. */
   userId: string | null;
   borrador: Borrador;
+  /** Paso del formulario o revisión del plan donde se quedó; null fuera del formulario. */
+  retomar: Retomar | null;
+  marcarRetomar: (retomar: Retomar | null) => void;
   prepararPara: (userId: string) => void;
   /** Con 2 ya elegidos, el nuevo reemplaza al primero que se eligió. */
   alternarArea: (area: Area) => void;
@@ -37,9 +42,12 @@ export const useOnboardingStore = create<OnboardingState>()(
     (set, get) => ({
       userId: null,
       borrador: BORRADOR_VACIO,
+      retomar: null,
+
+      marcarRetomar: (retomar) => set({ retomar }),
 
       prepararPara: (userId) => {
-        if (get().userId !== userId) set({ userId, borrador: BORRADOR_VACIO });
+        if (get().userId !== userId) set({ userId, borrador: BORRADOR_VACIO, retomar: null });
       },
 
       alternarArea: (area) => {
@@ -54,13 +62,17 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       responder: (pregunta, valor) => set({ borrador: { ...get().borrador, [pregunta]: valor } }),
 
-      reiniciar: () => set({ borrador: BORRADOR_VACIO }),
+      reiniciar: () => set({ borrador: BORRADOR_VACIO, retomar: null }),
     }),
     {
       name: 'habitgreen-onboarding',
       version: 1,
       storage: createJSONStorage(() => sqliteStorage),
-      partialize: (state) => ({ userId: state.userId, borrador: state.borrador }),
+      partialize: (state) => ({
+        userId: state.userId,
+        borrador: state.borrador,
+        retomar: state.retomar,
+      }),
     },
   ),
 );

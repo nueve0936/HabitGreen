@@ -71,6 +71,7 @@ export const es = {
     mostrarContrasena: 'Mostrar contraseña',
     ocultarContrasena: 'Ocultar contraseña',
     seleccionado: 'Seleccionado',
+    caracteres: '{n} de {max} caracteres',
   },
   bienvenida: {
     titulo: 'Pequeños pasos.\nGrandes cambios.',
@@ -82,6 +83,7 @@ export const es = {
     ilustracion: 'Persona paseando en bicicleta',
   },
   auth: {
+    sesionCaducada: 'Tu sesión caducó. Vuelve a iniciar sesión.',
     correo: 'Correo',
     correoPlaceholder: 'tucorreo@ejemplo.com',
     contrasena: 'Contraseña',
@@ -136,6 +138,7 @@ export const es = {
     validacion: {
       correoRequerido: 'Escribe tu correo.',
       correoInvalido: 'Revisa que el correo esté bien escrito.',
+      correoLargo: 'El correo puede tener hasta {n} caracteres.',
       contrasenaRequerida: 'Escribe tu contraseña.',
       contrasenaCorta: 'Usa al menos 8 caracteres.',
       contrasenasDistintas: 'Las contraseñas deben ser iguales. Por favor, inténtalo de nuevo.',
@@ -344,7 +347,11 @@ export const es = {
     pendientes: 'Pendientes de hoy',
     todoListo: '¡Todo listo por hoy!',
     progreso: '{n} de {total} hechos',
-    vacio: 'Hoy no tienes hábitos programados. Disfruta el día.',
+    vacio: {
+      titulo: 'Hoy no tienes pendientes',
+      descripcion: 'Disfruta el día. Tus hábitos vuelven pronto.',
+      verHabitos: 'Ver mis hábitos',
+    },
     hecho: 'Hecho',
     marcar: 'Marcar {titulo} como hecho',
     deshacer: 'Deshacer',
@@ -352,6 +359,7 @@ export const es = {
     error: 'No pudimos cargar tus hábitos de hoy.',
     errorGuardar: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
     errorReloj: 'Revisa la fecha de tu teléfono: parece estar atrasada.',
+    cambioDia: 'Cambió el día. Ya actualizamos tu lista.',
     sinHabitos: {
       titulo: 'Tu jardín está listo para empezar',
       descripcion: 'Crea tu primer hábito, pequeño y a tu ritmo.',
@@ -458,10 +466,33 @@ export const es = {
     guardar: 'Guardar cambios',
     noEncontrado: 'No encontramos este hábito.',
     errorGuardar: 'No pudimos guardar el hábito. Inténtalo de nuevo.',
+    borrador: {
+      pregunta: 'Tienes un hábito sin terminar. ¿Seguimos?',
+      seguir: 'Seguir',
+      cancelar: 'Cancelar',
+    },
+    // Usuario guiado con su límite de hábitos, del plan y propios (crece al subir de nivel).
+    limiteHabitos: {
+      titulo: 'Ya tienes {n} hábitos.',
+      mensaje:
+        'Para sumar otro, pausa o elimina uno. Conforme avances en tu plan podrás agregar más.',
+      // Al reanudar un hábito en pausa con el límite ya alcanzado.
+      tituloReanudar: 'Ya tienes {n} hábitos activos.',
+      mensajeReanudar:
+        'Para reanudar este, pausa o elimina otro. Conforme avances en tu plan podrás tener más.',
+      entendido: 'Entendido',
+    },
+    salir: {
+      titulo: '¿Guardar los cambios?',
+      mensaje: 'Si sales ahora, se pierde lo que cambiaste.',
+      guardar: 'Guardar',
+      descartar: 'Descartar',
+      cancelar: 'Cancelar',
+    },
     errores: {
       nombreCorto: 'Escribe al menos 3 caracteres.',
-      nombreLargo: 'Usa 60 caracteres o menos.',
-      descripcionLarga: 'Usa 140 caracteres o menos.',
+      nombreLargo: 'Usa {n} caracteres o menos.',
+      descripcionLarga: 'Usa {n} caracteres o menos.',
       categoria: 'Elige una categoría.',
       dias: 'Escoge mínimo un día.',
       duracion: 'Elige una duración de hasta 23 h 59 min.',
@@ -613,8 +644,8 @@ export const es = {
     irTienda: 'Ir a la Tienda',
     objetoPuesto: '{nombre}, lo lleva puesto. Toca para quitarlo.',
     objetoLibre: '{nombre}. Toca para ponérselo.',
-    objetoEnOtra: '{nombre}, lo lleva tu planta de {categoria}. Toca para traerlo aquí.',
-    movido: 'Lo movimos a tu planta de {categoria}.',
+    objetoEnOtra: '{nombre}, también lo lleva tu planta de {categorias}. Toca para ponérselo.',
+    reemplazado: 'Le pusimos {nuevo} en lugar de {anterior}.',
     error: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
   },
   tienda: {
@@ -693,13 +724,18 @@ export const es = {
     cancelar: 'Cancelar',
     destinoHoy: 'a hoy',
     destinoManana: 'a mañana',
-    destinoDia: 'al {dia} {n}',
+    // Espacio que no se parte (\u00A0): el número no queda solo en otra línea.
+    destinoDia: 'al {dia}\u00A0{n}',
     cortoHoy: 'Hoy',
     cortoManana: 'Mañana',
     cortoDia: '{dia} {n}',
     dias: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'],
     diasCortos: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
     silencioUno: 'Movimos «{habito}» {destino}.',
+    movido: 'Listo: «{habito}» quedó {destino}.',
+    quedoHoy: 'para hoy',
+    quedoManana: 'para mañana',
+    quedoDia: 'para el {dia}\u00A0{n}',
     silencioVarios: 'Acomodamos {n} hábitos en días libres.',
     reprogramadoHoy: 'Reprogramado para hoy',
     error: 'No pudimos guardar el cambio. Inténtalo de nuevo.',

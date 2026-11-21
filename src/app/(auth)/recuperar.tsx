@@ -11,6 +11,7 @@ import { Screen } from '@/components/ui/screen';
 import { AuthHeader } from '@/features/auth/components/auth-header';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import {
+  EMAIL_MAX,
   recoverSchema,
   type RecoverInput,
   type RecoverValues,
@@ -65,6 +66,7 @@ export default function RecuperarScreen() {
               error={errors.email?.message}
               autoCapitalize="none"
               autoComplete="email"
+              maxLength={EMAIL_MAX}
               keyboardType="email-address"
               textContentType="emailAddress"
               returnKeyType="send"

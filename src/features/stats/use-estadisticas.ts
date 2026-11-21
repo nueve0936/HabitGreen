@@ -46,6 +46,13 @@ export function useEstadisticas(userId: string) {
   const [desplazamiento, setDesplazamiento] = useState(0);
   const [diaElegido, setDiaElegido] = useState(hoy);
   const [area, setArea] = useState<Area | null>(null);
+  // Cambió el día con la pantalla abierta: si veías hoy en Diario, pasas al nuevo hoy; si veías
+  // otro día a propósito, te quedas ahí. Semanal y Mensual siguen solas al periodo actual.
+  const [hoyVisto, setHoyVisto] = useState(hoy);
+  if (hoyVisto !== hoy) {
+    setHoyVisto(hoy);
+    if (diaElegido === hoyVisto) setDiaElegido(hoy);
+  }
 
   const datos = consulta.data;
   const vista: Vista = pestana === 'semana' ? 'semana' : escala;

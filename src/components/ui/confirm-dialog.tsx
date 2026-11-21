@@ -13,6 +13,8 @@ export type ConfirmDialogProps = {
   tipo: 'peligro' | 'confirmar';
   onCancelar: () => void;
   onConfirmar: () => void;
+  /** «Atrás» del sistema. Por defecto, igual que cancelar. */
+  onCerrar?: () => void;
 };
 
 export function ConfirmDialog({
@@ -23,9 +25,15 @@ export function ConfirmDialog({
   tipo,
   onCancelar,
   onConfirmar,
+  onCerrar,
 }: ConfirmDialogProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onCerrar ?? onCancelar}
+    >
       <View className="flex-1 items-center justify-center bg-ink/40 px-10">
         <View accessibilityViewIsModal className="w-full gap-6 rounded-card bg-campo p-6">
           <AppText weight="bold" className="text-center" accessibilityRole="header">

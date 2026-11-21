@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Screen } from '@/components/ui/screen';
 import { AuthHeader } from '@/features/auth/components/auth-header';
+import { SessionExpiredNotice } from '@/features/auth/components/session-expired-notice';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
+  EMAIL_MAX,
   loginSchema,
   type LoginInput,
   type LoginValues,
@@ -64,6 +66,7 @@ export default function LoginScreen() {
       <AuthHeader title={t.login.titulo} />
 
       <View className="gap-4">
+        <SessionExpiredNotice />
         <Controller
           control={control}
           name="email"
@@ -77,6 +80,7 @@ export default function LoginScreen() {
               invalido={Boolean(errors.email) || errorServidor}
               autoCapitalize="none"
               autoComplete="email"
+              maxLength={EMAIL_MAX}
               keyboardType="email-address"
               textContentType="emailAddress"
               returnKeyType="next"

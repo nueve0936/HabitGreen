@@ -117,6 +117,7 @@ function entrada(cambios: Partial<EntradaProgresion> = {}): EntradaProgresion {
     configPlan: CONFIG_PLAN,
     presupuestoMin: 60,
     limiteDesbloqueado: false,
+    subidasPlan: 0,
     config: CONFIG,
     ...cambios,
   };
@@ -238,6 +239,40 @@ describe('hábito nuevo y presupuesto', () => {
     expect(t).toMatchObject({ tipo: 'nuevo', habito: { objetivo: 'dormir_mejor', nivel: 1 } });
   });
 
+  it('con un plan por área, solo revisa los hábitos de ese plan', () => {
+    const otro = habito('b', {
+      plan_id: 'p2',
+      objetivo: 'saber_gastos',
+      category_id: 'c-finanzas',
+    });
+    const t = decidir(
+      entrada({
+        planId: 'p1',
+        habitos: [habito('a'), otro],
+        horarios: [horario('a'), horario('b')],
+        ocurrencias: [...bien, ...ocurrencias('b', 14, 14)],
+      }),
+    );
+    expect(t.map((x) => x.id)).toEqual(['subir-a']);
+  });
+
+  it('con un plan por área, el hábito nuevo solo se busca en esa área', () => {
+    const nivel3 = habito('a', { nivel: 3, duracion_min: 30 });
+    const dormir = habito('d', { objetivo: 'dormir_mejor', nivel: 1, duracion_min: 2 });
+    const datos = {
+      habitos: [nivel3, dormir],
+      horarios: [horario('a'), horario('d')],
+      ocurrencias: bien,
+      respuestas: { ...RESPUESTAS, areas: ['salud_fisica' as const] },
+    };
+    // Sin plan concreto se iría a otra área (finanzas); con el plan de Salud Física, no.
+    expect(decidir(entrada(datos))).toMatchObject([{ habito: { objetivo: 'saber_gastos' } }]);
+    const conPlan = decidir(entrada({ ...datos, planId: 'p1' }));
+    expect(conPlan.every((t) => t.tipo !== 'nuevo' || t.habito.categoria === 'salud_fisica')).toBe(
+      true,
+    );
+  });
+
   it('si el siguiente nivel no cabe, propone un hábito nuevo; si tampoco cabe, «sin espacio»', () => {
     // Nivel 3 (30 min) no cabe en 20; un hábito nuevo de 2 min sí (15 + 2).
     expect(decidir(entrada({ ocurrencias: bien, presupuestoMin: 20 }))).toMatchObject([
@@ -273,6 +308,19 @@ describe('hábito nuevo y presupuesto', () => {
       }),
     );
     expect(tipos(t)).toEqual(['nuevo']);
+  });
+
+  it('con el límite total de hábitos alcanzado no propone otro, salvo con una subida más', () => {
+    const a = habito('a', { nivel: 3, duracion_min: 5 });
+    const b = habito('b', { objetivo: 'saber_gastos', nivel: 3, duracion_min: 5 });
+    const propio = habito('m', { objetivo: null, nivel: null, plan_id: null, duracion_min: 5 });
+    const datos = {
+      habitos: [a, b, propio],
+      horarios: [horario('a'), horario('b'), horario('m')],
+      ocurrencias: [...ocurrencias('a', 14, 14), ...ocurrencias('b', 14, 14)],
+    };
+    expect(decidir(entrada(datos))).toEqual([]);
+    expect(tipos(decidir(entrada({ ...datos, subidasPlan: 1 })))).toEqual(['nuevo']);
   });
 
   it('con 4 hábitos del plan no propone otro, salvo con el límite desbloqueado', () => {

@@ -67,7 +67,7 @@ export async function guardarPlan(
 
   // El orden importa: las políticas de RLS revisan que el plan y el hábito ya existan.
   const pasos = [
-    () => supabase.from('plans').upsert(filas.plan),
+    () => supabase.from('plans').upsert(filas.plans),
     () => supabase.from('habits').upsert(filas.habits),
     () => supabase.from('habit_schedules').upsert(filas.schedules),
     () => supabase.from('user_settings').upsert(filas.settings, { onConflict: 'user_id' }),

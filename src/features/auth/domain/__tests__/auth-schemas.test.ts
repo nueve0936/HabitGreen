@@ -1,6 +1,7 @@
-import { es } from '@/i18n/es';
+import { es, formatear } from '@/i18n/es';
 
 import {
+  EMAIL_MAX,
   loginSchema,
   newPasswordSchema,
   recoveryCodeSchema,
@@ -28,6 +29,21 @@ describe('loginSchema', () => {
 
   it('rechaza un correo mal escrito', () => {
     expect(firstError(loginSchema.safeParse({ email: 'ana@', password: 'x' }))).toBe(
+      v.correoInvalido,
+    );
+  });
+
+  it('acepta hasta 50 caracteres y rechaza más (decisión del usuario)', () => {
+    expect(EMAIL_MAX).toBe(50);
+    const correo = (n: number) => 'a'.repeat(n - '@correo.com'.length) + '@correo.com';
+    expect(loginSchema.safeParse({ email: correo(50), password: 'x' }).success).toBe(true);
+    expect(firstError(loginSchema.safeParse({ email: correo(51), password: 'x' }))).toBe(
+      formatear(v.correoLargo, { n: 50 }),
+    );
+  });
+
+  it('rechaza dos «@»', () => {
+    expect(firstError(loginSchema.safeParse({ email: 'ana@b@correo.com', password: 'x' }))).toBe(
       v.correoInvalido,
     );
   });

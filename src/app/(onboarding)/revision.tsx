@@ -1,6 +1,6 @@
-import { Redirect, router } from 'expo-router';
+import { Redirect, router, useFocusEffect } from 'expo-router';
 import { Plus } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
@@ -30,8 +30,8 @@ import type { HabitoPlan } from '@/schemas/plan';
 import { colors } from '@/theme';
 
 // «Tu plan está listo» (SDD 5.8 y 9.4, mockups de la revisión del plan). El usuario edita, quita o
-// agrega hábitos (hasta 3) y al pulsar «Confirmar plan» se guarda todo. Si sale de aquí sin
-// confirmar, no queda nada guardado.
+// agrega hábitos (hasta 3) y al pulsar «Confirmar plan» se guarda todo. Hasta entonces el borrador
+// solo vive en el teléfono: si se cierra la app, al abrirla se vuelve a esta revisión.
 // Antes de guardar se explica y se pide el permiso de avisos (SDD 7.1). Si no se da, el plan se
 // guarda sin horas: sin permiso no hay recordatorios.
 
@@ -40,6 +40,8 @@ export default function RevisionPlanScreen() {
   const { session, chooseMode } = useSession();
   const formulario = useOnboardingStore((s) => s.borrador);
   const reiniciarFormulario = useOnboardingStore((s) => s.reiniciar);
+  const marcarRetomar = useOnboardingStore((s) => s.marcarRetomar);
+  useFocusEffect(useCallback(() => marcarRetomar({ pantalla: 'revision' }), [marcarRetomar]));
   const borrador = usePlanReviewStore((s) => s.borrador);
   const ids = usePlanReviewStore((s) => s.ids);
   const acciones = usePlanReviewStore.getState();
@@ -71,7 +73,9 @@ export default function RevisionPlanScreen() {
     setGuardando(true);
     setError(false);
     try {
-      await guardarPlan(session.user.id, borrador, respuestas, ids, conRecordatorios);
+      // Un plan por área: se completan los ids de plan de cada área antes de guardar.
+      const idsCompletos = usePlanReviewStore.getState().idsParaGuardar() ?? ids;
+      await guardarPlan(session.user.id, borrador, respuestas, idsCompletos, conRecordatorios);
       guardado.current = true;
       // Guarda el modo y marca el onboarding como completo: el layout lleva a «Hoy».
       await chooseMode('guiado');

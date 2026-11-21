@@ -213,7 +213,7 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 | < 50 % | Bajar un nivel. En el nivel 1, usar `duracion_reducida_min`. |
 
 - Si el siguiente nivel no cabe en el presupuesto: mantener y proponer un hábito nuevo de nivel 1; si tampoco cabe, sugerir subir el tiempo diario en Perfil, sin presión.
-- **Límite:** máximo 4 hábitos activos del plan. A los 90 días del plan, con ≥ 85 % en los últimos 28 días, se desbloquea y solo limita el presupuesto. Los manuales no tienen límite.
+- **Límite:** máximo 4 hábitos activos del plan. A los 90 días del plan, con ≥ 85 % en los últimos 28 días, se desbloquea y solo limita el presupuesto. Límite total del usuario guiado (plan y manuales juntos): hasta 3 hábitos activos, más 1 por cada subida de nivel del plan, y sin límite tras el desbloqueo; la progresión no propone hábitos nuevos si ya se llegó. En el modo tradicional no hay límite.
 - La IA interviene en el plan inicial y al redactar niveles nuevos. Las reglas de progresión son código propio.
 - Decisiones de la Entrega 8 (detalle en SDD 6.3): tarjetas en Hoy; bajar es automático con «Mantenerlo como estaba»; se propone un solo hábito nuevo sugerido; la ventana cuenta desde el último cambio de nivel.
 
@@ -226,7 +226,7 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 ### Jardín y tienda
 
 - Las 5 plantas se ven desde el inicio; las de áreas sin hábitos, en fase 1 con una invitación a agregar un hábito.
-- Un accesorio se equipa en una sola planta a la vez. Nombres de los 15 accesorios: provisionales hasta que el usuario los defina.
+- Un mismo objeto puede estar en varias plantas a la vez; cada planta lleva como máximo uno de cada tipo. Nombres de los 15 accesorios: provisionales hasta que el usuario los defina.
 
 ## 7. IA: reglas
 

@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ProfileErrorView } from '@/features/auth/components/profile-error-view';
@@ -22,6 +23,10 @@ import { prepararAvisos } from '@/features/reminders/avisos';
 SplashScreen.preventAutoHideAsync().catch(() => {
   // En recargas rápidas la pantalla de carga ya puede estar oculta.
 });
+
+// Sin internet, Supabase reporta que no pudo renovar la sesión y lo reintenta solo. La app funciona
+// sin conexión (SDD 3.4), así que en desarrollo no se muestra como error en pantalla.
+LogBox.ignoreLogs(['AuthRetryableFetchError']);
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({

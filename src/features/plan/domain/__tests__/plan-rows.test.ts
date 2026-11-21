@@ -5,6 +5,7 @@ import { BORRADOR, habito, RESPUESTAS } from '../__fixtures__/plan';
 
 const IDS: IdsPlan = {
   planId: 'plan-1',
+  planesExtra: { social: 'plan-2' },
   habitos: {
     mover_mas: { habitId: 'habito-1', scheduleId: 'horario-1' },
     tiempo_de_calidad: { habitId: 'habito-2', scheduleId: 'horario-2' },
@@ -33,10 +34,10 @@ function filas(borrador = BORRADOR) {
 describe('filas que se guardan al pulsar «Empezar»', () => {
   it('liga plan, hábitos y horarios con los ids del cliente', () => {
     const f = filas();
-    expect(f.plan).toMatchObject({ id: 'plan-1', user_id: 'usuario-1', origen: 'ia' });
+    expect(f.plans[0]).toMatchObject({ id: 'plan-1', user_id: 'usuario-1', origen: 'ia' });
     expect(f.habits[1]).toMatchObject({
       id: 'habito-2',
-      plan_id: 'plan-1',
+      plan_id: 'plan-2',
       category_id: 'cat-social',
       objetivo: 'tiempo_de_calidad',
       nivel: 1,
@@ -50,6 +51,19 @@ describe('filas que se guardan al pulsar «Empezar»', () => {
       flexible: false,
       notificar: true,
       vigente_desde: '2026-11-01',
+    });
+  });
+
+  it('guarda un plan por área, con sus objetivos y el historial', () => {
+    const { plans } = filas();
+    expect(plans.map((p) => [p.id, p.area])).toEqual([
+      ['plan-1', 'salud_fisica'],
+      ['plan-2', 'social'],
+    ]);
+    expect(plans[1]?.respuestas).toEqual({
+      areas: ['social'],
+      objetivos: ['tiempo_de_calidad'],
+      historial: RESPUESTAS.historial,
     });
   });
 

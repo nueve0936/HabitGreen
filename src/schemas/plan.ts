@@ -71,7 +71,7 @@ export type BorradorPlan = z.infer<typeof borradorPlanSchema>;
 
 export const textoHabitoSchema = z.object({
   objetivo: z.enum(OBJETIVOS),
-  titulo: z.string().min(3).max(60),
+  titulo: z.string().min(3).max(30),
   descripcion: z.string().max(200),
 });
 
@@ -115,7 +115,7 @@ export const peticionAjusteSchema = z.object({
 export type PeticionAjuste = z.infer<typeof peticionAjusteSchema>;
 
 export const respuestaAjusteSchema = z.object({
-  titulo: z.string().min(3).max(60),
+  titulo: z.string().min(3).max(30),
   descripcion: z.string().max(200),
 });
 export type RespuestaAjuste = z.infer<typeof respuestaAjusteSchema>;

@@ -40,6 +40,7 @@ export const TABLAS = [
       segundo_aviso: B,
       ultima_evaluacion: T,
       limite_plan_desbloqueado: B,
+      subidas_plan: N,
       updated_at: T,
     },
   },
@@ -81,7 +82,20 @@ export const TABLAS = [
   {
     nombre: 'plans',
     clave: ['id'],
-    columnas: { id: T, user_id: T, origen: T, activo: B, creado_en: T, updated_at: T },
+    // Un plan por área (varios planes por usuario): sus respuestas de área, su revisión semanal y
+    // su desbloqueo de 90 días.
+    columnas: {
+      id: T,
+      user_id: T,
+      origen: T,
+      activo: B,
+      area: T,
+      respuestas: J,
+      ultima_evaluacion: T,
+      limite_desbloqueado: B,
+      creado_en: T,
+      updated_at: T,
+    },
   },
   {
     nombre: 'habits',
@@ -175,7 +189,7 @@ export const TABLAS = [
       id: T,
       user_id: T,
       accessory_id: T,
-      categoria_equipada: T,
+      categorias_equipadas: J,
       updated_at: T,
       eliminado_en: T,
     },

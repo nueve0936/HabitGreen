@@ -14,6 +14,7 @@ import { authRedirectUrl } from '@/features/auth/auth-redirect';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
+  EMAIL_MAX,
   registerSchema,
   type RegisterInput,
   type RegisterValues,
@@ -100,6 +101,7 @@ export default function RegistroScreen() {
               {...estado(errors.email)}
               autoCapitalize="none"
               autoComplete="email"
+              maxLength={EMAIL_MAX}
               keyboardType="email-address"
               textContentType="emailAddress"
             />

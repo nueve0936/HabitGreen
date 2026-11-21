@@ -152,6 +152,8 @@ Lexend Deca (`@expo-google-fonts/lexend-deca`), con la del sistema como respaldo
 | `SettingsRow` | Fila «Etiqueta — valor >» de al menos 48 dp. Sin acción, se muestra sin flecha. Con letra grande, la etiqueta baja de línea. |
 | `WheelColumn` | Rueda de 3 opciones de 48 dp; la elegida va en negritas entre dos líneas `accent`. Tocar otra opción la elige. Con `escribible` (números), tocar la del centro abre un campo numérico que se ajusta al rango. Con TalkBack se ajusta deslizando arriba o abajo. La usan la fecha, la duración del hábito y el tiempo diario de Perfil (las dos últimas con `DurationWheels` y `DialogActions`). |
 | `ProgressSteps` | Barra «1/3» dentro de una píldora: pista `divisor`, relleno `accent` y texto blanco. |
+| `ChoiceDialog` | Como `ConfirmDialog`, con tres botones apilados de 48 dp: el principal relleno `confirmar`, el que pierde algo con borde y texto `peligro`, y «Cancelar» como enlace. «Atrás» y tocar fuera cancelan. Lo usa el asistente de hábito al salir con cambios. |
+| Contador de `Field` | «n/máximo» en `small` `ink-soft` a la derecha bajo el campo (nombre 30, descripción 100). TalkBack: «n de máximo caracteres». |
 | `Dialog` / `ConfirmDialog` | Tarjeta `campo` sobre fondo `ink` al 40%. Botones de 48 dp: «Cancelar» con borde `borde` y la acción en `accent`, `peligro` o `confirmar`. Se cierra con el botón «atrás». |
 | Globo de menú (`HabitMenu`) | `campo` con sombra, anclado al ⋮. Se abre hacia arriba si no cabe abajo y crece con la letra del sistema. Filas de 48 dp con icono, texto y `>`; «Eliminar» va en `peligro`. |
 | Tarjeta de hábito (`HabitCheckCard`) | `campo` con sombra y casilla redonda de 28 dp, con zona táctil de 48. **Hecho:** casilla `accent` con ✓ blanca y título tachado en `ink-soft`. **En pausa:** ⏸ en lugar de la casilla y título tachado. **No toca hoy:** casilla punteada, sin relleno, con el texto «No toca hoy». |
@@ -180,7 +182,7 @@ Fuentes: [Layout basics](https://developer.android.com/design/ui/mobile/guides/l
 
 | Regla | Cómo se cumple |
 | --- | --- |
-| **Zona táctil de 48 × 48 dp** | Todo lo tocable mide al menos 48 dp (`h-12`, `min-h-12`). Si el elemento visible es más chico, se amplía con `hitSlop`. |
+| **Zona táctil de 48 × 48 dp** | Todo lo tocable mide al menos 48 dp (`h-12`, `min-h-12`; en `tailwind.config.js` el espaciado 12 vale 48 px, porque NativeWind usa 14 px por `rem` en nativo y sin eso medían 42 dp). Si el elemento visible es más chico, se amplía con `hitSlop`. |
 | **Edge-to-edge y áreas seguras** | Las pantallas usan `Screen`, con `SafeAreaView`. La barra de pestañas y las hojas inferiores respetan el inset inferior. Los modales anclados a un punto de la pantalla usan `statusBarTranslucent`. Nada tocable va bajo las barras del sistema. |
 | **Teclado** | El campo activo nunca queda tapado: `Screen` usa `KeyboardAvoidingView` (`height` en Android) y las pantallas con campos van dentro de un scroll. |
 | **Botón «atrás» del sistema** | En flujos de varios pasos, como el asistente de hábito, regresa un paso (`BackHandler`). Los diálogos y menús se cierran con él (`onRequestClose`). |

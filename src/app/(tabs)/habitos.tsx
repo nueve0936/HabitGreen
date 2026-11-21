@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
@@ -13,6 +12,7 @@ import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { ICONO_CATEGORIA } from '@/features/habits/categoria-icono';
 import { HabitCheckCard } from '@/features/habits/components/habit-check-card';
+import { useAgregarHabito } from '@/features/habits/use-agregar-habito';
 import { useHabitActions } from '@/features/habits/use-habit-actions';
 import { es } from '@/i18n/es';
 import { AREAS } from '@/schemas/onboarding';
@@ -30,6 +30,7 @@ export default function HabitosScreen() {
   const userId = session?.user.id ?? '';
   const habitos = useLocalQuery('habitos', leerHabitos);
   const acciones = useHabitActions(userId);
+  const agregar = useAgregarHabito();
 
   const lista = habitos.data ?? [];
   const secciones = AREAS.map((area) => ({
@@ -42,7 +43,7 @@ export default function HabitosScreen() {
       <Screen edges={['top']} contentClassName="gap-4 pt-6">
         <View className="flex-row items-center justify-between">
           <AppText variant="h1">{es.tabs.habitos}</AppText>
-          <ActionSquare label={t.agregar} icon={Plus} onPress={() => router.push('/habit/nuevo')} />
+          <ActionSquare label={t.agregar} icon={Plus} onPress={() => void agregar.abrir()} />
         </View>
 
         {/* Márgenes negativos: la sombra de las tarjetas no se corta en los bordes de la lista. */}
@@ -89,6 +90,7 @@ export default function HabitosScreen() {
       </Screen>
 
       {acciones.aviso}
+      {agregar.dialogo}
     </>
   );
 }

@@ -86,6 +86,8 @@ export default function TiendaScreen() {
           categoria: destino.area,
           pestana: 'objetos',
           tipo: destino.tipo,
+          // Para el aviso «Le pusimos … en lugar de …» si reemplazó a otro objeto.
+          ...(destino.quitado ? { puesto: destino.puesto, quitado: destino.quitado } : {}),
           // Distingue cada llegada, aunque se repitan la pestaña y el tipo.
           llegada: String(Date.now()),
         },

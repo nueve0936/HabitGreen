@@ -213,7 +213,7 @@ Cálidos y táctiles: cada toque recibe respuesta en menos de 100 ms, con cambio
 
 ### Buttons
 
-- **Shape:** píldora completa y 48 dp de alto.
+- **Shape:** píldora completa y 48 dp de alto. Los 48 dp salen de `h-12`, que en `tailwind.config.js` vale 48 px (sin ese ajuste, NativeWind lo dejaba en 42 dp).
 - **Primary:** verde brote con texto blanco en negritas, sin borde. Presionado: verde profundo.
 - **Secondary:** transparente con borde de contorno. Presionado: verde rocío.
 - **Tertiary:** enlace de texto subrayado, con al menos 48 dp de alto.
@@ -250,6 +250,14 @@ Casilla redonda con zona táctil de 48 dp, título y «hora · duración». Hech
 
 Tarjeta blanca arriba de la lista de Hoy, con un calendario verde en un círculo verde claro: «Movimos «Caminar» al jueves 19. Puedes cambiarlo.». Dos botones con borde lado a lado («Elegir otro día», «Está bien») y «Dejarlo» como enlace. Tono neutro, nunca de reproche. Un hábito que llegó movido dice «Reprogramado para hoy» en su tarjeta.
 
+### Hoy sin pendientes
+
+Cuando ese día no toca ningún hábito, la planta y las monedas se quedan arriba y la lista cede su lugar a un estado vacío centrado: un sol verde de línea, «Hoy no tienes pendientes» en H2, una línea de apoyo gris y un botón con borde «Ver mis hábitos». No hay barra de avance, porque no hay nada que avanzar.
+
+### Diálogo de tres opciones
+
+Tarjeta blanca centrada sobre el fondo atenuado: «¿Guardar los cambios?» con una línea de apoyo, y tres botones apilados: «Guardar» verde, «Descartar» con borde rojo y «Cancelar» como enlace. Los campos con límite muestran «12/30» en gris claro a la derecha.
+
 ### Tarjeta de progresión
 
 Cada 7 días, en el mismo lugar que la de reprogramación y con su mismo acomodo: icono verde en un círculo verde claro, el mensaje, un botón con borde y un enlace. «Te está saliendo muy bien. ¿Probamos con «Caminar 15 min» (15 min)?» con «Sí, vamos» y «Más adelante». Bajar ya se hizo y se dice con calma: «Vamos a hacerlo más ligero por ahora…», con «Entendido» y «Mantenerlo como estaba».
@@ -277,6 +285,10 @@ Las 3 fases de la planta en páginas horizontales, con puntos debajo. Las no alc
 ### Cuadrícula de objetos
 
 Celdas en 3 columnas, con pestañas de tipo fijas abajo. El objeto puesto lleva relleno verde rocío, borde verde brote y ✓.
+
+### Diálogo de aviso
+
+Tarjeta blanca centrada sobre el fondo atenuado, con el título en negritas, una línea de apoyo gris y un solo botón verde «Entendido» de 48 dp. Se usa cuando algo no se puede hacer y basta con explicarlo, como el límite de hábitos. Tocar fuera o «atrás» lo cierran; el fondo atenuado no existe para TalkBack.
 
 ### Aviso flotante
 

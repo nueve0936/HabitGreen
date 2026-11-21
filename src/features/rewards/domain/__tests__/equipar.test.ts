@@ -5,29 +5,42 @@ import {
   type PlantaCandidata,
 } from '../equipar';
 
-const gorra: AccesorioPropio = { id: 'gorra', tipo: 'sombrero', categoria_equipada: null };
-const boina: AccesorioPropio = { id: 'boina', tipo: 'sombrero', categoria_equipada: 'A' };
-const lentes: AccesorioPropio = { id: 'lentes', tipo: 'lentes', categoria_equipada: 'A' };
+const gorra: AccesorioPropio = { id: 'gorra', tipo: 'sombrero', categorias_equipadas: [] };
+const boina: AccesorioPropio = { id: 'boina', tipo: 'sombrero', categorias_equipadas: ['A'] };
+const lentes: AccesorioPropio = { id: 'lentes', tipo: 'lentes', categorias_equipadas: ['A'] };
 
 describe('equipar accesorios (SDD 6.4)', () => {
   it('ponerlo en una planta quita el otro del mismo tipo, no los de otro tipo', () => {
-    expect(cambiosAlEquipar(gorra, 'A', [gorra, boina, lentes])).toEqual([
-      { id: 'boina', categoria_equipada: null },
-      { id: 'gorra', categoria_equipada: 'A' },
+    expect(cambiosAlEquipar(gorra, 'A', true, [gorra, boina, lentes])).toEqual([
+      { id: 'boina', categorias_equipadas: [] },
+      { id: 'gorra', categorias_equipadas: ['A'] },
     ]);
   });
 
-  it('moverlo a otra planta lo quita de la anterior (una sola fila cambia)', () => {
-    expect(cambiosAlEquipar(boina, 'B', [gorra, boina, lentes])).toEqual([
-      { id: 'boina', categoria_equipada: 'B' },
+  it('el mismo objeto puede ir en otra planta sin dejar la primera', () => {
+    expect(cambiosAlEquipar(boina, 'B', true, [gorra, boina, lentes])).toEqual([
+      { id: 'boina', categorias_equipadas: ['A', 'B'] },
     ]);
   });
 
-  it('quitarlo y equiparlo donde ya está', () => {
-    expect(cambiosAlEquipar(boina, null, [boina])).toEqual([
-      { id: 'boina', categoria_equipada: null },
+  it('reemplaza solo en esa planta: el otro sigue en las demás', () => {
+    const enDos: AccesorioPropio = { ...boina, categorias_equipadas: ['A', 'B'] };
+    expect(cambiosAlEquipar(gorra, 'B', true, [gorra, enDos])).toEqual([
+      { id: 'boina', categorias_equipadas: ['A'] },
+      { id: 'gorra', categorias_equipadas: ['B'] },
     ]);
-    expect(cambiosAlEquipar(boina, 'A', [boina])).toEqual([]);
+  });
+
+  it('quitarlo de una planta no lo quita de las otras', () => {
+    const enDos: AccesorioPropio = { ...boina, categorias_equipadas: ['A', 'B'] };
+    expect(cambiosAlEquipar(enDos, 'A', false, [enDos])).toEqual([
+      { id: 'boina', categorias_equipadas: ['B'] },
+    ]);
+  });
+
+  it('sin cambios si ya está (o ya no está) en esa planta', () => {
+    expect(cambiosAlEquipar(boina, 'A', true, [boina])).toEqual([]);
+    expect(cambiosAlEquipar(gorra, 'A', false, [gorra])).toEqual([]);
   });
 });
 
@@ -69,6 +82,12 @@ describe('planta para «Equipar ahora» (SDD 9.4)', () => {
   it('si ninguna tiene hábitos ni el tipo libre, usa la primera', () => {
     const plantas = [planta('A', false, ['lentes']), planta('B', false, ['lentes'])];
     expect(plantaParaEquipar('lentes', plantas)).toBe('A');
+  });
+
+  it('salta las plantas que ya llevan ese objeto; si todas lo llevan, elige entre todas', () => {
+    const plantas = [planta('A', true), planta('B', true)];
+    expect(plantaParaEquipar('sombrero', plantas, null, ['A'])).toBe('B');
+    expect(plantaParaEquipar('sombrero', plantas, null, ['A', 'B'])).toBe('A');
   });
 
   it('un origen que ya no existe se ignora, y sin plantas devuelve null', () => {

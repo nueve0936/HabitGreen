@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import * as Network from 'expo-network';
 
 import { avisarCambioLocal } from '@/db/db-version-store';
-import { enTransaccion, getDb, guardarFilas, vaciarBaseLocal } from '@/db/database';
+import { asegurarDuenoBaseLocal, enTransaccion, getDb, guardarFilas } from '@/db/database';
 import { claveDeFila, TABLAS, tablaLocal, type TablaLocal } from '@/db/local-schema';
 import { leerOutbox, quitarDeOutbox, sumarIntento } from '@/db/outbox';
 import { fechaLocal, sumarDias } from '@/lib/dates';
@@ -30,7 +30,6 @@ import { useSyncStore } from './sync-store';
 
 const PAGINA = 1000;
 const DIAS_DE_HISTORIAL = 365;
-const DUENO = '__usuario';
 
 let usuario: string | null = null;
 let enCurso: Promise<void> | null = null;
@@ -94,7 +93,8 @@ async function hayTokenValido(): Promise<boolean> {
 
 async function unaVuelta(userId: string): Promise<void> {
   const db = await getDb();
-  await asegurarDueno(db, userId);
+  // Si la base era de otra cuenta y se vació, las pantallas se actualizan ya, sin esperar la vuelta.
+  if (await asegurarDuenoBaseLocal(userId)) avisarCambioLocal();
   if (!(await hayRed())) return;
   if (!(await hayTokenValido())) return;
 
@@ -121,19 +121,6 @@ function revisar(error: { message: string; code?: string | null } | null): void 
   if (!error) return;
   if (!esRechazoDefinitivo(error)) throw new SinRed(error.message);
   throw new Error(`${error.code}: ${error.message}`);
-}
-
-async function asegurarDueno(db: SQLiteDatabase, userId: string): Promise<void> {
-  const fila = await db.getFirstAsync<{ cursor: string }>(
-    'SELECT cursor FROM sync_state WHERE tabla = ?',
-    [DUENO],
-  );
-  if (fila?.cursor === userId) return;
-  if (fila) await vaciarBaseLocal();
-  await db.runAsync('INSERT OR REPLACE INTO sync_state (tabla, cursor) VALUES (?, ?)', [
-    DUENO,
-    userId,
-  ]);
 }
 
 async function actualizarZonaHoraria(db: SQLiteDatabase, userId: string): Promise<void> {
