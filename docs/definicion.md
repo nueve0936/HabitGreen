@@ -128,7 +128,7 @@ Validación: al menos 1 área y 1 objetivo; máximo 2 de cada; los objetivos deb
 |---|---|
 | 1 y 2 | Un hábito ancla por objetivo elegido (máximo 2 hábitos iniciales). |
 | 3 | Nivel de arranque: `primera_vez`, `empieza_y_deja` y `semanas_y_suelta` empiezan en nivel 1 (micro-paso mínimo); `mantiene` empieza en nivel 2. `semanas_y_suelta` recibe mensajes de apoyo en las semanas 3 y 4. |
-| 4 | Presupuesto diario total: 10, 20, 40 o 60 min. La duración de cada hábito no excede presupuesto / número de hábitos. |
+| 4 | Presupuesto diario total: 10, 20, 40 o 60 min. La duración de cada hábito no excede presupuesto / número de hábitos con duración. Los hábitos tipo recordatorio (todo lo que no consiste en hacer algo durante un tiempo) no tienen duración y no gastan tiempo del día. |
 | 5 | Momento de los recordatorios: 08:00, 13:00, 17:00 o 20:30. `varia` activa recordatorio flexible en ventana. Si la fila del catálogo tiene `momento_fijo`, ese momento gana. El usuario puede cambiar la hora al revisar el plan. |
 | 6 | `poco_tiempo`: duración = `duracion_reducida_min`. `olvido`: segundo aviso según la precedencia. `motivacion`: mensajes de ánimo y celebraciones más visibles. `desanimo`: reprogramación automática y silenciosa, tono sin culpa. `distraccion`: aviso único y breve, con temporizador opcional. `recursos`: solo variantes sin equipo ni espacio especial. |
 | 7 | Estilo de notificaciones (ver sección 11). |

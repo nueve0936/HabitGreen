@@ -26,7 +26,8 @@ export const habitoPlanSchema = z.object({
   variante: z.enum(['base', 'sin_recursos']),
   titulo: z.string().min(1),
   descripcion: z.string().nullable(),
-  duracion_min: z.number().int().positive(),
+  /** 0 = sin duración: un recordatorio que no gasta tiempo del día. */
+  duracion_min: z.number().int().nonnegative(),
   usa_duracion_reducida: z.boolean(),
   dias_semana: z.array(z.number().int().min(1).max(7)).min(1),
   /** null si el recordatorio es flexible (momento `varia`). */
@@ -107,7 +108,7 @@ export const peticionAjusteSchema = z.object({
   direccion: z.enum(['subir', 'bajar', 'nuevo']),
   /** Variante sin equipo ni espacio especial (P6 `recursos`). */
   sin_recursos: z.boolean(),
-  duracion_min: z.number().int().positive(),
+  duracion_min: z.number().int().nonnegative(),
   dias_semana: z.array(z.number().int().min(1).max(7)).min(1),
   historial: z.enum(HISTORIALES),
   obstaculo: z.enum(OBSTACULOS),

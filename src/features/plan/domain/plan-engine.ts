@@ -122,12 +122,18 @@ export function generarPlan(
   config: ConfigPlan,
 ): PlanMotor {
   const presupuesto = config.presupuestos[respuestas.tiempo];
-  const maxPorHabito = presupuesto / respuestas.objetivos.length;
+  const inicial = nivelInicial(respuestas.historial);
+  // Los hábitos sin duración (recordatorios) no gastan tiempo: el tiempo diario se reparte solo
+  // entre los que tienen minutos en su nivel inicial.
+  const conDuracion = respuestas.objetivos.filter(
+    (objetivo) => habitoParaNivel(respuestas, catalogo, config, objetivo, inicial).duracion_min > 0,
+  ).length;
+  const maxPorHabito = presupuesto / Math.max(1, conDuracion);
 
   const habitos = respuestas.objetivos.map((objetivo): HabitoPlan => {
     // Se empieza en el nivel inicial y se baja mientras la duración no quepa. El nivel 1 dura
     // 5 minutos o menos, así que siempre cabe (SDD 5.4, regla 2).
-    let nivel = nivelInicial(respuestas.historial);
+    let nivel = inicial;
     let habito = habitoParaNivel(respuestas, catalogo, config, objetivo, nivel);
     while (nivel > 1 && habito.duracion_min > maxPorHabito) {
       nivel = (nivel - 1) as Nivel;

@@ -284,7 +284,7 @@ La pantalla muestra las opciones agrupadas por área con encabezados H3.
 
 **Reglas del motor**
 
-1. Duración máxima por hábito = `presupuesto_min / número de hábitos`.
+1. Duración máxima por hábito = `presupuesto_min / número de hábitos con duración`. Los hábitos **sin duración** (recordatorios como tomar agua, anotar un gasto o enviar un mensaje: todo lo que no consiste en hacer algo durante un tiempo) duran 0 minutos en el catálogo, no gastan tiempo del día y dicen «Sin duración fija». En el nivel 1 no tienen versión corta: si cuesta, se ofrece apoyo. Cualquier hábito, también del plan, se puede editar a «Sin definir» (decisión del usuario, 20 nov; lista de 23 filas en la migración `20261121000002_habitos_sin_duracion.sql`).
 2. Para cada hábito se toma el nivel inicial; si su duración excede el máximo, se baja de nivel. Todos los hábitos de nivel 1 duran 5 minutos o menos, así que siempre cabe al menos el nivel 1.
 3. Los días de la semana salen de `dias_semana` de la fila del catálogo (ya no hay una regla global por nivel).
 4. Con `poco_tiempo`, la duración es `duracion_reducida_min` de la fila.

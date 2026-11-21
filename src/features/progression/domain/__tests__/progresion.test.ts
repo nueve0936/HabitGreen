@@ -206,6 +206,16 @@ describe('tabla de 6.3', () => {
     expect(apoyo).toMatchObject({ tipo: 'apoyo', habitId: 'a' });
   });
 
+  it('un hábito sin duración en el nivel 1 no tiene versión corta: solo apoyo', () => {
+    const recordatorio = habito('a', {
+      nivel: 1,
+      duracion_min: 0,
+      titulo: 'Tomar un vaso de agua',
+    });
+    const [t] = decidir(entrada({ habitos: [recordatorio], ocurrencias: ocurrencias('a', 2, 14) }));
+    expect(t).toMatchObject({ tipo: 'apoyo', habitId: 'a' });
+  });
+
   it('desde la versión corta, primero vuelve a la normal; con poco_tiempo sube de nivel', () => {
     const corto = habito('a', {
       nivel: 1,

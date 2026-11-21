@@ -19,6 +19,12 @@ describe('textos de la tarjeta del plan', () => {
     );
   });
 
+  it('un hábito sin duración dice «Sin duración fija»', () => {
+    expect(textoHorario(habito({ duracion_min: 0 }), BORRADOR.ventana_flexible, t)).toBe(
+      'Sin duración fija · Lun, Mar, Mié, Jue, Vie · 08:00',
+    );
+  });
+
   it('los 7 días se leen como «Todos los días»', () => {
     expect(textoDias([1, 2, 3, 4, 5, 6, 7], t)).toBe('Todos los días');
   });

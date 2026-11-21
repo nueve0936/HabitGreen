@@ -174,7 +174,10 @@ export async function leerLimiteDuracion(userId: string, habitId: string): Promi
   const [ajustes, habitos] = await Promise.all([leerAjustes(userId), leerHabitos()]);
   const habito = habitos.find((h) => h.habito.id === habitId)?.habito;
   if (!ajustes || !habito || habito.plan_id === null) return null;
-  const delPlan = habitos.filter((h) => h.habito.plan_id !== null && h.habito.activo).length;
+  // Los hábitos sin duración no gastan tiempo del día: no cuentan en el reparto.
+  const delPlan = habitos.filter(
+    (h) => h.habito.plan_id !== null && h.habito.activo && h.habito.duracion_min > 0,
+  ).length;
   return limiteDuracionPlan(ajustes.presupuestoMin, delPlan, habito.duracion_min);
 }
 

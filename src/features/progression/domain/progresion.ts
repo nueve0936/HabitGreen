@@ -267,7 +267,8 @@ function anterior(
     const nivel = (habito.nivel - 1) as Nivel;
     return valoresDeNivel(catalogo, respuestas, habito.objetivo, nivel, pocoTiempo, hoy);
   }
-  if (habito.usa_duracion_reducida) return null;
+  // Sin duración no hay versión corta: en el nivel 1 solo queda el apoyo.
+  if (habito.usa_duracion_reducida || habito.duracion_min === 0) return null;
   return valoresDeNivel(catalogo, respuestas, habito.objetivo, 1, true, hoy);
 }
 

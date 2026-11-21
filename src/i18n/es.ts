@@ -289,6 +289,7 @@ export const es = {
       titulo: 'Tu plan está listo',
       subtitulo: 'Empezamos con pasos pequeños. Quita, cambia o agrega lo que quieras.',
       minutos: '{n} min',
+      sinDuracion: 'Sin duración fija',
       todosLosDias: 'Todos los días',
       dias: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
       flexible: 'Entre {inicio} y {fin}',

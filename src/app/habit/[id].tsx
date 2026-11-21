@@ -81,7 +81,7 @@ export default function EditarHabitoScreen() {
       textoFinal={t.guardar}
       valoresIniciales={valoresDeHabito(item.habito, item.horario, item.categoria, inicio)}
       editando
-      permitirSinDuracion={item.habito.plan_id === null}
+      permitirSinDuracion
       limiteDuracion={limite.data ?? null}
       hoy={hoy}
       inicioEditable={inicio >= hoy}
