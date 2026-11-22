@@ -246,7 +246,6 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Pendiente | Origen |
 |---|---|
 | Fase 5 de límites: 3 hábitos por plan y planes que se ganan con las subidas | Varios planes |
-| Verificar en el teléfono los pulidos de Perfil (filas iguales, interruptor, títulos de planes) | Critique de Perfil |
 | Título cortado «Alejar el» en un hábito | Visto en Hoy |
 | Entrega 9.1 y 9.2: recorrido completo con TalkBack y corrección de errores | Backlog |
 | Entrega 10: geofencing básico | Backlog |
