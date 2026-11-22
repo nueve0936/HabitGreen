@@ -57,7 +57,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | APK de preview como cierre de la demo (Entrega 9.3) | Definición v4/v5 | Descartada | El usuario la quitó el 20 nov; la entrega es la app en el teléfono. |
 | Fuera de la demo: Lottie, Sentry, CI, temporizador de `distraccion`, eliminar cuenta | Definición v5 | Aceptada | Se agregan antes de publicar. |
 | Borrar las tablas del prototipo anterior en Supabase (2 oct) | Claude | Aceptada | No chocaban con las nuevas, pero eran de otro diseño. |
-| Correos de Auth con SMTP propio | Claude (opción 1), elegida por el usuario | Aceptada | La contraseña de aplicación de Gmail se escribe solo en el panel de Supabase. |
+| Correos de Auth con un SMTP propio de Gmail | Claude (opción 1), elegida por el usuario | Aceptada | La contraseña de aplicación de Gmail se escribe solo en el panel de Supabase. |
 
 ### 3.2 IA
 
@@ -200,7 +200,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Impeccable: Android, momentos cortos, «El jardín paciente», controles «cálidos y táctiles» | Claude | Aceptada | Respuestas del usuario a `init` y `document`. |
 | Renovar la paleta sin cambiar el acomodo de Figma | Claude | Aceptada | Referencias elegidas por el usuario: Finch, Todoist y TickTick. |
 | Dirección visual | Claude recomendó «A, con los colores por área de C» | Modificada | El usuario eligió **C, «Jardín alegre»**. |
-| Cambiar de pestaña deslizando, además de tocando | Usuario (5 nov) | Aceptada | |
+| Cambiar de pestaña deslizando, además de tocando | Usuario (5 nov) | Aceptada | Probado en el teléfono. |
 | En Hoy y en la Tienda, solo la lista se desplaza; lo de arriba queda fijo | Usuario | Aceptada | |
 | Todo lo tocable de 48 dp o más | Claude (revisión de Impeccable) | Aceptada | El usuario lo pidió para toda la app. |
 | Hoy sin pendientes con «Ver mis hábitos» | Claude | Aceptada | |
