@@ -290,6 +290,10 @@ Celdas en 3 columnas, con pestañas de tipo fijas abajo. El objeto puesto lleva 
 
 Tarjeta blanca centrada sobre el fondo atenuado, con el título en negritas, una línea de apoyo gris y un solo botón verde «Entendido» de 48 dp. Se usa cuando algo no se puede hacer y basta con explicarlo, como el límite de hábitos. Tocar fuera o «atrás» lo cierran; el fondo atenuado no existe para TalkBack.
 
+### Perfil
+
+Un índice corto: la cuenta arriba (círculo verde claro con la inicial y el correo) y una tarjeta blanca con filas de menú (`MenuRow`, 64 dp): icono verde en un círculo verde claro, título en negritas, un resumen gris debajo o un valor a la derecha, y ›. Un estado como «Avisos apagados» lleva un icono de alerta, nunca solo color. «Mis planes» y «Avisos y horas» abren su pantalla; «Tiempo diario», sus ruedas. «Cerrar sesión» al final.
+
 ### Mis planes
 
 En Perfil, una tarjeta blanca por plan: el icono del área sobre su tinte, «Plan de {área}» en H3, sus hábitos en una línea gris separados por «·» y «Terminar plan» como enlace rojo de 48 dp. Toda la tarjeta se puede tocar (presionada: verde rocío) y lleva una flecha › junto al título; abre el detalle del plan. Debajo, el botón con borde «Crear plan» con un «+», y una nota gris (necesita conexión, o ya hay un plan para cada área).

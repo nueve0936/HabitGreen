@@ -90,6 +90,8 @@ function RootNavigator() {
         <Stack.Screen name="plan-nuevo" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="detalle-plan/[id]" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="detalle-plan/sugerencias" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="mis-planes" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="avisos-horas" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       <Stack.Protected guard={zone === 'onboarding'}>
         <Stack.Screen name="(onboarding)" />

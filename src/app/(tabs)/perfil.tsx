@@ -1,101 +1,51 @@
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { LogOut } from 'lucide-react-native';
-import { useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, AppState, Linking, View } from 'react-native';
+import { Bell, LogOut, Sprout, Timer } from 'lucide-react-native';
+import { useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { MenuRow } from '@/components/ui/menu-row';
 import { Screen } from '@/components/ui/screen';
-import { SettingsRow } from '@/components/ui/settings-row';
 import { Snackbar } from '@/components/ui/snackbar';
 import { avisarCambioLocal } from '@/db/db-version-store';
-import { guardarAjustes, leerAjustesPerfil, type CambiosAjustes } from '@/db/settings-repository';
+import { leerMisPlanes } from '@/db/plan-repository';
+import { guardarAjustes, leerAjustesPerfil } from '@/db/settings-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { textoDuracion } from '@/features/habits/domain/formato';
-import { MisPlanes } from '@/features/plan/components/mis-planes';
-import { SecondNoticeToggle } from '@/features/plan/components/second-notice-toggle';
-import { fechaDesdeHora, horaDesdeFecha } from '@/features/plan/domain/plan-review';
-import { permisoConcedido } from '@/features/reminders/avisos';
 import { BudgetDialog } from '@/features/reminders/components/budget-dialog';
-import { StyleDialog } from '@/features/reminders/components/style-dialog';
-import type { MomentoAviso } from '@/features/reminders/domain/planificar-avisos';
+import { useAvisosActivos } from '@/features/reminders/use-avisos-activos';
 import { es, formatear } from '@/i18n/es';
+import { navegar } from '@/lib/navegar';
 import { cardShadow, colors } from '@/theme';
 
-// Perfil (SDD 9.4): avisos, horas por momento, tiempo diario, mis planes y la cuenta. Cada cambio se guarda al
-// momento en el teléfono y se sube con la cola, así que funciona sin conexión (SDD 3.4) y los avisos
-// se recalculan solos. Las horas son las generales: cada hábito conserva la suya.
-
-const MOMENTOS: Exclude<MomentoAviso, 'resumen_nocturno'>[] = [
-  'manana',
-  'mediodia',
-  'tarde',
-  'noche',
-];
-
-function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <View className="gap-3">
-      <AppText variant="h3" accessibilityRole="header">
-        {titulo}
-      </AppText>
-      {children}
-    </View>
-  );
-}
-
-function Grupo({ children }: { children: ReactNode }) {
-  return (
-    <View style={cardShadow} className="overflow-hidden rounded-card bg-campo">
-      {children}
-    </View>
-  );
-}
+// Perfil (SDD 9.4; decisión del usuario, «índice con pantallas»): arriba la cuenta; debajo una
+// tarjeta con tres filas que resumen y abren lo suyo («Mis planes» y «Avisos y horas» abren su
+// pantalla; «Tiempo diario», su diálogo de ruedas) y al final «Cerrar sesión». Cabe en una sola
+// pantalla. Cada cambio se guarda en el teléfono y se sube con la cola: funciona sin conexión.
 
 export default function PerfilScreen() {
   const t = es.perfil;
   const { session, signOut } = useSession();
   const userId = session?.user.id ?? '';
+  const correo = session?.user.email ?? '';
   const perfil = useLocalQuery(`perfil-${userId}`, () => leerAjustesPerfil(userId));
+  const planes = useLocalQuery(`mis-planes-${userId}`, () => leerMisPlanes(userId));
+  const avisosActivos = useAvisosActivos();
   const [signingOut, setSigningOut] = useState(false);
-  const [dialogo, setDialogo] = useState<'estilo' | 'tiempo' | null>(null);
+  const [eligiendoTiempo, setEligiendoTiempo] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState(false);
-  const [avisosActivos, setAvisosActivos] = useState(true);
-
-  // Al volver de los ajustes de Android, el estado del permiso puede haber cambiado.
-  useEffect(() => {
-    const revisar = () => {
-      permisoConcedido()
-        .then(setAvisosActivos)
-        .catch(() => setAvisosActivos(true));
-    };
-    revisar();
-    const suscripcion = AppState.addEventListener('change', (estado) => {
-      if (estado === 'active') revisar();
-    });
-    return () => suscripcion.remove();
-  }, []);
 
   const ajustes = perfil.data?.ajustes ?? null;
-
-  const guardar = (cambios: CambiosAjustes) => {
-    setErrorGuardar(false);
-    guardarAjustes(userId, cambios).catch(() => setErrorGuardar(true));
-  };
-
-  const elegirHora = (momento: MomentoAviso) => {
-    if (!ajustes) return;
-    DateTimePickerAndroid.open({
-      value: fechaDesdeHora(ajustes.horas[momento]),
-      mode: 'time',
-      is24Hour: true,
-      onValueChange: (_evento, fecha) =>
-        guardar({ horas_por_momento: { ...ajustes.horas, [momento]: horaDesdeFecha(fecha) } }),
-    });
-  };
+  const minutosDia = perfil.data?.minutosDiaMasCargado ?? 0;
+  const cuantos = planes.data?.length ?? 0;
+  const textoPlanes =
+    cuantos === 0
+      ? t.indice.sinPlanes
+      : cuantos === 1
+        ? t.indice.unPlan
+        : formatear(t.indice.planes, { n: String(cuantos) });
 
   const onSignOut = async () => {
     setSigningOut(true);
@@ -106,12 +56,30 @@ export default function PerfilScreen() {
     }
   };
 
-  const minutosDia = perfil.data?.minutosDiaMasCargado ?? 0;
-
   return (
     <>
       <Screen edges={['top']} scroll contentClassName="gap-6 pt-6">
         <AppText variant="h1">{es.tabs.perfil}</AppText>
+
+        <View
+          accessible
+          accessibilityLabel={formatear(t.indice.cuentaA11y, { correo })}
+          className="flex-row items-center gap-3"
+        >
+          <View className="h-12 w-12 items-center justify-center rounded-chip bg-accent-claro">
+            <AppText variant="h3" tone="acento">
+              {(correo[0] ?? '?').toUpperCase()}
+            </AppText>
+          </View>
+          <View className="flex-1">
+            <AppText variant="small" tone="ink-soft">
+              {t.sesionIniciada}
+            </AppText>
+            <AppText weight="semibold" numberOfLines={1}>
+              {correo}
+            </AppText>
+          </View>
+        </View>
 
         {perfil.cargando && !perfil.data ? (
           <ActivityIndicator color={colors.ink} accessibilityLabel={es.comun.cargando} />
@@ -120,97 +88,48 @@ export default function PerfilScreen() {
             <Alert variant="error" message={t.errorLeer} />
             <Button variant="secondary" label={es.comun.reintentar} onPress={avisarCambioLocal} />
           </View>
-        ) : ajustes === null ? (
-          <Alert variant="info" message={t.sinAjustes} />
         ) : (
-          <>
-            <Seccion titulo={t.avisos}>
-              {avisosActivos ? null : (
-                <View className="gap-2">
-                  <Alert variant="advertencia" message={t.avisosApagados} />
-                  <Button
-                    variant="secondary"
-                    label={t.abrirAjustes}
-                    onPress={() => void Linking.openSettings()}
-                  />
-                </View>
-              )}
-              <Grupo>
-                <SettingsRow
-                  label={t.estilo}
-                  value={t.estilos[ajustes.estilo]}
-                  onPress={() => setDialogo('estilo')}
-                  ultima={ajustes.estilo === 'resumen_nocturno'}
-                />
-                {/* El segundo aviso solo existe con avisos por hábito (SDD 5.6). */}
-                {ajustes.estilo === 'resumen_nocturno' ? null : (
-                  <View className="px-4 py-2">
-                    <SecondNoticeToggle
-                      value={ajustes.segundoAviso}
-                      onChange={(activo) => guardar({ segundo_aviso: activo })}
-                    />
-                  </View>
-                )}
-              </Grupo>
-            </Seccion>
-
-            <Seccion titulo={t.horas}>
-              <Grupo>
-                {MOMENTOS.map((momento, i) => (
-                  <SettingsRow
-                    key={momento}
-                    label={es.onboarding.formulario.momento[momento]}
-                    value={ajustes.horas[momento]}
-                    onPress={() => elegirHora(momento)}
-                    ultima={i === MOMENTOS.length - 1 && ajustes.estilo !== 'resumen_nocturno'}
-                  />
-                ))}
-                {ajustes.estilo === 'resumen_nocturno' ? (
-                  <SettingsRow
-                    label={t.resumen}
-                    value={ajustes.horas.resumen_nocturno}
-                    onPress={() => elegirHora('resumen_nocturno')}
-                    ultima
-                  />
-                ) : null}
-              </Grupo>
-              <AppText variant="small" tone="ink-soft">
-                {t.horasNota}
-              </AppText>
-            </Seccion>
-
-            <Seccion titulo={t.tiempo}>
-              <Grupo>
-                <SettingsRow
-                  label={t.tiempoAlDia}
-                  value={textoDuracion(ajustes.presupuestoMin)}
-                  onPress={() => setDialogo('tiempo')}
+          <View className="gap-3">
+            <View style={cardShadow} className="overflow-hidden rounded-card bg-campo">
+              <MenuRow
+                icono={Sprout}
+                titulo={t.planes.titulo}
+                valor={textoPlanes}
+                onPress={() => navegar.push('/mis-planes')}
+              />
+              <MenuRow
+                icono={Bell}
+                titulo={t.indice.avisosHoras}
+                resumen={
+                  !avisosActivos
+                    ? t.indice.avisosApagados
+                    : ajustes
+                      ? t.estilos[ajustes.estilo]
+                      : undefined
+                }
+                alerta={!avisosActivos}
+                onPress={() => navegar.push('/avisos-horas')}
+              />
+              {ajustes ? (
+                <MenuRow
+                  icono={Timer}
+                  titulo={t.tiempo}
+                  valor={textoDuracion(ajustes.presupuestoMin)}
+                  onPress={() => setEligiendoTiempo(true)}
                   ultima
                 />
-              </Grupo>
-              {/* Se permite bajarlo: solo se avisa, nunca se tocan los hábitos (SDD 6.5). */}
-              {minutosDia > ajustes.presupuestoMin ? (
-                <Alert
-                  variant="advertencia"
-                  message={formatear(t.tiempoCorto, { n: textoDuracion(minutosDia) })}
-                />
               ) : null}
-            </Seccion>
-          </>
+            </View>
+            {ajustes === null ? <Alert variant="info" message={t.sinAjustes} /> : null}
+            {/* Se permite bajarlo: solo se avisa, nunca se tocan los hábitos (SDD 6.5). */}
+            {ajustes && minutosDia > ajustes.presupuestoMin ? (
+              <Alert
+                variant="advertencia"
+                message={formatear(t.tiempoCorto, { n: textoDuracion(minutosDia) })}
+              />
+            ) : null}
+          </View>
         )}
-
-        <Seccion titulo={t.planes.titulo}>
-          <MisPlanes userId={userId} />
-        </Seccion>
-
-        <Seccion titulo={t.cuenta}>
-          <Card className="gap-1">
-            <AppText variant="small">{t.sesionIniciada}</AppText>
-            <AppText variant="body" weight="semibold">
-              {session?.user.email ?? ''}
-            </AppText>
-          </Card>
-        </Seccion>
 
         <View className="mt-auto">
           <Button
@@ -222,19 +141,17 @@ export default function PerfilScreen() {
           />
         </View>
 
-        {ajustes && dialogo === 'estilo' ? (
-          <StyleDialog
-            valor={ajustes.estilo}
-            onElegir={(estilo) => guardar({ estilo_notificaciones: estilo })}
-            onCerrar={() => setDialogo(null)}
-          />
-        ) : null}
-        {ajustes && dialogo === 'tiempo' ? (
+        {ajustes && eligiendoTiempo ? (
           <BudgetDialog
             valor={ajustes.presupuestoMin}
             minutosDia={minutosDia}
-            onElegir={(minutos) => guardar({ presupuesto_min: minutos })}
-            onCerrar={() => setDialogo(null)}
+            onElegir={(minutos) => {
+              setErrorGuardar(false);
+              guardarAjustes(userId, { presupuesto_min: minutos }).catch(() =>
+                setErrorGuardar(true),
+              );
+            }}
+            onCerrar={() => setEligiendoTiempo(false)}
           />
         ) : null}
       </Screen>

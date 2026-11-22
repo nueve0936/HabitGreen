@@ -246,6 +246,8 @@ Se quitó el campo `mensaje` del borrador (Entrega 8): los mensajes de la tarjet
 
 | Elemento | Texto |
 | --- | --- |
+| Índice: filas | Mis planes («{n} planes» · «1 plan» · «Sin planes») · Avisos y horas («{estilo}» o «Avisos apagados») · Tiempo diario |
+| Encabezado de la cuenta | Sesión iniciada como · {correo} |
 | Secciones | Avisos · Horas · Tiempo diario · Cuenta |
 | Avisos apagados en Android | Los avisos están apagados en tu teléfono. Actívalos para recibir tus recordatorios. Botón: «Abrir ajustes». |
 | Estilo (fila) | Resumen nocturno · Aviso suave · Aviso con ánimo · Lo mínimo |

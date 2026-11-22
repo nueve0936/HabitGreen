@@ -707,6 +707,15 @@ export const es = {
   },
   perfil: {
     sesionIniciada: 'Sesión iniciada como',
+    // Perfil como índice (decisión del usuario): filas que abren su pantalla.
+    indice: {
+      avisosHoras: 'Avisos y horas',
+      avisosApagados: 'Avisos apagados',
+      planes: '{n} planes',
+      unPlan: '1 plan',
+      sinPlanes: 'Sin planes',
+      cuentaA11y: 'Sesión iniciada como {correo}',
+    },
     // Detalle de un plan (Perfil → Mis planes → un plan).
     detallePlan: {
       desde: 'Desde el {dia} de {mes}',
