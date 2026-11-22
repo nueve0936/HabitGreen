@@ -120,15 +120,21 @@ export function generarPlan(
   respuestas: Respuestas,
   catalogo: readonly FilaCatalogo[],
   config: ConfigPlan,
+  /**
+   * Minutos del día que ya usan los hábitos que tiene (el día más cargado). Un plan siguiente se
+   * acomoda en el tiempo que queda libre; si no alcanza, sus hábitos arrancan en el nivel 1.
+   */
+  minutosOcupados = 0,
 ): PlanMotor {
   const presupuesto = config.presupuestos[respuestas.tiempo];
+  const libre = Math.max(0, presupuesto - minutosOcupados);
   const inicial = nivelInicial(respuestas.historial);
   // Los hábitos sin duración (recordatorios) no gastan tiempo: el tiempo diario se reparte solo
   // entre los que tienen minutos en su nivel inicial.
   const conDuracion = respuestas.objetivos.filter(
     (objetivo) => habitoParaNivel(respuestas, catalogo, config, objetivo, inicial).duracion_min > 0,
   ).length;
-  const maxPorHabito = presupuesto / Math.max(1, conDuracion);
+  const maxPorHabito = libre / Math.max(1, conDuracion);
 
   const habitos = respuestas.objetivos.map((objetivo): HabitoPlan => {
     // Se empieza en el nivel inicial y se baja mientras la duración no quepa. El nivel 1 dura
@@ -182,9 +188,9 @@ export function sugerenciasDeHabitos(
   const objetivos = [...new Set(catalogo.map((f) => f.objetivo))].filter(
     (o) => !respuestas.objetivos.includes(o),
   );
+  // Un plan por área: solo se sugieren hábitos de su área (decisión del usuario).
   const deSusAreas = (o: Objetivo) => respuestas.areas.includes(areaDeObjetivo(o));
-  const ordenados = [...objetivos.filter(deSusAreas), ...objetivos.filter((o) => !deSusAreas(o))];
-  return ordenados.flatMap((objetivo) => {
+  return objetivos.filter(deSusAreas).flatMap((objetivo) => {
     try {
       return [habitoParaNivel(respuestas, catalogo, config, objetivo, 1)];
     } catch {

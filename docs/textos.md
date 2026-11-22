@@ -118,6 +118,33 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Límite de hábitos (guiado, plan y propios) | Ya tienes {n} hábitos. · Para sumar otro, pausa o elimina uno. Conforme avances en tu plan podrás agregar más. · Botón: «Entendido» |
 | Sesión cerrada sola (bienvenida e inicio de sesión; se ve una vez y se quita a los 10 s) | Tu sesión caducó. Vuelve a iniciar sesión. |
 
+## Varios planes (Mis planes)
+
+| Momento | Texto |
+| --- | --- |
+| P1, primer plan | ¿En qué área quieres empezar? · Elige una. Cuando avances podrás crear un plan para otra área. |
+| P1, planes siguientes | ¿Para qué área es este plan? · Elige una. Cada área tiene su propio plan. |
+| Área con plan, en P1 | Ya tienes un plan de esta área |
+| Elegir modo, ayuda | Es solo para empezar: después puedes crear tus propios hábitos o un plan desde Perfil. |
+| Perfil, sección | Mis planes |
+| Sin planes | Todavía no tienes un plan. Crea uno y te proponemos pasos pequeños para un área. |
+| Tarjeta de un plan | Plan de {área} · {hábitos separados por «·»; «{título} (en pausa)»} · «Terminar plan» |
+| Plan sin hábitos activos | Este plan ya no tiene hábitos activos. |
+| Botón y notas | Crear plan · Crear un plan necesita conexión. · Ya tienes un plan para cada área. |
+| Confirmar terminar | ¿Terminar tu plan de {área}? Sus hábitos se quedan como tuyos, con su historial. · Botones: «Cancelar», «Terminar» |
+| Detalle del plan, encabezado | Plan de {área} · Desde el {día} de {mes} · Tu meta: {meta} / Tus metas: {a} y {b} |
+| Resumen | Resumen · Cada 7 días vemos cómo te fue y te proponemos ajustes. · (hábito por debajo del 50 %) ¿Lo hacemos más ligero? |
+| Cómo vas | Llevas {hechos} de {total} en las últimas 2 semanas · (poco historial) Todavía es pronto para medir. Cada día que lo haces cuenta. |
+| Próxima revisión | Revisamos tu plan hoy / mañana / en {n} días |
+| Fila de hábito | {días · hora · duración} · Sin duración fija · En pausa · {n} seguidos |
+| Menú ⋮ (extras) | Hacerlo más ligero · Sacar del plan |
+| Confirmar más ligero | ¿Lo hacemos más ligero? «{antes}» pasa a «{después}». Hacerlo más ligero también es avanzar. · Botones: «Cancelar», «Más ligero» |
+| Confirmar sacar | «{título}» se queda como hábito tuyo, con su historial. Ya no sube ni baja de nivel. · Botones: «Cancelar», «Sacar» |
+| Avisos | Listo: «{título}» quedó más ligero. · Listo: «{título}» ahora es un hábito tuyo. |
+| Agregar un hábito al plan | Sugerir otros hábitos · Este empieza un poco más retador · Hábitos para empezar, de esta misma área. · ¿Agregamos «{título}» a tu plan? · Con este hábito pasas tu tiempo diario por {n} min; lo subimos a lo necesario. · Ya no hay más hábitos sugeridos para esta área. · Este plan ya tiene todos los hábitos que puede tener por ahora. |
+| Plan inactivo | Este plan ya no está activo. · Volver |
+| Plan que no cabe en el tiempo diario | Este plan pasa tu tiempo diario por {n} min. Puedes subirlo en Perfil o quitar un hábito. Si lo guardas así, tu tiempo diario sube a lo necesario. |
+
 ## 5. Progresión
 
 | Situación | Texto |

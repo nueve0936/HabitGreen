@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { CommonActions } from 'expo-router/react-navigation';
 import { useEffect } from 'react';
 import { Alert as AlertNativo, View } from 'react-native';
@@ -12,6 +12,7 @@ import { useSession } from '@/features/auth/session-context';
 import { pilaParaRetomar } from '@/features/onboarding/domain/retomar';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { es } from '@/i18n/es';
+import { navegar } from '@/lib/navegar';
 
 // Pantalla «Empezar» del mockup: se ve justo después de confirmar la cuenta. La sesión ya está
 // iniciada, así que la flecha atrás pregunta si quiere salir de la cuenta y, al confirmar, cierra
@@ -73,7 +74,7 @@ export default function EmpezarScreen() {
         </AppText>
       </View>
 
-      <Button label={t.boton} onPress={() => router.push('/modo')} className="mt-10" />
+      <Button label={t.boton} onPress={() => navegar.push('/modo')} className="mt-10" />
     </Screen>
   );
 }

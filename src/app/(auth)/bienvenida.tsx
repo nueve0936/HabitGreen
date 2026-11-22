@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Screen } from '@/components/ui/screen';
 import { SessionExpiredNotice } from '@/features/auth/components/session-expired-notice';
 import { es } from '@/i18n/es';
+import { navegar } from '@/lib/navegar';
 
 // Pantalla «Inicio» del mockup: ilustración, lema y acceso a registro o inicio de sesión. Si la
 // sesión caducó sola, lo explica arriba de los botones.
@@ -33,10 +33,14 @@ export default function BienvenidaScreen() {
 
       <View className="mt-10 gap-2">
         <SessionExpiredNotice />
-        <Button label={t.crearCuenta} onPress={() => router.push('/registro')} />
+        <Button label={t.crearCuenta} onPress={() => navegar.push('/registro')} />
         <View className="flex-row flex-wrap items-center justify-center">
           <AppText variant="body">{t.yaTienesCuenta}</AppText>
-          <Button variant="tertiary" label={t.iniciaSesion} onPress={() => router.push('/login')} />
+          <Button
+            variant="tertiary"
+            label={t.iniciaSesion}
+            onPress={() => navegar.push('/login')}
+          />
         </View>
       </View>
     </Screen>

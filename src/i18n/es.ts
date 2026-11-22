@@ -173,7 +173,8 @@ export const es = {
     },
     modo: {
       titulo: '¿Cómo quieres empezar?',
-      ayuda: 'Puedes crear tus propios hábitos en cualquier momento.',
+      ayuda:
+        'Es solo para empezar: después puedes crear tus propios hábitos o un plan desde Perfil.',
       guiadoTitulo: 'Quiero un plan para mí',
       guiadoDescripcion: 'Respondes 7 preguntas y te armamos un plan que empieza ligero.',
       tradicionalTitulo: 'Prefiero crear mis hábitos',
@@ -186,8 +187,13 @@ export const es = {
       crearPlan: 'Crear mi plan',
       preguntas: {
         areas: {
-          titulo: '¿En qué áreas te gustaría empezar?',
-          ayuda: 'Elige hasta 2. Podrás sumar más cuando estas ya sean parte de tu día.',
+          titulo: '¿En qué área quieres empezar?',
+          ayuda: 'Elige una. Cuando avances podrás crear un plan para otra área.',
+        },
+        // P1 de los planes siguientes (Perfil → Mis planes → Crear plan).
+        areasNuevoPlan: {
+          titulo: '¿Para qué área es este plan?',
+          ayuda: 'Elige una. Cada área tiene su propio plan.',
         },
         objetivos: {
           titulo: '¿Qué te gustaría lograr primero?',
@@ -214,6 +220,7 @@ export const es = {
           ayuda: 'Puedes cambiarlo cuando quieras en Perfil.',
         },
       },
+      areaOcupada: 'Ya tienes un plan de esta área',
       areas: {
         salud_fisica: 'Salud física',
         trabajo: 'Trabajo / Estudio',
@@ -238,6 +245,25 @@ export const es = {
         mantener_contacto: 'Mantener contacto con las personas que quiero',
         tiempo_de_calidad: 'Pasar tiempo de calidad con alguien',
         conocer_gente: 'Conocer gente nueva',
+        estirarme: 'Estirarme',
+        aire_libre: 'Salir al aire libre',
+        pausas_activas: 'Hacer pausas activas',
+        leer_mas: 'Leer más',
+        ordenar_espacio: 'Ordenar mi espacio',
+        practicar_habilidad: 'Practicar una habilidad',
+        concentrarme: 'Concentrarme mejor',
+        agradecer_mas: 'Agradecer más',
+        escribir_diario: 'Escribir lo que siento',
+        meditar: 'Meditar',
+        crear_algo: 'Hacer algo creativo',
+        pagar_a_tiempo: 'Pagar a tiempo',
+        aprender_finanzas: 'Aprender de finanzas',
+        planear_compras: 'Planear mis compras',
+        ordenar_cuentas: 'Ordenar mis cuentas',
+        escuchar_mejor: 'Escuchar mejor',
+        ayudar_a_alguien: 'Ayudar a alguien',
+        agradecer_a_otros: 'Agradecer a otros',
+        retomar_amistad: 'Retomar una amistad',
       },
       historial: {
         primera_vez: 'Es mi primera vez',
@@ -299,6 +325,9 @@ export const es = {
       maximo:
         'Inicialmente tendrás un máximo de 3 hábitos. Conforme vayas avanzando podrás ir agregando más.',
       notaAjuste: 'Si un día no puedes, tu meta se ajusta sin perder progreso.',
+      // Plan nuevo desde la app que no cabe en el tiempo diario.
+      excedeTiempo:
+        'Este plan pasa tu tiempo diario por {n} min. Puedes subirlo en Perfil o quitar un hábito. Si lo guardas así, tu tiempo diario sube a lo necesario.',
       quitarConfirmar: '¿Seguro que deseas eliminar el hábito «{titulo}»?',
       cancelar: 'Cancelar',
       eliminar: 'Eliminar',
@@ -678,8 +707,75 @@ export const es = {
   },
   perfil: {
     sesionIniciada: 'Sesión iniciada como',
-    modoGuiado: 'Modo: plan guiado',
-    modoTradicional: 'Modo: mis propios hábitos',
+    // Detalle de un plan (Perfil → Mis planes → un plan).
+    detallePlan: {
+      desde: 'Desde el {dia} de {mes}',
+      meta: 'Tu meta: {metas}',
+      metas: 'Tus metas: {metas}',
+      metasY: '{a} y {b}',
+      resumen: 'Resumen',
+      revisionAyuda: 'Cada 7 días vemos cómo te fue y te proponemos ajustes.',
+      sugerirMasLigero: '¿Lo hacemos más ligero?',
+      sugerirMasLigeroA11y: 'Hacer más ligero {titulo}',
+      avance: 'Llevas {hechos} de {total} en las últimas 2 semanas',
+      pronto: 'Todavía es pronto para medir. Cada día que lo haces cuenta.',
+      revisionHoy: 'Revisamos tu plan hoy',
+      revisionManana: 'Revisamos tu plan mañana',
+      revisionEn: 'Revisamos tu plan en {n} días',
+      habitos: 'Hábitos del plan',
+      sinHabitos: 'Este plan ya no tiene hábitos activos.',
+      sinDuracion: 'Sin duración fija',
+      enPausa: 'En pausa',
+      racha: '{n} seguidos',
+      rachaA11y: 'Racha de {n}',
+      abrir: 'Abrir {titulo}',
+      agregar: 'Agregar un hábito al plan',
+      noActivo: 'Este plan ya no está activo.',
+      volver: 'Volver',
+      menu: { masLigero: 'Hacerlo más ligero', sacar: 'Sacar del plan' },
+      masLigeroPregunta:
+        '¿Lo hacemos más ligero? «{antes}» pasa a «{despues}». Hacerlo más ligero también es avanzar.',
+      masLigeroConfirmar: 'Más ligero',
+      sacarPregunta:
+        '«{titulo}» se queda como hábito tuyo, con su historial. Ya no sube ni baja de nivel.',
+      sacarConfirmar: 'Sacar',
+      cancelar: 'Cancelar',
+      listoMasLigero: 'Listo: «{titulo}» quedó más ligero.',
+      listoSacar: 'Listo: «{titulo}» ahora es un hábito tuyo.',
+      error: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
+      sugerencias: {
+        titulo: 'Agregar un hábito al plan',
+        subtitulo: 'Hábitos para empezar, de esta misma área.',
+        vacio: 'Ya no hay más hábitos sugeridos para esta área.',
+        agregar: 'Agregar',
+        agregarEtiqueta: 'Agregar {titulo}',
+        // Versiones de nivel 2 o 3 de una meta.
+        masRetador: 'Este empieza un poco más retador',
+        confirmar: '¿Agregamos «{titulo}» a tu plan?',
+        excede: 'Con este hábito pasas tu tiempo diario por {n} min; lo subimos a lo necesario.',
+        cancelar: 'Cancelar',
+        listo: 'Listo: «{titulo}» ya es parte de tu plan.',
+        sinLugar: 'Este plan ya tiene todos los hábitos que puede tener por ahora.',
+      },
+    },
+    // Mis planes (varios planes por usuario, uno por área).
+    planes: {
+      titulo: 'Mis planes',
+      vacio: 'Todavía no tienes un plan. Crea uno y te proponemos pasos pequeños para un área.',
+      planDe: 'Plan de {area}',
+      verPlan: 'Ver el plan de {area}',
+      sinHabitos: 'Este plan ya no tiene hábitos activos.',
+      enPausa: '{titulo} (en pausa)',
+      crear: 'Crear plan',
+      necesitaConexion: 'Crear un plan necesita conexión.',
+      todasOcupadas: 'Ya tienes un plan para cada área.',
+      terminar: 'Terminar plan',
+      terminarEtiqueta: 'Terminar el plan de {area}',
+      terminarPregunta:
+        '¿Terminar tu plan de {area}? Sus hábitos se quedan como tuyos, con su historial.',
+      terminarConfirmar: 'Terminar',
+      cancelar: 'Cancelar',
+    },
     cerrarSesion: 'Cerrar sesión',
     avisos: 'Avisos',
     avisosApagados:

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
@@ -21,6 +20,7 @@ import {
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
+import { navegar } from '@/lib/navegar';
 
 export default function LoginScreen() {
   const t = es.auth;
@@ -110,7 +110,7 @@ export default function LoginScreen() {
             <Button
               variant="tertiary"
               label={t.login.olvidaste}
-              onPress={() => router.push('/recuperar')}
+              onPress={() => navegar.push('/recuperar')}
               className="px-0"
             />
           </View>
@@ -125,7 +125,7 @@ export default function LoginScreen() {
           <Button
             variant="tertiary"
             label={t.login.registrate}
-            onPress={() => router.replace('/registro')}
+            onPress={() => navegar.replace('/registro')}
           />
         </View>
       </View>

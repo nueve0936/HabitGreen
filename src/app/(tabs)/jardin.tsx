@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { ShoppingBag } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
@@ -15,6 +14,7 @@ import { CoinBalance } from '@/features/rewards/components/coin-balance';
 import { PlantPanel } from '@/features/rewards/components/plant-panel';
 import { es } from '@/i18n/es';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Jardín (SDD 9.4 y mockup «Plantas #1»): las 5 plantas desde el primer día, con su fase y sus
 // accesorios, sin números de nivel ni XP. Tocar una planta abre sus detalles; la bolsa, única
@@ -35,7 +35,7 @@ export default function JardinScreen() {
           {es.tabs.jardin}
         </AppText>
         <CoinBalance saldo={saldo} />
-        <ActionSquare label={t.tienda} icon={ShoppingBag} onPress={() => router.push('/tienda')} />
+        <ActionSquare label={t.tienda} icon={ShoppingBag} onPress={() => navegar.push('/tienda')} />
       </View>
 
       <ScrollView
@@ -62,7 +62,7 @@ export default function JardinScreen() {
                 <PlantPanel
                   planta={planta}
                   onPress={() =>
-                    router.push({
+                    navegar.push({
                       pathname: '/planta/[categoria]',
                       params: { categoria: planta.area },
                     })

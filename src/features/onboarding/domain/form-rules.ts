@@ -1,6 +1,6 @@
 import {
   areaDeObjetivo,
-  MAX_AREAS,
+  MAX_AREAS_POR_PLAN,
   MAX_OBJETIVOS,
   OBJETIVOS_POR_AREA,
   respuestasSchema,
@@ -41,7 +41,7 @@ export function alternarArea(
   borrador: Borrador,
   area: Area,
 ): { areas: Area[]; objetivos: Objetivo[] } {
-  const areas = alternarSeleccion(borrador.areas, area, MAX_AREAS);
+  const areas = alternarSeleccion(borrador.areas, area, MAX_AREAS_POR_PLAN);
   const objetivos = borrador.objetivos.filter((o) => areas.includes(areaDeObjetivo(o)));
   return { areas, objetivos };
 }
@@ -55,6 +55,16 @@ export function objetivosPorAreaElegida(
   areas: readonly Area[],
 ): { area: Area; objetivos: readonly Objetivo[] }[] {
   return areas.map((area) => ({ area, objetivos: OBJETIVOS_POR_AREA[area] }));
+}
+
+/**
+ * Pasos del formulario: el primer plan pregunta las 7; los planes siguientes solo las del área
+ * (P1 área, P2 objetivos y P3 historial) y reusan las globales (P4 a P7) ya guardadas.
+ */
+export const PASOS_PLAN_ADICIONAL = 3;
+
+export function totalPasos(adicional: boolean): number {
+  return adicional ? PASOS_PLAN_ADICIONAL : TOTAL_PASOS;
 }
 
 /** Verdadero si la respuesta del paso permite continuar. */

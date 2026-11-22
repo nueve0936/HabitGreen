@@ -9,12 +9,16 @@ import {
   type Registro,
 } from '@/features/habits/domain/habitos-del-dia';
 import { nuevaVersionHorario } from '@/features/habits/domain/horario';
+import { avanceDelPlan, diasParaRevision, type Avance } from '@/features/plan/domain/detalle-plan';
 import type { FilaCatalogo } from '@/features/plan/domain/plan-engine';
 import { respuestasDelPlan } from '@/features/plan/domain/respuestas-plan';
+import { sugerenciasPorNiveles } from '@/features/plan/domain/sugerencias-plan';
 import {
   decidir,
   esDelPlan,
   llegoAlLimiteTotal,
+  pasoHaciaAbajo,
+  cumplimientoDe,
   tocaDesbloquear,
   tocaEvaluar,
   type ConfigProgresion,
@@ -23,9 +27,16 @@ import {
   type ValoresNivel,
 } from '@/features/progression/domain/progresion';
 import { historial } from '@/features/stats/domain/cumplimiento';
+import { rachaDeHabito } from '@/features/stats/domain/rachas';
 import { fechaLocal } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
-import { AREAS, respuestasSchema, type Area, type Respuestas } from '@/schemas/onboarding';
+import {
+  AREAS,
+  respuestasSchema,
+  type Area,
+  type Objetivo,
+  type Respuestas,
+} from '@/schemas/onboarding';
 import { respuestaAjusteSchema, type HabitoPlan, type PeticionAjuste } from '@/schemas/plan';
 import type { OperacionOutbox } from '@/sync/domain/sync-rules';
 
@@ -357,6 +368,69 @@ export async function deshacerBajada(
 }
 
 /**
+ * Crea un hábito en un plan (nivel 1) con su horario, si cabe: no repite un objetivo que ya está en
+ * algún plan y respeta el límite de hábitos del plan y el límite total. Devuelve su id y las
+ * operaciones para la cola, o null si no hay lugar.
+ */
+async function crearHabitoDelPlan(
+  db: SQLiteDatabase,
+  userId: string,
+  plan: PlanActivo,
+  comunes: Comunes,
+  h: HabitoPlan,
+): Promise<{ id: string; operaciones: OperacionOutbox[] } | null> {
+  const entrada = entradaDelPlan(comunes, plan);
+  const activos = entrada.habitos.filter(
+    (x) => esDelPlan(x) && x.activo && x.archivado_en === null,
+  );
+  const repetido = activos.some((x) => x.objetivo === h.objetivo);
+  // Límite de hábitos de este plan y límite total: el usuario pudo crear uno propio mientras tanto.
+  const delPlan = activos.filter((x) => x.plan_id === plan.id).length;
+  const lleno =
+    (!plan.limiteDesbloqueado && delPlan >= entrada.config.limite_habitos_plan) ||
+    llegoAlLimiteTotal(entrada);
+  if (repetido || lleno) return null;
+
+  const ahora = new Date().toISOString();
+  const habito = {
+    id: randomUUID(),
+    user_id: userId,
+    category_id: await idCategoria(db, h.categoria),
+    plan_id: plan.id,
+    objetivo: h.objetivo,
+    nivel: h.nivel,
+    usa_duracion_reducida: h.usa_duracion_reducida,
+    nivel_desde: entrada.hoy,
+    titulo: h.titulo,
+    descripcion: h.descripcion,
+    duracion_min: h.duracion_min,
+    activo: true,
+    archivado_en: null,
+  };
+  const horario = {
+    id: randomUUID(),
+    habit_id: habito.id,
+    user_id: userId,
+    dias_semana: h.dias_semana,
+    hora: h.hora,
+    flexible: h.flexible,
+    notificar: h.notificar,
+    vigente_desde: entrada.hoy,
+    vigente_hasta: null,
+  };
+  await guardarFilas(db, 'habits', [{ ...habito, created_at: ahora, updated_at: ahora }]);
+  await guardarFilas(db, 'habit_schedules', [{ ...horario, updated_at: ahora }]);
+  // El hábito va primero: la política de RLS del horario revisa que el hábito exista.
+  return {
+    id: habito.id,
+    operaciones: [
+      { operacion: 'upsert', tabla: 'habits', clave: habito.id, payload: habito },
+      { operacion: 'upsert', tabla: 'habit_schedules', clave: horario.id, payload: horario },
+    ],
+  };
+}
+
+/**
  * «Sí, vamos» de un hábito nuevo: lo crea en el plan (nivel 1) con su horario. Devuelve su id, o
  * null si ya no hay lugar (se llegó al límite de hábitos del plan mientras tanto).
  */
@@ -373,56 +447,160 @@ export async function aceptarNuevo(
       tarjeta.planId ? p.id === tarjeta.planId : p.area === tarjeta.habito.categoria,
     );
     if (!comunes || !plan) return [];
-    const entrada = entradaDelPlan(comunes, plan);
-    const planId = plan.id;
-    const activos = entrada.habitos.filter(
-      (h) => esDelPlan(h) && h.activo && h.archivado_en === null,
-    );
-    const repetido = activos.some((h) => h.objetivo === tarjeta.habito.objetivo);
-    // Límite de hábitos de este plan (4) y límite total de hábitos: el usuario pudo crear uno
-    // propio mientras tanto.
-    const delPlan = activos.filter((h) => h.plan_id === planId).length;
-    const lleno =
-      (!plan.limiteDesbloqueado && delPlan >= entrada.config.limite_habitos_plan) ||
-      llegoAlLimiteTotal(entrada);
-    if (repetido || lleno) return [];
+    const resultado = await crearHabitoDelPlan(db, userId, plan, comunes, tarjeta.habito);
+    if (!resultado) return [];
+    creado = resultado.id;
+    return resultado.operaciones;
+  });
+  return creado;
+}
 
-    const h: HabitoPlan = tarjeta.habito;
-    const ahora = new Date().toISOString();
-    const habito = {
-      id: randomUUID(),
-      user_id: userId,
-      category_id: await idCategoria(db, h.categoria),
-      plan_id: planId,
-      objetivo: h.objetivo,
-      nivel: h.nivel,
-      usa_duracion_reducida: h.usa_duracion_reducida,
-      nivel_desde: entrada.hoy,
-      titulo: h.titulo,
-      descripcion: h.descripcion,
-      duracion_min: h.duracion_min,
-      activo: true,
-      archivado_en: null,
+// --- Detalle del plan (Perfil → Mis planes → un plan) ----------------------------------------
+
+export type HabitoDelDetalle = {
+  habito: Habito;
+  horario: Horario | null;
+  /** Racha actual: ocurrencias programadas seguidas que se completaron. */
+  racha: number;
+  /** El paso más ligero para «Hacerlo más ligero», o null si ya está en el más ligero. */
+  masLigero: ValoresNivel | null;
+  /** Va por debajo del 50 % en su ventana: la fila sugiere hacerlo más ligero. */
+  sugerirMasLigero: boolean;
+};
+
+export type DetallePlan = {
+  id: string;
+  area: Area;
+  /** Fecha local en que empezó el plan. */
+  inicio: string;
+  /** Metas del plan (sus objetivos), para «Tu meta: …». */
+  objetivos: Objetivo[];
+  /** Últimas 2 semanas; null si todavía es pronto para medir. */
+  avance: Avance | null;
+  diasParaRevision: number;
+  habitos: HabitoDelDetalle[];
+  /** Hay lugar para un hábito más en este plan (y en el límite total). */
+  puedeAgregar: boolean;
+};
+
+/** Todo lo que muestra el detalle de un plan, o null si el plan ya no está activo. */
+export async function leerDetallePlan(userId: string, planId: string): Promise<DetallePlan | null> {
+  const db = await getDb();
+  const plan = (await leerPlanesActivos(db, userId)).find((p) => p.id === planId);
+  const comunes = plan ? await leerComunes(db, userId) : null;
+  if (!plan || !comunes) return null;
+  const entrada = entradaDelPlan(comunes, plan);
+
+  const suyos = entrada.habitos.filter((h) => h.plan_id === plan.id && h.archivado_en === null);
+  const ids = new Set(suyos.map((h) => h.id));
+  const habitos = suyos.map((habito): HabitoDelDetalle => {
+    const horarios = entrada.horarios.filter((x) => x.habit_id === habito.id);
+    const horario = horarioDeReferencia(horarios, entrada.hoy) ?? null;
+    const ocurrencias = entrada.ocurrencias.filter((o) => o.habitId === habito.id);
+    const masLigero = esDelPlan(habito) ? pasoHaciaAbajo(habito, entrada) : null;
+    // Misma ventana y mismo umbral de bajar que la revisión, pero solo como sugerencia.
+    const conteo = horario
+      ? cumplimientoDe(
+          habito,
+          horario.dias_semana.length,
+          entrada.ocurrencias,
+          entrada.hoy,
+          entrada.config,
+        )
+      : null;
+    return {
+      habito,
+      horario,
+      racha: rachaDeHabito(ocurrencias).actual,
+      masLigero,
+      sugerirMasLigero:
+        masLigero !== null &&
+        habito.activo &&
+        conteo !== null &&
+        conteo.hechos / conteo.total < entrada.config.umbral_bajar,
     };
-    const horario = {
-      id: randomUUID(),
-      habit_id: habito.id,
-      user_id: userId,
-      dias_semana: h.dias_semana,
-      hora: h.hora,
-      flexible: h.flexible,
-      notificar: h.notificar,
-      vigente_desde: entrada.hoy,
-      vigente_hasta: null,
-    };
-    await guardarFilas(db, 'habits', [{ ...habito, created_at: ahora, updated_at: ahora }]);
-    await guardarFilas(db, 'habit_schedules', [{ ...horario, updated_at: ahora }]);
-    creado = habito.id;
-    // El hábito va primero: la política de RLS del horario revisa que el hábito exista.
-    return [
-      { operacion: 'upsert', tabla: 'habits', clave: habito.id, payload: habito },
-      { operacion: 'upsert', tabla: 'habit_schedules', clave: horario.id, payload: horario },
-    ];
+  });
+  const activos = suyos.filter((h) => h.activo).length;
+  return {
+    id: plan.id,
+    area: plan.area,
+    inicio: plan.inicio,
+    // Las metas que eligió al crear el plan; si no las hay, las de sus hábitos activos.
+    objetivos:
+      entrada.respuestas.objetivos.length > 0
+        ? entrada.respuestas.objetivos
+        : [...new Set(suyos.flatMap((h) => (esDelPlan(h) && h.activo ? [h.objetivo] : [])))],
+    avance: avanceDelPlan(entrada.ocurrencias, ids, entrada.hoy, entrada.config.minimo_ocurrencias),
+    diasParaRevision: diasParaRevision(
+      entrada.hoy,
+      plan.ultimaEvaluacion,
+      plan.inicio,
+      entrada.config.dias_entre_evaluaciones,
+    ),
+    habitos,
+    puedeAgregar:
+      (plan.limiteDesbloqueado || activos < entrada.config.limite_habitos_plan) &&
+      !llegoAlLimiteTotal(entrada),
+  };
+}
+
+/**
+ * «Hacerlo más ligero» (decisión del usuario): baja el hábito un paso ahora, igual que la revisión
+ * (nivel anterior o versión corta), y reinicia su ventana. Devuelve los valores nuevos para pedir
+ * sus textos a la IA, o null si ya estaba en su paso más ligero.
+ */
+export async function hacerMasLigero(
+  userId: string,
+  habitId: string,
+): Promise<{ despues: ValoresNivel; objetivo: string } | null> {
+  let resultado: { despues: ValoresNivel; objetivo: string } | null = null;
+  await aplicar(async (db) => {
+    const comunes = await leerComunes(db, userId);
+    const habito = comunes?.habitos.find((h) => h.id === habitId);
+    const plan = (await leerPlanesActivos(db, userId)).find((p) => p.id === habito?.plan_id);
+    if (!comunes || !habito || !plan || !esDelPlan(habito)) return [];
+    const despues = pasoHaciaAbajo(habito, entradaDelPlan(comunes, plan));
+    if (!despues) return [];
+    resultado = { despues, objetivo: habito.objetivo };
+    return aplicarNivel(db, userId, habitId, despues);
+  });
+  return resultado;
+}
+
+/**
+ * Sugerencias para «Agregar un hábito al plan»: las 3 versiones de cada meta libre de su área,
+ * primero las más ligeras, sin repetir metas que ya estén en algún plan.
+ */
+export async function sugerenciasParaPlan(userId: string, planId: string): Promise<HabitoPlan[]> {
+  const db = await getDb();
+  const plan = (await leerPlanesActivos(db, userId)).find((p) => p.id === planId);
+  const comunes = plan ? await leerComunes(db, userId) : null;
+  if (!plan || !comunes) return [];
+  const entrada = entradaDelPlan(comunes, plan);
+  // Metas que ya están en algún plan (aunque estén en pausa): no se repiten.
+  const ocupadas = new Set(
+    entrada.habitos
+      .filter((h) => esDelPlan(h) && h.archivado_en === null)
+      .map((h) => String(h.objetivo)),
+  );
+  return sugerenciasPorNiveles(entrada.respuestas, entrada.catalogo, entrada.configPlan, ocupadas);
+}
+
+/** «Agregar un hábito al plan»: lo crea en el nivel 1. Devuelve su id, o null si ya no cabe. */
+export async function agregarAlPlan(
+  userId: string,
+  planId: string,
+  habito: HabitoPlan,
+): Promise<string | null> {
+  let creado: string | null = null;
+  await aplicar(async (db) => {
+    const comunes = await leerComunes(db, userId);
+    const plan = (await leerPlanesActivos(db, userId)).find((p) => p.id === planId);
+    if (!comunes || !plan) return [];
+    const resultado = await crearHabitoDelPlan(db, userId, plan, comunes, habito);
+    if (!resultado) return [];
+    creado = resultado.id;
+    return resultado.operaciones;
   });
   return creado;
 }

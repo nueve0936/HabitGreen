@@ -1,5 +1,7 @@
 import { Modal, Pressable, View } from 'react-native';
 
+import { useAccionUnica } from '@/lib/use-accion-unica';
+
 import { AppText } from './app-text';
 
 // Diálogo de confirmación de los mockups del plan («Quitar» y «Agregar hábito»): tarjeta clara,
@@ -27,6 +29,9 @@ export function ConfirmDialog({
   onConfirmar,
   onCerrar,
 }: ConfirmDialogProps) {
+  // Un toque doble rápido no confirma (ni cancela) dos veces.
+  const cancelarUnaVez = useAccionUnica(onCancelar);
+  const confirmarUnaVez = useAccionUnica(onConfirmar);
   return (
     <Modal
       visible={visible}
@@ -43,7 +48,7 @@ export function ConfirmDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={cancelar}
-              onPress={onCancelar}
+              onPress={cancelarUnaVez}
               className="h-12 flex-1 items-center justify-center rounded-field border-2 border-borde bg-campo active:bg-accent-claro"
             >
               <AppText weight="bold">{cancelar}</AppText>
@@ -51,7 +56,7 @@ export function ConfirmDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={confirmar}
-              onPress={onConfirmar}
+              onPress={confirmarUnaVez}
               className={`h-12 flex-1 items-center justify-center rounded-field active:opacity-80 ${
                 tipo === 'peligro' ? 'bg-peligro' : 'bg-confirmar'
               }`}

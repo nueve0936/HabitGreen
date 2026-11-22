@@ -152,6 +152,19 @@ export type AjustesPerfil = {
   minutosDiaMasCargado: number;
 };
 
+/** Minutos de cada día (lunes … domingo) que suman los hábitos activos con horario. */
+export async function leerMinutosPorDia(): Promise<number[]> {
+  const habitos = await leerHabitos();
+  return minutosPorDia(
+    habitos
+      .filter((h) => h.habito.activo && h.horario !== undefined)
+      .map((h) => ({
+        duracion_min: h.habito.duracion_min,
+        dias_semana: h.horario?.dias_semana ?? [],
+      })),
+  );
+}
+
 /** Lo que muestra Perfil. */
 export async function leerAjustesPerfil(userId: string): Promise<AjustesPerfil> {
   const [ajustes, habitos] = await Promise.all([leerAjustes(userId), leerHabitos()]);

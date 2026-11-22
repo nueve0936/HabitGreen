@@ -1,5 +1,7 @@
 import { Modal, Pressable, View } from 'react-native';
 
+import { useAccionUnica } from '@/lib/use-accion-unica';
+
 import { AppText } from './app-text';
 
 // Diálogo con tres respuestas, como el de confirmación pero apiladas: la principal en verde
@@ -30,13 +32,17 @@ export function ChoiceDialog({
   onPeligro,
   onCancelar,
 }: ChoiceDialogProps) {
+  // Un toque doble rápido no manda la elección dos veces.
+  const principalUnaVez = useAccionUnica(onPrincipal);
+  const peligroUnaVez = useAccionUnica(onPeligro);
+  const cancelarUnaVez = useAccionUnica(onCancelar);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>
       <View className="flex-1 items-center justify-center px-10">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={cancelar}
-          onPress={onCancelar}
+          onPress={cancelarUnaVez}
           className="absolute inset-0 bg-ink/40"
         />
         <View accessibilityViewIsModal className="w-full gap-5 rounded-card bg-campo p-6">
@@ -54,7 +60,7 @@ export function ChoiceDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={principal}
-              onPress={onPrincipal}
+              onPress={principalUnaVez}
               style={{ minHeight: 48 }}
               className="items-center justify-center rounded-field bg-confirmar px-4 active:opacity-80"
             >
@@ -65,7 +71,7 @@ export function ChoiceDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={peligro}
-              onPress={onPeligro}
+              onPress={peligroUnaVez}
               style={{ minHeight: 48 }}
               className="items-center justify-center rounded-field border-2 border-peligro bg-campo px-4 active:bg-error-claro"
             >
@@ -76,7 +82,7 @@ export function ChoiceDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={cancelar}
-              onPress={onCancelar}
+              onPress={cancelarUnaVez}
               style={{ minHeight: 48 }}
               className="items-center justify-center px-4 active:opacity-70"
             >

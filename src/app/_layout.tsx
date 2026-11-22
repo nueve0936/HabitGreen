@@ -87,6 +87,9 @@ function RootNavigator() {
         <Stack.Screen name="habit/[id]" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="tienda" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="planta/[categoria]" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="plan-nuevo" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="detalle-plan/[id]" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="detalle-plan/sugerencias" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       <Stack.Protected guard={zone === 'onboarding'}>
         <Stack.Screen name="(onboarding)" />

@@ -143,8 +143,8 @@ Un plan por área (hasta 5), cada uno con hasta 3 hábitos; el modo deja de ser 
 | --- | --- | --- |
 | V.1 | Base de datos y progresión por plan: `plans` con área, respuestas, revisión y desbloqueo propios (el plan actual se partió por área); la progresión y el apoyo de las semanas 3 y 4 funcionan plan por plan; al confirmar, un plan por área | hecho |
 | V.2 | Hábitos sin duración (tipo recordatorio): 23 filas del catálogo con 0 minutos («Hora fija para acostarme» separada de su rutina), el tiempo diario se reparte solo entre los que tienen duración, «Sin duración fija» en la revisión y la IA no menciona minutos. Acomodar planes nuevos en el tiempo libre queda para V.3, que es cuando se crean | hecho |
-| V.3 | Formulario por plan: P1 de una sola área, 3 pasos para los planes siguientes; P2 (objetivos) y las sugerencias de la revisión solo muestran el área elegida (confirmado por el usuario) | pendiente |
-| V.4 | «Mis planes» en Perfil (crear y terminar plan) y quitar el modo | pendiente |
+| V.3 | Formulario por plan: P1 de una sola área, 3 pasos para los planes siguientes; P2 (objetivos) y las sugerencias de la revisión solo muestran el área elegida; el plan nuevo se acomoda en el tiempo libre y avisa si no cabe. Se hizo junto con V.4 (decisión del usuario) | en curso (falta tu prueba en el teléfono) |
+| V.4 | «Mis planes» en Perfil (crear y terminar plan, ruta `/plan-nuevo` con las mismas pantallas del formulario), **detalle del plan** (`/detalle-plan/[id]`: cómo vas, próxima revisión, hábitos con ⋮, más ligero, sacar del plan y agregar un hábito) y quitar el modo | en curso (falta tu prueba en el teléfono) |
 | V.5 | Límites: 3 hábitos por plan y planes que se ganan con las subidas; los propios cuentan solo propios y sin límite si no hay planes | pendiente |
 
 ## Entrega 9: Cierre (días 18–19, ~6 h)

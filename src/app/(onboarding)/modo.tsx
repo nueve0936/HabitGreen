@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 
@@ -14,6 +14,7 @@ import { useSession } from '@/features/auth/session-context';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { usePlanReviewStore } from '@/features/plan/plan-review-store';
 import { es } from '@/i18n/es';
+import { navegar } from '@/lib/navegar';
 
 // Elección de modo (SDD 9.4). El modo tradicional se guarda aquí, con sus ajustes por defecto, y
 // el layout raíz lleva a las pestañas. El guiado pasa primero por el formulario; su modo se guarda
@@ -40,7 +41,7 @@ export default function ModoScreen() {
         }
         prepararFormulario(session.user.id);
       }
-      router.push({ pathname: '/formulario/[paso]', params: { paso: '1' } });
+      navegar.push({ pathname: '/formulario/[paso]', params: { paso: '1' } });
       return;
     }
     if (session === null) return;
@@ -64,7 +65,7 @@ export default function ModoScreen() {
       <View className="-ml-4">
         {/* Si la app se abrió directo aquí, no hay historial: la flecha lleva a Empezar. */}
         <BackButton
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/empezar'))}
+          onPress={() => (navegar.canGoBack() ? navegar.back() : navegar.replace('/empezar'))}
         />
       </View>
 

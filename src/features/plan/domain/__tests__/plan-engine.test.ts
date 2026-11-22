@@ -168,6 +168,24 @@ describe('generarPlan', () => {
     ]);
   });
 
+  it('un plan nuevo se acomoda en el tiempo que dejan libre los hábitos que ya tiene', () => {
+    // 40 min entre 2 hábitos = 20 por hábito: «mantiene» cabe en nivel 2 (15 min). Con 25 min ya
+    // ocupados quedan 15, 7.5 por hábito: arrancan en el nivel 1.
+    const libre = generarPlan(
+      { ...BASE, historial: 'mantiene', tiempo: '20_40' },
+      CATALOGO,
+      CONFIG,
+    );
+    const ocupado = generarPlan(
+      { ...BASE, historial: 'mantiene', tiempo: '20_40' },
+      CATALOGO,
+      CONFIG,
+      25,
+    );
+    expect(libre.habitos.map((h) => h.nivel)).toEqual([2, 2]);
+    expect(ocupado.habitos.map((h) => h.nivel)).toEqual([1, 1]);
+  });
+
   it('baja de nivel cuando la duración no cabe', () => {
     // 10 min / 2 hábitos = 5 min por hábito; el nivel 2 (15 min) no cabe.
     const { habitos } = plan({ historial: 'mantiene', tiempo: 'menos_10' });

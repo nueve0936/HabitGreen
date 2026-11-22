@@ -1,9 +1,9 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 
 import { leerCupoHabitos } from '@/db/habits-repository';
 import { useSession } from '@/features/auth/session-context';
 import type { Area } from '@/schemas/onboarding';
+import { navegar } from '@/lib/navegar';
 
 import { LimiteHabitosDialog } from './components/limite-habitos-dialog';
 
@@ -24,8 +24,8 @@ export function useAgregarHabito() {
         return;
       }
     }
-    if (categoria) router.push({ pathname: '/habit/nuevo', params: { categoria } });
-    else router.push('/habit/nuevo');
+    if (categoria) navegar.push({ pathname: '/habit/nuevo', params: { categoria } });
+    else navegar.push('/habit/nuevo');
   };
 
   const dialogo = (

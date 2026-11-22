@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 
 import { useDbVersion } from '@/db/db-version-store';
@@ -15,6 +14,7 @@ import { useLocalQuery } from '@/db/use-local-query';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
 import { useSyncStore } from '@/sync/sync-store';
+import { navegar } from '@/lib/navegar';
 
 import type { Tarjeta } from './domain/progresion';
 
@@ -24,7 +24,15 @@ import type { Tarjeta } from './domain/progresion';
 // fechas, y al instalar la app los datos llegan después de la primera sincronización. Ya hecha,
 // `ultima_evaluacion` queda en hoy y no se repite.
 
-export function useProgresion(userId: string) {
+export type OpcionesProgresion = {
+  /** Solo las tarjetas de este plan (detalle del plan). */
+  planId?: string;
+  /** Si revisa la progresión al abrir; la revisión la hace Hoy, el detalle solo muestra. */
+  revisar?: boolean;
+};
+
+export function useProgresion(userId: string, opciones: OpcionesProgresion = {}) {
+  const { planId, revisar = true } = opciones;
   const t = es.progresion;
   const hoy = fechaLocal();
   const version = useDbVersion((s) => s.version);
@@ -39,7 +47,7 @@ export function useProgresion(userId: string) {
   const revisando = useRef(false);
 
   useEffect(() => {
-    if (!userId || sincronizando || revisando.current) return;
+    if (!revisar || !userId || sincronizando || revisando.current) return;
     revisando.current = true;
     revisarProgresion(userId)
       .then(({ bajadas }) => {
@@ -51,9 +59,11 @@ export function useProgresion(userId: string) {
       .finally(() => {
         revisando.current = false;
       });
-  }, [userId, hoy, version, sincronizando]);
+  }, [userId, hoy, version, sincronizando, revisar]);
 
-  const pendientes = (consulta.data ?? []).filter((x) => !resueltas.has(x.id));
+  const pendientes = (consulta.data ?? []).filter(
+    (x) => !resueltas.has(x.id) && (planId === undefined || x.planId === planId),
+  );
   const actual: Tarjeta | null = pendientes[0] ?? null;
 
   const resolver = async (tarjeta: Tarjeta, accion: () => Promise<void>) => {
@@ -114,7 +124,7 @@ export function useProgresion(userId: string) {
     irAPerfil: () => {
       if (!actual) return;
       void resolver(actual, () => cerrarTarjeta(userId, actual.id)).then(() =>
-        router.navigate('/perfil'),
+        navegar.navigate('/perfil'),
       );
     },
     cerrarAvisos: () => {

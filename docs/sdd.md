@@ -1,4 +1,4 @@
-# Habit Green: Planeación y SDD del MVP (v5)
+# Habit Green: Planeación y SDD del MVP (v5)undefined · Estirarme → `estirarme` · Salir al aire libre → `aire_libre` · Hacer pausas activas → `pausas_activas` |undefined · Leer más → `leer_mas` · Ordenar mi espacio → `ordenar_espacio` · Practicar una habilidad → `practicar_habilidad` · Concentrarme mejor → `concentrarme` |undefined · Agradecer más → `agradecer_mas` · Escribir lo que siento → `escribir_diario` · Meditar → `meditar` · Hacer algo creativo → `crear_algo` |undefined · Pagar a tiempo → `pagar_a_tiempo` · Aprender de finanzas → `aprender_finanzas` · Planear mis compras → `planear_compras` · Ordenar mis cuentas → `ordenar_cuentas` |undefined · Escuchar mejor → `escuchar_mejor` · Ayudar a alguien → `ayudar_a_alguien` · Agradecer a otros → `agradecer_a_otros` · Retomar una amistad → `retomar_amistad` |
 
 Documento de planeación y diseño de software para la app móvil Habit Green (React Native + Expo). Alcance: MVP en 3 semanas, con base para escalar a tiendas.
 
@@ -51,7 +51,7 @@ Cambios de la v2 (se mantienen): formulario con claves, catálogo semilla, motor
 
 **Fuera del MVP:** categorías creadas por el usuario (el modelo ya lo contempla), push remotos, cron en servidor, funciones sociales, pagos, modo oscuro, insignias.
 
-**Fuera de la demo (se agregan antes de publicar):** iOS, Lottie, Sentry, GitHub Actions, temporizador de `distraccion`, eliminar cuenta y formulario para usuarios del modo tradicional.
+**Fuera de la demo (se agregan antes de publicar):** iOS, Lottie, Sentry, GitHub Actions, temporizador de `distraccion` y eliminar cuenta. (El formulario para quien empezó creando sus hábitos ya está: Perfil → Mis planes.)
 
 ## 2. Planeación del proyecto
 
@@ -275,7 +275,7 @@ La pantalla muestra las opciones agrupadas por área con encabezados H3.
 
 | Entrada | Salida |
 | --- | --- |
-| P1 y P2 | Un hábito ancla por objetivo (máximo 2). |
+| P1 y P2 | **Un área por plan** (varios planes por usuario, decisión del usuario del 20 nov) y un hábito ancla por objetivo (máximo 2, solo de esa área). Las sugerencias de «Agregar otro hábito» también son solo de esa área. |
 | P3 | Nivel inicial: `primera_vez`, `empieza_y_deja`, `semanas_y_suelta` → 1; `mantiene` → 2. Con `semanas_y_suelta` se activan mensajes de apoyo en las semanas 3 y 4. |
 | P4 | `presupuesto_min`: 10, 20, 40 o 60. |
 | P5 | Hora del recordatorio: `manana` 08:00, `mediodia` 13:00, `tarde` 17:00, `noche` 20:30; `varia` → flexible (ventana 17:00 y segundo aviso a las 20:00). Configurable en `app_config`. Si la fila del catálogo tiene `momento_fijo`, ese momento gana sobre la P5. |
@@ -319,7 +319,7 @@ Regla general: **la P7 decide cuántas notificaciones llegan; la P6 solo ajusta 
 
 ### 5.7 Catálogo de hábitos semilla
 
-16 objetivos × 3 niveles = 48 filas base, más variantes `sin_recursos` donde hace falta. Son acciones generales y de bajo riesgo; no hay consejos médicos, dietas ni de inversión, ni cantidades sensibles (calorías, montos, horas de sueño). Los textos son editables en `habit_catalog`.
+35 objetivos (7 por área) × 3 niveles = 105 filas base, más variantes `sin_recursos` donde hace falta. Las 19 metas que llevaron cada área a 7 (decisión del usuario, 22 nov) están en `20261122000001_metas_nuevas.sql`, con títulos validados por el usuario. Son acciones generales y de bajo riesgo; no hay consejos médicos, dietas ni de inversión, ni cantidades sensibles (calorías, montos, horas de sueño). Los textos son editables en `habit_catalog`.
 
 **Principios**
 
@@ -619,12 +619,17 @@ Quien elige «Prefiero crear mis hábitos» no responde el formulario. Se crea `
 - **Salir con cambios sin guardar** (decisión del usuario): la X o «atrás» en el primer paso abren un diálogo «¿Guardar los cambios?» con «Guardar» (valida; si falta algo, lleva al paso del primer error), «Descartar» y «Cancelar». Sin cambios, sale directo. Aplica a crear y a editar.
 - **Borrador al crear** (decisión del usuario, pulidos antes del APK): lo escrito y el paso se guardan en el teléfono mientras se crea un hábito. Si la app se cierra a medias, al volver a «Crear hábito» sale «Tienes un hábito sin terminar. ¿Seguimos?» con «Cancelar» (borra el borrador y abre el asistente vacío) y «Seguir» (que abre en el paso donde iba); «atrás» cierra sin decidir y lo conserva. Se borra al guardar, al descartar, al salir sin cambios o a los 7 días; una fecha de inicio que quedó en el pasado pasa a hoy. Al editar no hay borrador.
 - El aviso de presupuesto también se aplica al editar la duración o los días de un hábito.
-- Un usuario tradicional no puede hacer el formulario después (queda para v1.1).
+- **Sin modo fijo** (decisión del usuario, 20 nov): quien empezó creando sus hábitos puede crear un plan desde Perfil → Mis planes (su primer plan pregunta los 7 pasos y guarda sus ajustes), y cualquiera puede terminar un plan.
 
 ### 6.6 Mezcla de modos
 
 - Un usuario guiado puede crear hábitos manuales con las mismas reglas que en 6.5: sin progresión, sin contar para el límite de 4 hábitos del plan y con el aviso de presupuesto.
-- `profiles.modo` indica cómo empezó el usuario; no restringe qué tipo de hábitos puede tener.
+- `profiles.modo` indica cómo empezó el usuario; no restringe qué tipo de hábitos puede tener. Perfil ya no lo muestra.
+- **Mis planes** (Perfil): un plan por área, cada uno con sus hábitos («(en pausa)» si lo están) y «Terminar plan». «Crear plan» (necesita conexión) abre el formulario en la ruta `/plan-nuevo`, dentro de la app: si el usuario ya hizo el formulario, solo pregunta 3 pasos (P1 «¿Para qué área es este plan?», P2 y P3) y reusa P4 a P7; si no, los 7. Las áreas que ya tienen plan salen deshabilitadas con «Ya tienes un plan de esta área». El plan nuevo se acomoda en el tiempo que dejan libre los hábitos que ya tiene (el día más cargado): si no alcanza, arranca en el nivel 1; si aun así pasa del tiempo diario, la revisión avisa «Este plan pasa tu tiempo diario por {n} min…» y al guardar el tiempo diario sube a lo necesario. Un plan siguiente no toca los ajustes ni las respuestas globales. Al guardar se vuelve a Hoy.
+- **Detalle del plan** (`/detalle-plan/[id]`, al tocar una tarjeta de Mis planes; decisión del usuario, acomodo «secciones apiladas»): encabezado con el área, «Desde el {día} de {mes}» y «Tu meta: {objetivos}»; «Resumen» en una tarjeta (cómo vas: hechos de las últimas 2 semanas con la barra de Hoy o, con menos de 4 días programados, «Todavía es pronto para medir…»; próxima revisión: días que faltan y «Cada 7 días vemos cómo te fue y te proponemos ajustes.») y, debajo, la propuesta pendiente de ese plan con sus mismos botones; si un hábito va por debajo del 50 % en su ventana, su fila sugiere «¿Lo hacemos más ligero?»; «Hábitos del plan» (filas tocables con días, hora, duración o «Sin duración fija», racha y «En pausa»; tocar abre la edición; el ⋮ suma «Hacerlo más ligero» y «Sacar del plan» a Editar, Pausar o Reanudar y Eliminar); «Agregar un hábito al plan» (si hay lugar) y, abajo del todo, «Terminar plan» como botón principal verde con confirmación (critique de Impeccable y decisión del usuario).
+- **Acciones a mano** (aprobadas por el usuario, cambian la progresión): **hacerlo más ligero** baja el hábito un paso ahora, con el mismo paso que la revisión (nivel anterior o versión corta), reinicia su ventana y pide textos a la IA; no aparece si ya está en su paso más ligero. **Sacar del plan** lo deja como hábito propio con su historial (si era el último, el plan se termina). **Agregar un hábito al plan** ofrece las 3 versiones del catálogo de cada meta libre de su área (primero las más ligeras), de 4 en 4 con «Sugerir otros hábitos»; las de nivel 2 o 3 dicen «Este empieza un poco más retador» y el hábito entra en el nivel elegido. Respeta los límites y, si no cabe en el tiempo diario, lo avisa y lo sube a lo necesario. Subir de nivel sigue siendo solo con la revisión.
+- **Un solo toque por acción** (pulidos): los botones, diálogos, tarjetas y filas tocables ignoran un segundo toque mientras la acción está en curso (o 600 ms), para no abrir la misma pantalla dos veces ni repetir una acción (`src/lib/candado.ts`).
+- **Terminar plan** (con confirmación): el plan queda inactivo y sus hábitos pasan a ser propios, con su historial, racha y planta; ya no suben ni bajan de nivel. Se quitan sus tarjetas de progresión. Funciona sin conexión.
 
 ## 7. Notificaciones y ubicación
 

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
@@ -18,6 +17,7 @@ import {
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
+import { navegar } from '@/lib/navegar';
 
 // Primer paso de la recuperación: Supabase envía un código al correo y la siguiente pantalla lo
 // pide. Se usa un código y no un enlace porque el enlace depende de que el teléfono sepa abrir la
@@ -45,7 +45,7 @@ export default function RecuperarScreen() {
       return;
     }
     // Supabase responde igual exista o no la cuenta, así que la app tampoco lo revela.
-    router.push({ pathname: '/recuperar-codigo', params: { correo: email } });
+    navegar.push({ pathname: '/recuperar-codigo', params: { correo: email } });
   });
 
   return (

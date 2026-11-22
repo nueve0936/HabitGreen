@@ -20,8 +20,17 @@ type OnboardingState = {
   borrador: Borrador;
   /** Paso del formulario o revisión del plan donde se quedó; null fuera del formulario. */
   retomar: Retomar | null;
+  /** Plan siguiente (3 pasos): las respuestas globales ya vienen del primer plan. */
+  adicional: boolean;
+  /** Áreas que ya tienen un plan activo: no se pueden elegir en P1. */
+  areasOcupadas: Area[];
   marcarRetomar: (retomar: Retomar | null) => void;
   prepararPara: (userId: string) => void;
+  /**
+   * Crear un plan desde la app (Perfil → Mis planes). Con `globales` es un plan siguiente de 3
+   * pasos; sin ellas (nunca hizo el formulario) son los 7 pasos.
+   */
+  prepararNuevoPlan: (userId: string, globales: Partial<Borrador> | null, ocupadas: Area[]) => void;
   /** Con 2 ya elegidos, el nuevo reemplaza al primero que se eligió. */
   alternarArea: (area: Area) => void;
   alternarObjetivo: (objetivo: Objetivo) => void;
@@ -43,12 +52,24 @@ export const useOnboardingStore = create<OnboardingState>()(
       userId: null,
       borrador: BORRADOR_VACIO,
       retomar: null,
+      adicional: false,
+      areasOcupadas: [],
 
       marcarRetomar: (retomar) => set({ retomar }),
 
       prepararPara: (userId) => {
         if (get().userId !== userId) set({ userId, borrador: BORRADOR_VACIO, retomar: null });
+        set({ adicional: false, areasOcupadas: [] });
       },
+
+      prepararNuevoPlan: (userId, globales, ocupadas) =>
+        set({
+          userId,
+          borrador: { ...BORRADOR_VACIO, ...(globales ?? {}) },
+          retomar: null,
+          adicional: globales !== null,
+          areasOcupadas: ocupadas,
+        }),
 
       alternarArea: (area) => {
         const { borrador } = get();
@@ -62,7 +83,8 @@ export const useOnboardingStore = create<OnboardingState>()(
 
       responder: (pregunta, valor) => set({ borrador: { ...get().borrador, [pregunta]: valor } }),
 
-      reiniciar: () => set({ borrador: BORRADOR_VACIO, retomar: null }),
+      reiniciar: () =>
+        set({ borrador: BORRADOR_VACIO, retomar: null, adicional: false, areasOcupadas: [] }),
     }),
     {
       name: 'habitgreen-onboarding',
@@ -72,6 +94,8 @@ export const useOnboardingStore = create<OnboardingState>()(
         userId: state.userId,
         borrador: state.borrador,
         retomar: state.retomar,
+        adicional: state.adicional,
+        areasOcupadas: state.areasOcupadas,
       }),
     },
   ),

@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Sun } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, useWindowDimensions, View } from 'react-native';
 
@@ -28,6 +27,7 @@ import { descripcionPlanta, PlantImage } from '@/features/rewards/components/pla
 import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Hoy (SDD 9.4 y mockup «Pantalla Dashboard»): monedas, tu planta más avanzada, la barra de avance
 // de los hábitos de hoy y sus tarjetas con casilla. De la barra hacia arriba queda fijo y solo se
@@ -173,7 +173,7 @@ export default function HoyScreen() {
           <Button
             variant="secondary"
             label={t.vacio.verHabitos}
-            onPress={() => router.navigate('/habitos')}
+            onPress={() => navegar.navigate('/habitos')}
           />
         </View>
       ) : (
@@ -260,7 +260,7 @@ export default function HoyScreen() {
           </AppText>
           <Button
             label={t.sinHabitos.crear}
-            onPress={() => router.push('/habit/nuevo')}
+            onPress={() => navegar.push('/habit/nuevo')}
             className="mt-2"
           />
         </View>

@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert as AlertNativo, View } from 'react-native';
 
@@ -22,6 +22,7 @@ import { fechaLocal } from '@/lib/dates';
 import type { HabitoFormInput, HabitoFormValues } from '@/schemas/habit';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Crear un hábito manual (SDD 6.5, mockups «Crear hábito #1–#3»). Se guarda en el teléfono y se
 // sube al sincronizar, así que funciona sin conexión. Al terminar se vuelve a la pestaña Hábitos;
@@ -55,7 +56,7 @@ export default function NuevoHabitoScreen() {
   const salir = () => {
     terminado.current = true;
     borrarBorradorHabito();
-    router.back();
+    navegar.back();
   };
 
   const crear = async (valores: HabitoFormValues) => {
@@ -74,10 +75,10 @@ export default function NuevoHabitoScreen() {
       // Desde Detalles de una planta se regresa ahí; si no, a la pestaña Hábitos, aunque se haya
       // llegado desde Hoy.
       if (area) {
-        router.back();
+        navegar.back();
       } else {
-        router.dismissAll();
-        router.navigate('/habitos');
+        navegar.dismissAll();
+        navegar.navigate('/habitos');
       }
     } catch (causa) {
       console.warn('No se pudo crear el hábito', causa);
@@ -131,7 +132,7 @@ export default function NuevoHabitoScreen() {
           setDecision('nuevo');
         }}
         onConfirmar={() => setDecision('seguir')}
-        onCerrar={() => router.back()}
+        onCerrar={() => navegar.back()}
       />
     </>
   );

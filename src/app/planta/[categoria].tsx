@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -24,6 +24,7 @@ import type { TipoAccesorio } from '@/features/rewards/domain/equipar';
 import { es, formatear } from '@/i18n/es';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Detalles de la planta (SDD 9.4, mockups «Detalles #1», «#2» y «#2.1»): la planta en sus 3 fases y un
 // panel con Hábitos y Objetos, que cambia tocando o deslizando. Equipar es instantáneo y funciona sin
@@ -226,7 +227,7 @@ export default function PlantaScreen() {
             tipo={tipo}
             onCambiarTipo={setTipo}
             onTocar={(a) => void equipar(a)}
-            onIrATienda={() => router.push({ pathname: '/tienda', params: { desde: area } })}
+            onIrATienda={() => navegar.push({ pathname: '/tienda', params: { desde: area } })}
             margenInferior={insets.bottom}
           />
         </View>

@@ -290,6 +290,14 @@ Celdas en 3 columnas, con pestañas de tipo fijas abajo. El objeto puesto lleva 
 
 Tarjeta blanca centrada sobre el fondo atenuado, con el título en negritas, una línea de apoyo gris y un solo botón verde «Entendido» de 48 dp. Se usa cuando algo no se puede hacer y basta con explicarlo, como el límite de hábitos. Tocar fuera o «atrás» lo cierran; el fondo atenuado no existe para TalkBack.
 
+### Mis planes
+
+En Perfil, una tarjeta blanca por plan: el icono del área sobre su tinte, «Plan de {área}» en H3, sus hábitos en una línea gris separados por «·» y «Terminar plan» como enlace rojo de 48 dp. Toda la tarjeta se puede tocar (presionada: verde rocío) y lleva una flecha › junto al título; abre el detalle del plan. Debajo, el botón con borde «Crear plan» con un «+», y una nota gris (necesita conexión, o ya hay un plan para cada área).
+
+### Detalle del plan
+
+Secciones apiladas con H3: encabezado con el icono del área sobre su tinte (56 dp), «Desde…» en gris y «Tu meta: …» en negritas; «Resumen», una sola tarjeta blanca con dos filas con icono verde en un círculo verde claro (brote: cómo vas, con la barra de Hoy o un mensaje de ánimo; calendario: próxima revisión, con una línea gris que la explica) y, debajo, la tarjeta de progresión pendiente; «Hábitos del plan» en una sola tarjeta blanca con filas separadas por líneas verde brote, cada una con su ⋮ de 48 dp, la racha con una llama verde y, si va por debajo del 50 %, el enlace verde «¿Lo hacemos más ligero?»; el botón con borde «+ Agregar un hábito al plan» y, abajo del todo, «Terminar plan» como botón principal (píldora verde), con confirmación verde porque no borra nada.
+
 ### Aviso flotante
 
 Un aviso temporal sobre la parte baja de la pantalla, para lo que ocurre al marcar un hábito. No mueve las tarjetas y deja pasar los toques a lo que tiene debajo.

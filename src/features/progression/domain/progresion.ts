@@ -256,8 +256,11 @@ function siguiente(
   return valoresDeNivel(catalogo, respuestas, habito.objetivo, nivel, pocoTiempo, hoy);
 }
 
-/** Paso hacia abajo: el nivel anterior o, en el nivel 1, la versión corta. Null si ya no hay. */
-function anterior(
+/**
+ * Paso hacia abajo: el nivel anterior o, en el nivel 1, la versión corta. Null si ya no hay. Lo
+ * usan la revisión (bajar) y «Hacerlo más ligero» del detalle del plan.
+ */
+export function pasoHaciaAbajo(
   habito: Habito & { objetivo: Objetivo; nivel: Nivel },
   entrada: EntradaProgresion,
 ): ValoresNivel | null {
@@ -322,7 +325,7 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
         quiereNuevo = true;
       }
     } else if (proporcion < config.umbral_bajar) {
-      const despues = anterior(habito, entrada);
+      const despues = pasoHaciaAbajo(habito, entrada);
       tarjetas.push(
         despues
           ? {

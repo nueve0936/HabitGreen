@@ -7,6 +7,7 @@ import type { Respuestas } from '@/schemas/onboarding';
 import {
   cumplimientoDe,
   decidir,
+  pasoHaciaAbajo,
   PROGRESION_POR_DEFECTO,
   tocaDesbloquear,
   tocaEvaluar,
@@ -204,6 +205,18 @@ describe('tabla de 6.3', () => {
     const corto = { ...nivel1, usa_duracion_reducida: true, duracion_min: 2 };
     const [apoyo] = decidir(entrada({ habitos: [corto], ocurrencias: ocurrencias('a', 2, 14) }));
     expect(apoyo).toMatchObject({ tipo: 'apoyo', habitId: 'a' });
+  });
+
+  it('«Hacerlo más ligero» usa el mismo paso hacia abajo: nivel anterior, versión corta o nada', () => {
+    const nivel2 = habito('a');
+    expect(pasoHaciaAbajo(nivel2 as never, entrada())).toMatchObject({ nivel: 1 });
+    const nivel1 = habito('a', { nivel: 1, duracion_min: 5 });
+    expect(pasoHaciaAbajo(nivel1 as never, entrada())).toMatchObject({
+      nivel: 1,
+      usa_duracion_reducida: true,
+    });
+    const corto = habito('a', { nivel: 1, duracion_min: 2, usa_duracion_reducida: true });
+    expect(pasoHaciaAbajo(corto as never, entrada())).toBeNull();
   });
 
   it('un hábito sin duración en el nivel 1 no tiene versión corta: solo apoyo', () => {
