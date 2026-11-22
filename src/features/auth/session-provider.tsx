@@ -1,15 +1,17 @@
 import { isAuthRetryableFetchError, type Session } from '@supabase/supabase-js';
 import * as Linking from 'expo-linking';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { getProfile, saveMode, type AppMode, type Profile } from '@/db/profile-repository';
-import { vaciarBaseLocal } from '@/db/database';
+import { asegurarDuenoBaseLocal, vaciarBaseLocal } from '@/db/database';
 import { cancelarAvisos } from '@/features/reminders/avisos';
-import { leerSesionGuardada, supabase } from '@/lib/supabase';
+import { borrarSesionGuardada, leerSesionGuardada, supabase } from '@/lib/supabase';
 import { deviceTimeZone } from '@/lib/time-zone';
 import { sincronizarAhora } from '@/sync/sync-engine';
 
 import { parseAuthCallbackUrl } from './domain/auth-callback';
+import { caducoSinConexion } from './domain/sesion-caducada';
+import { leerUltimaConexion, marcarConexion, marcarSesionCaducada } from './sesion-caducada-store';
 import {
   SessionContext,
   type CallbackStatus,
@@ -28,6 +30,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [profileRequest, setProfileRequest] = useState(0);
   const [isRecovery, setIsRecovery] = useState(false);
   const [callbackStatus, setCallbackStatus] = useState<CallbackStatus>('none');
+  // Cierre pedido por el usuario: no se explica como sesión caducada.
+  const cerrandoAMano = useRef(false);
 
   // 1. Sesión guardada y cambios de sesión.
   useEffect(() => {
@@ -37,8 +41,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       .then(async ({ data, error }) => {
         // Sin red y con el token vencido, Supabase no puede renovarlo y no devuelve sesión, pero
         // la guardada sigue siendo válida: se usa para abrir la app con los datos locales.
-        const sesion =
+        let sesion =
           data.session ?? (isAuthRetryableFetchError(error) ? await leerSesionGuardada() : null);
+        if (sesion !== null) {
+          // Más de 60 días sin conexión: la sesión caduca, pero los datos locales se quedan
+          // (decisión del usuario). Sin registro previo, el conteo empieza ahora.
+          const ultima = leerUltimaConexion();
+          if (ultima === null) marcarConexion();
+          else if (caducoSinConexion(ultima, Date.now())) {
+            marcarSesionCaducada(true);
+            await borrarSesionGuardada();
+            sesion = null;
+          }
+        }
         if (active) setSession(sesion);
       })
       .finally(() => {
@@ -50,6 +65,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       if (event === 'PASSWORD_RECOVERY') setIsRecovery(true);
       if (event === 'SIGNED_OUT') setIsRecovery(false);
+      // Renovar el token o entrar es hablar con el servidor: reinicia el conteo de 60 días.
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') marcarConexion();
+      if (event === 'SIGNED_IN') marcarSesionCaducada(false);
+      // Se cerró sin que el usuario lo pidiera (por ejemplo, desde otro lado): se explica al entrar.
+      if (event === 'SIGNED_OUT' && !cerrandoAMano.current) marcarSesionCaducada(true);
     });
 
     return () => {
@@ -101,13 +121,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => subscription.remove();
   }, []);
 
-  // 3. Perfil del usuario con sesión.
+  // 3. Perfil del usuario con sesión. Antes se revisa que la base local sea de esta cuenta: si era
+  // de otra, se vacía (y se cancelan sus avisos) mientras sigue la pantalla de carga, para que
+  // nunca se vean sus hábitos.
   const userId = session?.user.id ?? null;
 
   useEffect(() => {
     if (userId === null) return;
     let active = true;
-    getProfile(userId)
+    asegurarDuenoBaseLocal(userId)
+      .then((vaciada) => (vaciada ? cancelarAvisos() : undefined))
+      .catch(() => {
+        // Si la revisión falla, la sincronización la repite antes de subir o bajar nada.
+      })
+      .then(() => getProfile(userId))
       .then((profile) => {
         if (active) setProfileState({ userId, status: 'ready', profile });
       })
@@ -142,10 +169,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Antes de salir se intenta subir lo pendiente; después se borran los datos locales para que
     // la siguiente cuenta empiece limpia.
-    await sincronizarAhora().catch(() => {});
-    await supabase.auth.signOut();
-    await vaciarBaseLocal().catch(() => {});
-    await cancelarAvisos().catch(() => {});
+    // El borrado va en finally: ocurre aunque falle el cierre en Supabase.
+    cerrandoAMano.current = true;
+    try {
+      await sincronizarAhora().catch(() => {});
+      await supabase.auth.signOut();
+    } finally {
+      cerrandoAMano.current = false;
+      await vaciarBaseLocal().catch(() => {});
+      await cancelarAvisos().catch(() => {});
+    }
   }, []);
 
   const value = useMemo<SessionContextValue>(

@@ -1,15 +1,18 @@
 import { z } from 'zod';
 
-import { es } from '@/i18n/es';
+import { es, formatear } from '@/i18n/es';
 
 const v = es.auth.validacion;
 
 export const MIN_PASSWORD_LENGTH = 8;
+/** Largo máximo del correo (decisión del usuario). Cámbialo aquí: lo usan el esquema y los campos. */
+export const EMAIL_MAX = 50;
 
 const email = z
   .string()
   .trim()
   .min(1, v.correoRequerido)
+  .max(EMAIL_MAX, formatear(v.correoLargo, { n: EMAIL_MAX }))
   .pipe(z.email(v.correoInvalido))
   .transform((value) => value.toLowerCase());
 

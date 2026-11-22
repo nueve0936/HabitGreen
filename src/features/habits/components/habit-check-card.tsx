@@ -4,6 +4,7 @@ import { Pressable, View, type HostInstance } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { es, formatear } from '@/i18n/es';
+import { useAccionUnica } from '@/lib/use-accion-unica';
 import { cardShadow, colors } from '@/theme';
 
 import { textoDuracion } from '../domain/formato';
@@ -56,6 +57,8 @@ export function HabitCheckCard({
   const [unRenglon, setUnRenglon] = useState(true);
   const botonMenu = useRef<HostInstance>(null);
   const tachado = hecho || enPausa;
+  // Un toque doble rápido no abre la edición dos veces.
+  const abrir = useAccionUnica(onPress);
 
   const abrirMenu = () =>
     botonMenu.current?.measureInWindow((x, y, ancho, alto) => onOpciones?.({ x, y, ancho, alto }));
@@ -67,7 +70,7 @@ export function HabitCheckCard({
     <Pressable
       style={cardShadow}
       disabled={!onPress}
-      onPress={onPress}
+      onPress={abrir}
       // Sin acción propia (Hoy) no agrupa: el lector recorre el título y la casilla por separado.
       accessible={Boolean(onPress)}
       accessibilityRole={onPress ? 'button' : undefined}

@@ -13,7 +13,8 @@ const validas = {
 describe('claves del formulario', () => {
   it('cada objetivo pertenece a un área y no hay objetivos sueltos', () => {
     const agrupados = Object.values(OBJETIVOS_POR_AREA).flat();
-    expect([...agrupados].sort()).toEqual([...OBJETIVOS].sort());
+    const orden = (a: string, b: string) => a.localeCompare(b);
+    expect([...agrupados].sort(orden)).toEqual([...OBJETIVOS].sort(orden));
     expect(areaDeObjetivo('tiempo_de_calidad')).toBe('social');
   });
 });

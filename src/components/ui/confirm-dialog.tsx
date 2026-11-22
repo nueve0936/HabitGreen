@@ -1,5 +1,7 @@
 import { Modal, Pressable, View } from 'react-native';
 
+import { useAccionUnica } from '@/lib/use-accion-unica';
+
 import { AppText } from './app-text';
 
 // Diálogo de confirmación de los mockups del plan («Quitar» y «Agregar hábito»): tarjeta clara,
@@ -13,6 +15,8 @@ export type ConfirmDialogProps = {
   tipo: 'peligro' | 'confirmar';
   onCancelar: () => void;
   onConfirmar: () => void;
+  /** «Atrás» del sistema. Por defecto, igual que cancelar. */
+  onCerrar?: () => void;
 };
 
 export function ConfirmDialog({
@@ -23,9 +27,18 @@ export function ConfirmDialog({
   tipo,
   onCancelar,
   onConfirmar,
+  onCerrar,
 }: ConfirmDialogProps) {
+  // Un toque doble rápido no confirma (ni cancela) dos veces.
+  const cancelarUnaVez = useAccionUnica(onCancelar);
+  const confirmarUnaVez = useAccionUnica(onConfirmar);
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onCerrar ?? onCancelar}
+    >
       <View className="flex-1 items-center justify-center bg-ink/40 px-10">
         <View accessibilityViewIsModal className="w-full gap-6 rounded-card bg-campo p-6">
           <AppText weight="bold" className="text-center" accessibilityRole="header">
@@ -35,7 +48,7 @@ export function ConfirmDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={cancelar}
-              onPress={onCancelar}
+              onPress={cancelarUnaVez}
               className="h-12 flex-1 items-center justify-center rounded-field border-2 border-borde bg-campo active:bg-accent-claro"
             >
               <AppText weight="bold">{cancelar}</AppText>
@@ -43,7 +56,7 @@ export function ConfirmDialog({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={confirmar}
-              onPress={onConfirmar}
+              onPress={confirmarUnaVez}
               className={`h-12 flex-1 items-center justify-center rounded-field active:opacity-80 ${
                 tipo === 'peligro' ? 'bg-peligro' : 'bg-confirmar'
               }`}

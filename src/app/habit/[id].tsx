@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert as AlertNativo, View } from 'react-native';
 
@@ -16,6 +16,7 @@ import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
 import type { HabitoFormValues } from '@/schemas/habit';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Editar un hábito (mockups «Editar hábito #1–#3»): mismo asistente que al crear. La categoría no
 // cambia (definición 6) y la fecha de inicio solo si el hábito todavía no empieza. El horario se
@@ -44,7 +45,7 @@ export default function EditarHabitoScreen() {
           formatear(es.habitos.presupuestoSubio, { n: textoDuracion(presupuestoNuevo) }),
         );
       }
-      router.back();
+      navegar.back();
     } catch (causa) {
       console.warn('No se pudo guardar el hábito', causa);
       setError(true);
@@ -81,14 +82,14 @@ export default function EditarHabitoScreen() {
       textoFinal={t.guardar}
       valoresIniciales={valoresDeHabito(item.habito, item.horario, item.categoria, inicio)}
       editando
-      permitirSinDuracion={item.habito.plan_id === null}
+      permitirSinDuracion
       limiteDuracion={limite.data ?? null}
       hoy={hoy}
       inicioEditable={inicio >= hoy}
       enviando={enviando}
       error={error}
       onEnviar={(valores) => void guardar(valores)}
-      onCerrar={() => router.back()}
+      onCerrar={() => navegar.back()}
     />
   );
 }

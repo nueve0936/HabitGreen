@@ -5,18 +5,61 @@ import { z } from 'zod';
 // que solo puede importar zod (nada de React Native ni de Expo).
 
 export const VERSION_FORMULARIO = 3;
+/** Áreas que acepta el esquema: las respuestas de antes de los planes por área tienen hasta 2. */
 export const MAX_AREAS = 2;
+/** Un plan es de una sola área (varios planes por usuario): lo que permite elegir el formulario. */
+export const MAX_AREAS_POR_PLAN = 1;
 export const MAX_OBJETIVOS = 2;
 
 export const AREAS = ['salud_fisica', 'trabajo', 'salud_mental', 'finanzas', 'social'] as const;
 export type Area = (typeof AREAS)[number];
 
 export const OBJETIVOS_POR_AREA = {
-  salud_fisica: ['mover_mas', 'dormir_mejor', 'comer_mejor', 'tomar_agua'],
-  trabajo: ['organizar_dia', 'procrastinar_menos', 'aprender_algo'],
-  salud_mental: ['manejar_estres', 'desconectar_pantallas', 'tiempo_para_mi'],
-  finanzas: ['saber_gastos', 'empezar_ahorrar', 'evitar_impulsivas'],
-  social: ['mantener_contacto', 'tiempo_de_calidad', 'conocer_gente'],
+  salud_fisica: [
+    'mover_mas',
+    'dormir_mejor',
+    'comer_mejor',
+    'tomar_agua',
+    'estirarme',
+    'aire_libre',
+    'pausas_activas',
+  ],
+  trabajo: [
+    'organizar_dia',
+    'procrastinar_menos',
+    'aprender_algo',
+    'leer_mas',
+    'ordenar_espacio',
+    'practicar_habilidad',
+    'concentrarme',
+  ],
+  salud_mental: [
+    'manejar_estres',
+    'desconectar_pantallas',
+    'tiempo_para_mi',
+    'agradecer_mas',
+    'escribir_diario',
+    'meditar',
+    'crear_algo',
+  ],
+  finanzas: [
+    'saber_gastos',
+    'empezar_ahorrar',
+    'evitar_impulsivas',
+    'pagar_a_tiempo',
+    'aprender_finanzas',
+    'planear_compras',
+    'ordenar_cuentas',
+  ],
+  social: [
+    'mantener_contacto',
+    'tiempo_de_calidad',
+    'conocer_gente',
+    'escuchar_mejor',
+    'ayudar_a_alguien',
+    'agradecer_a_otros',
+    'retomar_amistad',
+  ],
 } as const satisfies Record<Area, readonly string[]>;
 
 export const OBJETIVOS = [
@@ -36,6 +79,25 @@ export const OBJETIVOS = [
   'mantener_contacto',
   'tiempo_de_calidad',
   'conocer_gente',
+  'estirarme',
+  'aire_libre',
+  'pausas_activas',
+  'leer_mas',
+  'ordenar_espacio',
+  'practicar_habilidad',
+  'concentrarme',
+  'agradecer_mas',
+  'escribir_diario',
+  'meditar',
+  'crear_algo',
+  'pagar_a_tiempo',
+  'aprender_finanzas',
+  'planear_compras',
+  'ordenar_cuentas',
+  'escuchar_mejor',
+  'ayudar_a_alguien',
+  'agradecer_a_otros',
+  'retomar_amistad',
 ] as const;
 export type Objetivo = (typeof OBJETIVOS)[number];
 

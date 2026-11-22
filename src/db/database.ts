@@ -1,5 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
+import { accionDueno } from '@/sync/domain/dueno-base';
+
 import {
   aValoresLocales,
   desdeValoresLocales,
@@ -21,7 +23,9 @@ import {
 
 const NOMBRE = 'habitgreen.db';
 // 3: se agrega onboarding_answers (Entrega 5). 4: habits.nivel_desde (Entrega 8).
-const ESQUEMA_VERSION = 4;
+// 5: user_settings.subidas_plan. 6: user_accessories.categorias_equipadas (pulidos antes del APK).
+// 7: plans.area, respuestas, ultima_evaluacion y limite_desbloqueado (un plan por área).
+const ESQUEMA_VERSION = 7;
 
 let abierta: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -119,4 +123,27 @@ export async function vaciarBaseLocal(): Promise<void> {
     await db.runAsync('DELETE FROM sync_state');
     await db.runAsync('DELETE FROM progresion_tarjetas');
   });
+}
+
+// Fila de sync_state donde se anota de qué cuenta son los datos locales.
+const DUENO = '__usuario';
+
+/**
+ * Deja la base local lista para `userId`: si era de otra cuenta, la vacía (SDD 3.4). Se llama al
+ * entrar, antes de mostrar las pestañas, y en cada sincronización. Devuelve true si la vació.
+ */
+export async function asegurarDuenoBaseLocal(userId: string): Promise<boolean> {
+  const db = await getDb();
+  const fila = await db.getFirstAsync<{ cursor: string }>(
+    'SELECT cursor FROM sync_state WHERE tabla = ?',
+    [DUENO],
+  );
+  const accion = accionDueno(fila?.cursor ?? null, userId);
+  if (accion === 'mantener') return false;
+  if (accion === 'vaciar') await vaciarBaseLocal();
+  await db.runAsync('INSERT OR REPLACE INTO sync_state (tabla, cursor) VALUES (?, ?)', [
+    DUENO,
+    userId,
+  ]);
+  return accion === 'vaciar';
 }

@@ -37,6 +37,19 @@ export async function leerSesionGuardada(): Promise<Session | null> {
   }
 }
 
+/**
+ * Borra la sesión guardada sin pedir nada al servidor. Sin red, `signOut` de Supabase intenta antes
+ * renovar el token, falla y no la borra; así se cierra igual cuando caduca sin conexión.
+ */
+export async function borrarSesionGuardada(): Promise<void> {
+  if (!storage) return;
+  try {
+    await storage.removeItem(storageKey);
+  } catch {
+    // Ya no estaba.
+  }
+}
+
 // Solo se renueva el token mientras la app está en primer plano (recomendación de Supabase).
 if (Platform.OS !== 'web') {
   AppState.addEventListener('change', (state) => {

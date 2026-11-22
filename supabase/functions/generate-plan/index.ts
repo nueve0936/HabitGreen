@@ -17,7 +17,11 @@ import {
   type ConfigPlan,
   type FilaCatalogo,
 } from '../_shared/generated/plan-engine.ts';
-import { borradorPlanSchema, leerRespuestaIa, type BorradorPlan } from '../_shared/generated/plan.ts';
+import {
+  borradorPlanSchema,
+  leerRespuestaIa,
+  type BorradorPlan,
+} from '../_shared/generated/plan.ts';
 import { INSTRUCCIONES_GENERATE_PLAN } from '../_shared/prompts.ts';
 
 const CORS = {
@@ -155,7 +159,10 @@ Deno.serve(async (req) => {
     // 3. Motor del plan con el catálogo y la configuración de la base de datos.
     const catalogo = await leerCatalogo(db);
     const config = await leerConfig(db);
-    const plan = generarPlan(r, catalogo, config.motor);
+    // Un plan siguiente se acomoda en el tiempo que dejan libre los hábitos que ya tiene.
+    const ocupados = Number(cuerpo?.minutos_ocupados);
+    const minutosOcupados = Number.isFinite(ocupados) && ocupados > 0 ? ocupados : 0;
+    const plan = generarPlan(r, catalogo, config.motor, minutosOcupados);
 
     // 4 y 5. Textos de la IA, con un reintento; si no, se quedan los del catálogo.
     const admin = createClient(URL_PROYECTO, CLAVE_SERVICIO, { auth: { persistSession: false } });

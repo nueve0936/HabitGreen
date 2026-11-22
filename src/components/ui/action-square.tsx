@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 
+import { useAccionUnica } from '@/lib/use-accion-unica';
 import { cardShadow, colors } from '@/theme';
 
 // Botón cuadrado de la acción principal en el encabezado de una pestaña: «+» en Hábitos y la bolsa
@@ -13,11 +14,12 @@ export type ActionSquareProps = {
 };
 
 export function ActionSquare({ label, icon: Icon, onPress }: ActionSquareProps) {
+  const unaVez = useAccionUnica(onPress);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      onPress={onPress}
+      onPress={unaVez}
       style={cardShadow}
       className="h-12 w-12 items-center justify-center rounded-accion bg-accent active:bg-accent-oscuro"
     >

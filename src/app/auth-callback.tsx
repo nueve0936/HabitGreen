@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -10,6 +9,7 @@ import { useSession } from '@/features/auth/session-context';
 import { useAppZone, ZONE_HOME } from '@/features/auth/use-app-zone';
 import { es } from '@/i18n/es';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Aquí llegan los enlaces de los correos (habitgreen://auth-callback). SessionProvider procesa
 // los tokens; esta pantalla espera a que termine y lleva al usuario a donde corresponde.
@@ -32,7 +32,7 @@ export default function AuthCallbackScreen() {
 
   useEffect(() => {
     if (!done || zone === 'loading' || zone === 'profile-error') return;
-    router.replace(ZONE_HOME[zone]);
+    navegar.replace(ZONE_HOME[zone]);
   }, [done, zone]);
 
   if (callbackStatus === 'error') {
@@ -42,7 +42,7 @@ export default function AuthCallbackScreen() {
         <Button
           label={t.irAlInicio}
           onPress={() =>
-            router.replace(zone === 'loading' || zone === 'profile-error' ? '/' : ZONE_HOME[zone])
+            navegar.replace(zone === 'loading' || zone === 'profile-error' ? '/' : ZONE_HOME[zone])
           }
         />
       </Screen>

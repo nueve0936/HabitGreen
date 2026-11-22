@@ -99,7 +99,8 @@ export function primerDia(datos: DatosEstadisticas): string | null {
   const fechas = datos.horarios
     .filter((h) => conCategoria.has(h.habit_id))
     .map((h) => h.vigente_desde)
-    .sort();
+    // Fechas "YYYY-MM-DD": el orden alfabético es el cronológico (con comparación explícita).
+    .sort((a, b) => a.localeCompare(b));
   return fechas[0] ?? null;
 }
 

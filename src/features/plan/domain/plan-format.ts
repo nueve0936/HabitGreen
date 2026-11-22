@@ -6,12 +6,17 @@ import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
 
 export type TextosHorario = TextosDias & {
   minutos: string;
+  /** Para los hábitos sin duración (0 minutos). */
+  sinDuracion: string;
   flexible: string;
 };
 
 export { textoDias };
 
-/** «5 min · Lun, Mar, Jue, Sáb · 20:30» (o la ventana, si el aviso es flexible). */
+/**
+ * «5 min · Lun, Mar, Jue, Sáb · 20:30» (o la ventana, si el aviso es flexible). Un hábito sin
+ * duración dice «Sin duración fija» en lugar de los minutos.
+ */
 export function textoHorario(
   h: HabitoPlan,
   ventana: BorradorPlan['ventana_flexible'],
@@ -21,7 +26,7 @@ export function textoHorario(
     h.flexible || h.hora === null
       ? t.flexible.replace('{inicio}', ventana.inicio).replace('{fin}', ventana.fin)
       : h.hora;
-  return [t.minutos.replace('{n}', String(h.duracion_min)), textoDias(h.dias_semana, t), hora].join(
-    ' · ',
-  );
+  const duracion =
+    h.duracion_min > 0 ? t.minutos.replace('{n}', String(h.duracion_min)) : t.sinDuracion;
+  return [duracion, textoDias(h.dias_semana, t), hora].join(' · ');
 }

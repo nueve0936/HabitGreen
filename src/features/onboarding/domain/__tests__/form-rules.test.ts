@@ -6,6 +6,7 @@ import {
   leerPaso,
   pasoCompleto,
   respuestasCompletas,
+  totalPasos,
   type Borrador,
 } from '../form-rules';
 
@@ -32,12 +33,14 @@ describe('alternarArea', () => {
     });
   });
 
-  it('con 2 áreas, una tercera reemplaza a la primera y descarta sus objetivos', () => {
-    const borrador: Borrador = { areas: ['trabajo', 'social'], objetivos: ['aprender_algo'] };
-    expect(alternarArea(borrador, 'finanzas')).toEqual({
-      areas: ['social', 'finanzas'],
-      objetivos: [],
-    });
+  it('un plan es de un área: elegir otra la reemplaza y descarta sus objetivos', () => {
+    const borrador: Borrador = { areas: ['trabajo'], objetivos: ['aprender_algo'] };
+    expect(alternarArea(borrador, 'finanzas')).toEqual({ areas: ['finanzas'], objetivos: [] });
+  });
+
+  it('el primer plan tiene 7 pasos y los siguientes, 3', () => {
+    expect(totalPasos(false)).toBe(7);
+    expect(totalPasos(true)).toBe(3);
   });
 });
 

@@ -10,9 +10,9 @@ import { textoDuracion } from '@/features/habits/domain/formato';
 import { horaCorta } from '@/features/habits/domain/horario';
 import { es, formatear } from '@/i18n/es';
 import { diaIso, fechaLocal, sumarDias } from '@/lib/dates';
-import type { Acompanamiento, Historial, Momento, Obstaculo } from '@/schemas/onboarding';
+import type { Acompanamiento, Momento, Obstaculo } from '@/schemas/onboarding';
 
-import { semanaDeApoyo } from './semana-apoyo';
+import { semanaDeApoyoEnPlanes, type PlanApoyo } from './semana-apoyo';
 
 // Qué avisos programar (SDD 5.6 y 7.1). Función pura: recibe lo que hay en SQLite y la hora actual
 // y devuelve los avisos de la ventana de 7 días con su texto ya resuelto. Cada vez que algo cambia
@@ -55,10 +55,8 @@ export type DatosAvisos = {
   config: ConfigAvisos;
   /** P5 del formulario; null en modo tradicional. */
   momento: Momento | null;
-  /** P3 del formulario; null en modo tradicional. */
-  historial: Historial | null;
-  /** Fecha local en que se creó el plan activo. */
-  inicioPlan: string | null;
+  /** Planes activos con su historial (P3) y su inicio, para el apoyo de las semanas 3 y 4. */
+  planes: readonly PlanApoyo[];
   habitos: readonly Habito[];
   horarios: readonly Horario[];
   ocurrencias: readonly Ocurrencia[];
@@ -221,8 +219,7 @@ export function planificarAvisos(datos: DatosAvisos, ahora: Date): AvisoPlaneado
     }
 
     // Apoyo de las semanas 3 y 4: el lunes, si el estilo no es `minimo`.
-    const semana =
-      diaIso(fecha) === 1 ? semanaDeApoyo(datos.historial, datos.inicioPlan, fecha) : null;
+    const semana = diaIso(fecha) === 1 ? semanaDeApoyoEnPlanes(datos.planes, fecha) : null;
     if (semana !== null && estilo !== 'minimo') {
       agregar('apoyo', fecha, horaMomento, 0, t.apoyo[semana].titulo, t.apoyo[semana].mensaje);
     }

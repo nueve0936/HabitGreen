@@ -102,7 +102,7 @@ Siete pasos, una pregunta por pantalla, con progreso visible («Paso 3 de 7»), 
 
 | # | Pregunta | Ayuda | Tipo | Claves |
 |---|---|---|---|---|
-| 1 | ¿En qué áreas te gustaría empezar? | Elige hasta 2. Podrás sumar más cuando estas ya sean parte de tu día. | Hasta 2 | `salud_fisica`, `trabajo`, `salud_mental`, `finanzas`, `social` |
+| 1 | ¿En qué área quieres empezar? (planes siguientes: «¿Para qué área es este plan?») | Elige una. Cuando avances podrás crear un plan para otra área. | Una por plan | `salud_fisica`, `trabajo`, `salud_mental`, `finanzas`, `social` |
 | 2 | ¿Qué te gustaría lograr primero? | Elige hasta 2. | Hasta 2, solo de las áreas elegidas | Ver tabla de objetivos |
 | 3 | Cuando has intentado crear un hábito, ¿qué suele pasar? | No hay respuesta mala: nos ayuda a empezar a tu ritmo. | Única | `primera_vez`, `empieza_y_deja`, `semanas_y_suelta`, `mantiene` |
 | 4 | ¿Cuánto tiempo al día te gustaría dedicarle? | Es tu límite. Empezaremos con menos para que sea fácil. | Única | `menos_10`, `10_20`, `20_40`, `mas_40` |
@@ -114,11 +114,11 @@ Siete pasos, una pregunta por pantalla, con progreso visible («Paso 3 de 7»), 
 
 | Área | Claves |
 |---|---|
-| `salud_fisica` | `mover_mas`, `dormir_mejor`, `comer_mejor`, `tomar_agua` |
-| `trabajo` | `organizar_dia`, `procrastinar_menos`, `aprender_algo` |
-| `salud_mental` | `manejar_estres`, `desconectar_pantallas`, `tiempo_para_mi` |
-| `finanzas` | `saber_gastos`, `empezar_ahorrar`, `evitar_impulsivas` |
-| `social` | `mantener_contacto`, `tiempo_de_calidad`, `conocer_gente` |
+| `salud_fisica` | `mover_mas`, `dormir_mejor`, `comer_mejor`, `tomar_agua`, `estirarme`, `aire_libre`, `pausas_activas` |
+| `trabajo` | `organizar_dia`, `procrastinar_menos`, `aprender_algo`, `leer_mas`, `ordenar_espacio`, `practicar_habilidad`, `concentrarme` |
+| `salud_mental` | `manejar_estres`, `desconectar_pantallas`, `tiempo_para_mi`, `agradecer_mas`, `escribir_diario`, `meditar`, `crear_algo` |
+| `finanzas` | `saber_gastos`, `empezar_ahorrar`, `evitar_impulsivas`, `pagar_a_tiempo`, `aprender_finanzas`, `planear_compras`, `ordenar_cuentas` |
+| `social` | `mantener_contacto`, `tiempo_de_calidad`, `conocer_gente`, `escuchar_mejor`, `ayudar_a_alguien`, `agradecer_a_otros`, `retomar_amistad` |
 
 Validación: al menos 1 área y 1 objetivo; máximo 2 de cada; los objetivos deben pertenecer a las áreas elegidas. El límite de 2 protege la poca carga inicial: se agregan áreas cuando el usuario ya sostiene las primeras.
 
@@ -128,7 +128,7 @@ Validación: al menos 1 área y 1 objetivo; máximo 2 de cada; los objetivos deb
 |---|---|
 | 1 y 2 | Un hábito ancla por objetivo elegido (máximo 2 hábitos iniciales). |
 | 3 | Nivel de arranque: `primera_vez`, `empieza_y_deja` y `semanas_y_suelta` empiezan en nivel 1 (micro-paso mínimo); `mantiene` empieza en nivel 2. `semanas_y_suelta` recibe mensajes de apoyo en las semanas 3 y 4. |
-| 4 | Presupuesto diario total: 10, 20, 40 o 60 min. La duración de cada hábito no excede presupuesto / número de hábitos. |
+| 4 | Presupuesto diario total: 10, 20, 40 o 60 min. La duración de cada hábito no excede presupuesto / número de hábitos con duración. Los hábitos tipo recordatorio (todo lo que no consiste en hacer algo durante un tiempo) no tienen duración y no gastan tiempo del día. |
 | 5 | Momento de los recordatorios: 08:00, 13:00, 17:00 o 20:30. `varia` activa recordatorio flexible en ventana. Si la fila del catálogo tiene `momento_fijo`, ese momento gana. El usuario puede cambiar la hora al revisar el plan. |
 | 6 | `poco_tiempo`: duración = `duracion_reducida_min`. `olvido`: segundo aviso según la precedencia. `motivacion`: mensajes de ánimo y celebraciones más visibles. `desanimo`: reprogramación automática y silenciosa, tono sin culpa. `distraccion`: aviso único y breve, con temporizador opcional. `recursos`: solo variantes sin equipo ni espacio especial. |
 | 7 | Estilo de notificaciones (ver sección 11). |
@@ -149,7 +149,7 @@ La P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o mo
 
 ### Catálogo semilla
 
-16 objetivos × 3 niveles (48 filas) más variantes sin recursos. Cada fila tiene `titulo`, `duracion_min`, `duracion_reducida_min`, `dias_semana` (int[] ISO, 1 = lunes … 7 = domingo), `momento_fijo` (opcional) y `sin_recursos`. El catálogo completo está en SDD 5.7. Principios: nivel 1 de 5 minutos o menos; saltos de máximo el doble o el triple; una dimensión de progreso a la vez; sin cantidades sensibles.
+35 objetivos (7 por área, decisión del usuario del 22 nov) × 3 niveles (105 filas) más variantes sin recursos; las 19 metas nuevas están en la migración `20261122000001_metas_nuevas.sql`. Cada fila tiene `titulo`, `duracion_min`, `duracion_reducida_min`, `dias_semana` (int[] ISO, 1 = lunes … 7 = domingo), `momento_fijo` (opcional) y `sin_recursos`. El catálogo completo está en SDD 5.7. Principios: nivel 1 de 5 minutos o menos; saltos de máximo el doble o el triple; una dimensión de progreso a la vez; sin cantidades sensibles.
 
 ## 6. Reglas de negocio (no cambiar sin aprobación)
 
@@ -193,7 +193,7 @@ La P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o mo
 - Sin formulario: `presupuesto_min` 20, `recordatorio_suave`, hora elegida al crear cada hábito y segundo aviso apagado. Todo se edita en Perfil.
 - Los hábitos manuales no entran en la progresión (no suben ni bajan de nivel). Sí tienen reprogramación, recompensas y estadísticas.
 - El presupuesto no limita la creación: si se excede, aviso suave y `presupuesto_min` sube a la suma real.
-- El usuario guiado también puede crear hábitos manuales con estas reglas. El tradicional no puede hacer el formulario (v1.1).
+- El usuario guiado también puede crear hábitos manuales con estas reglas. Sin modo fijo: quien empezó creando sus hábitos puede crear un plan desde Perfil → Mis planes, y cualquiera puede terminar un plan (sus hábitos pasan a ser propios). Un plan por área; los planes siguientes solo preguntan área, objetivos e historial.
 
 ### Hábitos
 
@@ -213,7 +213,8 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 | < 50 % | Bajar un nivel. En el nivel 1, usar `duracion_reducida_min`. |
 
 - Si el siguiente nivel no cabe en el presupuesto: mantener y proponer un hábito nuevo de nivel 1; si tampoco cabe, sugerir subir el tiempo diario en Perfil, sin presión.
-- **Límite:** máximo 4 hábitos activos del plan. A los 90 días del plan, con ≥ 85 % en los últimos 28 días, se desbloquea y solo limita el presupuesto. Los manuales no tienen límite.
+- **Límite:** máximo 4 hábitos activos del plan. A los 90 días del plan, con ≥ 85 % en los últimos 28 días, se desbloquea y solo limita el presupuesto. Límite total del usuario guiado (plan y manuales juntos): hasta 3 hábitos activos, más 1 por cada subida de nivel del plan, y sin límite tras el desbloqueo; la progresión no propone hábitos nuevos si ya se llegó. En el modo tradicional no hay límite.
+- Desde el detalle del plan, el usuario también puede **hacer más ligero** un hábito (bajar un paso ahora), **sacarlo del plan** (pasa a propio) y **agregar un hábito** de su área, eligiendo cualquiera de sus versiones del catálogo (no solo la más ligera). Subir sigue siendo solo con la revisión de 7 días.
 - La IA interviene en el plan inicial y al redactar niveles nuevos. Las reglas de progresión son código propio.
 - Decisiones de la Entrega 8 (detalle en SDD 6.3): tarjetas en Hoy; bajar es automático con «Mantenerlo como estaba»; se propone un solo hábito nuevo sugerido; la ventana cuenta desde el último cambio de nivel.
 
@@ -226,7 +227,7 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 ### Jardín y tienda
 
 - Las 5 plantas se ven desde el inicio; las de áreas sin hábitos, en fase 1 con una invitación a agregar un hábito.
-- Un accesorio se equipa en una sola planta a la vez. Nombres de los 15 accesorios: provisionales hasta que el usuario los defina.
+- Un mismo objeto puede estar en varias plantas a la vez; cada planta lleva como máximo uno de cada tipo. Nombres de los 15 accesorios: provisionales hasta que el usuario los defina.
 
 ## 7. IA: reglas
 

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
@@ -14,12 +13,14 @@ import { authRedirectUrl } from '@/features/auth/auth-redirect';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
+  EMAIL_MAX,
   registerSchema,
   type RegisterInput,
   type RegisterValues,
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
+import { navegar } from '@/lib/navegar';
 
 export default function RegistroScreen() {
   const t = es.auth;
@@ -78,7 +79,7 @@ export default function RegistroScreen() {
     }
     setServerError(null);
     if (!data.session) {
-      router.replace({ pathname: '/revisa-tu-correo', params: { correo: email } });
+      navegar.replace({ pathname: '/revisa-tu-correo', params: { correo: email } });
     }
   });
 
@@ -100,6 +101,7 @@ export default function RegistroScreen() {
               {...estado(errors.email)}
               autoCapitalize="none"
               autoComplete="email"
+              maxLength={EMAIL_MAX}
               keyboardType="email-address"
               textContentType="emailAddress"
             />
@@ -154,7 +156,7 @@ export default function RegistroScreen() {
           <Button
             variant="tertiary"
             label={t.registro.iniciaSesion}
-            onPress={() => router.replace('/login')}
+            onPress={() => navegar.replace('/login')}
           />
         </View>
       </View>

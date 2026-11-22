@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, type PressableProps, View } from 'react-native';
 
 import { colors } from '@/theme';
+import { useAccionUnica } from '@/lib/use-accion-unica';
 
 import { AppText } from './app-text';
 
@@ -41,9 +42,12 @@ export function Button({
   disabled,
   icon,
   className = '',
+  onPress,
   ...props
 }: ButtonProps) {
   const isDisabled = Boolean(disabled) || loading;
+  // Un toque doble rápido no manda la acción dos veces.
+  const unaVez = useAccionUnica(onPress);
 
   return (
     <Pressable
@@ -53,6 +57,7 @@ export function Button({
       disabled={isDisabled}
       className={`${isDisabled ? DISABLED_CLASS[variant] : CONTAINER_CLASS[variant]} ${className}`}
       {...props}
+      onPress={unaVez}
     >
       {loading ? (
         <ActivityIndicator color={colors.ink} />

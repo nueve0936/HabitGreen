@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Sun } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
@@ -27,6 +27,7 @@ import { descripcionPlanta, PlantImage } from '@/features/rewards/components/pla
 import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Hoy (SDD 9.4 y mockup «Pantalla Dashboard»): monedas, tu planta más avanzada, la barra de avance
 // de los hábitos de hoy y sus tarjetas con casilla. De la barra hacia arriba queda fijo y solo se
@@ -34,7 +35,8 @@ import { colors } from '@/theme';
 // los cambios después. Al completar: moneda animada, o un aviso flotante de por qué no dio monedas,
 // y la celebración si la planta cambió de fase (SDD 6.1). En las semanas 3 y 4 del plan, quien suele
 // soltar los hábitos ve un mensaje de apoyo arriba de la lista (SDD 7.1). Cada 7 días, las
-// tarjetas de la progresión proponen subir de nivel o sumar un hábito (SDD 6.3).
+// tarjetas de la progresión proponen subir de nivel o sumar un hábito (SDD 6.3). Un día sin hábitos
+// programados muestra «Hoy no tienes pendientes» con un atajo a Hábitos.
 
 // Con letra muy grande o una pantalla baja, la parte fija dejaría sin espacio a la lista: entonces
 // se desplaza toda la pantalla (guía de UX/UI, sección 6).
@@ -98,27 +100,30 @@ export default function HoyScreen() {
         </AppText>
       </View>
 
-      <View className="gap-3">
-        <View className="flex-row items-end justify-between">
-          <AppText weight="bold">{todoHecho ? t.todoListo : t.pendientes}</AppText>
+      {/* Sin hábitos hoy no hay avance que mostrar: el estado vacío de la lista lo explica. */}
+      {items.length > 0 ? (
+        <View className="gap-3">
+          <View className="flex-row items-end justify-between">
+            <AppText weight="bold">{todoHecho ? t.todoListo : t.pendientes}</AppText>
+            {items.length > 0 ? (
+              <AppText variant="small" weight="semibold" tone="acento">
+                {formatear(t.progreso, { n: hechos, total: items.length })}
+              </AppText>
+            ) : null}
+          </View>
           {items.length > 0 ? (
-            <AppText variant="small" weight="semibold" tone="acento">
-              {formatear(t.progreso, { n: hechos, total: items.length })}
-            </AppText>
+            <View
+              accessible
+              accessibilityRole="progressbar"
+              accessibilityLabel={formatear(t.progreso, { n: hechos, total: items.length })}
+              accessibilityValue={{ min: 0, max: items.length, now: hechos }}
+              className="h-3 w-full overflow-hidden rounded-chip bg-divisor"
+            >
+              <View style={{ width: `${avance}%` }} className="h-full rounded-chip bg-accent" />
+            </View>
           ) : null}
         </View>
-        {items.length > 0 ? (
-          <View
-            accessible
-            accessibilityRole="progressbar"
-            accessibilityLabel={formatear(t.progreso, { n: hechos, total: items.length })}
-            accessibilityValue={{ min: 0, max: items.length, now: hechos }}
-            className="h-3 w-full overflow-hidden rounded-chip bg-divisor"
-          >
-            <View style={{ width: `${avance}%` }} className="h-full rounded-chip bg-accent" />
-          </View>
-        ) : null}
-      </View>
+      ) : null}
     </>
   );
 
@@ -155,7 +160,22 @@ export default function HoyScreen() {
       ) : null}
       {apoyo ? <Alert variant="info" message={apoyo.mensaje} /> : null}
       {items.length === 0 ? (
-        <AppText tone="ink-soft">{t.vacio}</AppText>
+        <View className="flex-1 items-center justify-center gap-4 py-6">
+          <Sun size={32} color={colors.accent} strokeWidth={2} />
+          <View className="gap-2">
+            <AppText variant="h2" accessibilityRole="header" className="text-center">
+              {t.vacio.titulo}
+            </AppText>
+            <AppText tone="ink-soft" className="text-center">
+              {t.vacio.descripcion}
+            </AppText>
+          </View>
+          <Button
+            variant="secondary"
+            label={t.vacio.verHabitos}
+            onPress={() => navegar.navigate('/habitos')}
+          />
+        </View>
       ) : (
         items.map((item) => (
           <HabitCheckCard
@@ -240,7 +260,7 @@ export default function HoyScreen() {
           </AppText>
           <Button
             label={t.sinHabitos.crear}
-            onPress={() => router.push('/habit/nuevo')}
+            onPress={() => navegar.push('/habit/nuevo')}
             className="mt-2"
           />
         </View>
@@ -270,7 +290,7 @@ export default function HoyScreen() {
         {/* Márgenes negativos: la sombra de las tarjetas no se corta en los bordes de la lista. */}
         <ScrollView
           className="-mx-8 flex-1"
-          contentContainerClassName="gap-3 px-8 pb-6 pt-1"
+          contentContainerClassName="grow gap-3 px-8 pb-6 pt-1"
           keyboardShouldPersistTaps="handled"
         >
           {lista}

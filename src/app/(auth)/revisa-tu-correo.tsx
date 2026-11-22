@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { MailCheck } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -12,6 +12,7 @@ import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import { es, formatear } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Después de registrarse: pide abrir el enlace del correo. Al abrirlo, la app inicia sesión
 // sola (auth-callback) y lleva a la bienvenida.
@@ -61,7 +62,7 @@ export default function RevisaTuCorreoScreen() {
       {feedback ? <Alert variant={feedback.variant} message={feedback.message} /> : null}
 
       <View className="gap-2">
-        <Button label={t.irALogin} onPress={() => router.replace('/login')} />
+        <Button label={t.irALogin} onPress={() => navegar.replace('/login')} />
         <Button variant="secondary" label={t.reenviar} loading={sending} onPress={resend} />
       </View>
     </Screen>

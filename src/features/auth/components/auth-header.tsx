@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
 import { Sprout } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Encabezado de las pantallas de cuenta (mockups Login y Registrar): botón de regresar,
 // logotipo (provisional hasta tener el definitivo) y título.
@@ -15,7 +15,7 @@ export type AuthHeaderProps = {
 };
 
 export function AuthHeader({ title, description }: AuthHeaderProps) {
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/bienvenida'));
+  const goBack = () => (navegar.canGoBack() ? navegar.back() : navegar.replace('/bienvenida'));
 
   return (
     <View className="mb-8 gap-4 pt-2">

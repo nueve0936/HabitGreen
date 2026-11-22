@@ -4,6 +4,7 @@ import {
   type Habito,
   type Horario,
 } from '@/features/habits/domain/habitos-del-dia';
+import { alcanzoLimiteHabitos, limiteHabitos } from '@/features/habits/domain/limite-habitos';
 import { minutosPorDia, type CargaHabito } from '@/features/habits/domain/presupuesto';
 import {
   elegirFilaCatalogo,
@@ -104,6 +105,13 @@ export type EntradaProgresion = {
   configPlan: ConfigPlan;
   presupuestoMin: number;
   limiteDesbloqueado: boolean;
+  /** Subidas de nivel aceptadas: cada una da 1 lugar más en el límite total de hábitos. */
+  subidasPlan: number;
+  /**
+   * Plan que se revisa (varios planes por usuario, uno por área): solo se evalúan sus hábitos y el
+   * hábito nuevo se busca solo en su área. Sin él se revisan todos los hábitos del plan juntos.
+   */
+  planId?: string;
   config: ConfigProgresion;
 };
 
@@ -114,6 +122,22 @@ const esObjetivo = (o: unknown): o is Objetivo => (OBJETIVOS as readonly unknown
 /** Hábito del plan con nivel válido. */
 export function esDelPlan(h: Habito): h is Habito & { objetivo: Objetivo; nivel: Nivel } {
   return esObjetivo(h.objetivo) && esNivel(h.nivel);
+}
+
+/**
+ * Límite total de hábitos activos (del plan y propios) del usuario guiado: si ya llegó, la
+ * progresión no propone hábitos nuevos (decisión del usuario, pulidos antes del APK).
+ */
+export function llegoAlLimiteTotal(
+  entrada: Pick<EntradaProgresion, 'habitos' | 'subidasPlan' | 'limiteDesbloqueado'>,
+): boolean {
+  const activos = entrada.habitos.filter((h) => h.activo && h.archivado_en === null).length;
+  const limite = limiteHabitos({
+    modo: 'guiado',
+    subidas: entrada.subidasPlan,
+    desbloqueado: entrada.limiteDesbloqueado,
+  });
+  return alcanzoLimiteHabitos(activos, limite);
 }
 
 /** Pasaron los días entre revisiones desde la última (o desde que empezó el plan). */
@@ -195,14 +219,17 @@ export function cabe(otros: readonly CargaHabito[], carga: CargaHabito, presupue
  * plan (sin contar los archivados), primero de sus áreas, que quepa en el presupuesto.
  */
 export function sugerenciaNueva(
-  entrada: Pick<EntradaProgresion, 'catalogo' | 'respuestas' | 'configPlan'>,
+  entrada: Pick<EntradaProgresion, 'catalogo' | 'respuestas' | 'configPlan' | 'planId'>,
   ocupados: ReadonlySet<string>,
   entraEnPresupuesto: (h: HabitoPlan) => boolean,
 ): HabitoPlan | null {
   const { catalogo, respuestas, configPlan } = entrada;
   const objetivos = [...new Set(catalogo.map((f) => f.objetivo))].filter((o) => !ocupados.has(o));
   const deSusAreas = (o: Objetivo) => respuestas.areas.includes(areaDeObjetivo(o));
-  const ordenados = [...objetivos.filter(deSusAreas), ...objetivos.filter((o) => !deSusAreas(o))];
+  // Con un plan por área, otra área es otro plan: solo se sugiere de la misma área.
+  const ordenados = entrada.planId
+    ? objetivos.filter(deSusAreas)
+    : [...objetivos.filter(deSusAreas), ...objetivos.filter((o) => !deSusAreas(o))];
   for (const objetivo of ordenados) {
     try {
       const habito = habitoParaNivel(respuestas, catalogo, configPlan, objetivo, 1);
@@ -229,8 +256,11 @@ function siguiente(
   return valoresDeNivel(catalogo, respuestas, habito.objetivo, nivel, pocoTiempo, hoy);
 }
 
-/** Paso hacia abajo: el nivel anterior o, en el nivel 1, la versión corta. Null si ya no hay. */
-function anterior(
+/**
+ * Paso hacia abajo: el nivel anterior o, en el nivel 1, la versión corta. Null si ya no hay. Lo
+ * usan la revisión (bajar) y «Hacerlo más ligero» del detalle del plan.
+ */
+export function pasoHaciaAbajo(
   habito: Habito & { objetivo: Objetivo; nivel: Nivel },
   entrada: EntradaProgresion,
 ): ValoresNivel | null {
@@ -240,7 +270,8 @@ function anterior(
     const nivel = (habito.nivel - 1) as Nivel;
     return valoresDeNivel(catalogo, respuestas, habito.objetivo, nivel, pocoTiempo, hoy);
   }
-  if (habito.usa_duracion_reducida) return null;
+  // Sin duración no hay versión corta: en el nivel 1 solo queda el apoyo.
+  if (habito.usa_duracion_reducida || habito.duracion_min === 0) return null;
   return valoresDeNivel(catalogo, respuestas, habito.objetivo, 1, true, hoy);
 }
 
@@ -265,7 +296,7 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
 
   const delPlan = conHorario.filter(
     (c): c is { habito: Habito & { objetivo: Objetivo; nivel: Nivel }; horario: Horario } =>
-      esDelPlan(c.habito),
+      esDelPlan(c.habito) && (entrada.planId === undefined || c.habito.plan_id === entrada.planId),
   );
 
   const tarjetas: Tarjeta[] = [];
@@ -294,7 +325,7 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
         quiereNuevo = true;
       }
     } else if (proporcion < config.umbral_bajar) {
-      const despues = anterior(habito, entrada);
+      const despues = pasoHaciaAbajo(habito, entrada);
       tarjetas.push(
         despues
           ? {
@@ -312,7 +343,9 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
 
   if (quiereNuevo) {
     const activosDelPlan = delPlan.length;
-    const hayLugar = entrada.limiteDesbloqueado || activosDelPlan < config.limite_habitos_plan;
+    const hayLugar =
+      (entrada.limiteDesbloqueado || activosDelPlan < config.limite_habitos_plan) &&
+      !llegoAlLimiteTotal(entrada);
     if (hayLugar) {
       // No se repite un objetivo que ya está en el plan (aunque esté en pausa).
       const ocupados = new Set(

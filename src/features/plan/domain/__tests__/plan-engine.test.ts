@@ -149,6 +149,43 @@ describe('generarPlan', () => {
     expect(habitos[0]?.duracion_min).toBe(15);
   });
 
+  it('un hábito sin duración no gasta del tiempo diario', () => {
+    // 20 min entre 2 hábitos serían 10 por hábito (el nivel 2 de caminar, 15 min, no cabría). Si
+    // tiempo de calidad no tiene duración, caminar puede usar los 20.
+    const sinDuracion = CATALOGO.map((fila) =>
+      fila.objetivo === 'tiempo_de_calidad'
+        ? { ...fila, duracion_min: 0, duracion_reducida_min: 0 }
+        : fila,
+    );
+    const { habitos } = generarPlan(
+      { ...BASE, historial: 'mantiene', tiempo: '10_20' },
+      sinDuracion,
+      CONFIG,
+    );
+    expect(habitos.map((h) => [h.objetivo, h.nivel, h.duracion_min])).toEqual([
+      ['mover_mas', 2, 15],
+      ['tiempo_de_calidad', 2, 0],
+    ]);
+  });
+
+  it('un plan nuevo se acomoda en el tiempo que dejan libre los hábitos que ya tiene', () => {
+    // 40 min entre 2 hábitos = 20 por hábito: «mantiene» cabe en nivel 2 (15 min). Con 25 min ya
+    // ocupados quedan 15, 7.5 por hábito: arrancan en el nivel 1.
+    const libre = generarPlan(
+      { ...BASE, historial: 'mantiene', tiempo: '20_40' },
+      CATALOGO,
+      CONFIG,
+    );
+    const ocupado = generarPlan(
+      { ...BASE, historial: 'mantiene', tiempo: '20_40' },
+      CATALOGO,
+      CONFIG,
+      25,
+    );
+    expect(libre.habitos.map((h) => h.nivel)).toEqual([2, 2]);
+    expect(ocupado.habitos.map((h) => h.nivel)).toEqual([1, 1]);
+  });
+
   it('baja de nivel cuando la duración no cabe', () => {
     // 10 min / 2 hábitos = 5 min por hábito; el nivel 2 (15 min) no cabe.
     const { habitos } = plan({ historial: 'mantiene', tiempo: 'menos_10' });

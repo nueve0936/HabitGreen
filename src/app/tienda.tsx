@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, useWindowDimensions, View } from 'react-native';
 
@@ -18,6 +18,7 @@ import type { TipoAccesorio } from '@/features/rewards/domain/equipar';
 import { es } from '@/i18n/es';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Tienda (SDD 6.4 y 9.4, mockups «Tienda #1–#3»): los 15 accesorios con su precio. Regresar, título
 // y monedero quedan fijos y solo se desplaza la lista. Tocar un objeto abre la hoja de compra.
@@ -86,14 +87,16 @@ export default function TiendaScreen() {
           categoria: destino.area,
           pestana: 'objetos',
           tipo: destino.tipo,
+          // Para el aviso «Le pusimos … en lugar de …» si reemplazó a otro objeto.
+          ...(destino.quitado ? { puesto: destino.puesto, quitado: destino.quitado } : {}),
           // Distingue cada llegada, aunque se repitan la pestaña y el tipo.
           llegada: String(Date.now()),
         },
       } as const;
       cerrar();
       // Desde Detalles se regresa a esa pantalla; desde Jardín, «atrás» debe volver a Jardín.
-      if (origen) router.dismissTo(ruta);
-      else router.replace(ruta);
+      if (origen) navegar.dismissTo(ruta);
+      else navegar.replace(ruta);
     } catch {
       setAviso({ tipo: 'error', texto: t.errorEquipar });
     } finally {

@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
@@ -12,11 +12,13 @@ import type { AppMode } from '@/db/profile-repository';
 import { guardarAjustesTradicionales } from '@/db/settings-repository';
 import { useSession } from '@/features/auth/session-context';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
+import { usePlanReviewStore } from '@/features/plan/plan-review-store';
 import { es } from '@/i18n/es';
+import { navegar } from '@/lib/navegar';
 
 // Elección de modo (SDD 9.4). El modo tradicional se guarda aquí, con sus ajustes por defecto, y
 // el layout raíz lleva a las pestañas. El guiado pasa primero por el formulario; su modo se guarda
-// al confirmar el plan.
+// al confirmar el plan. Aquí todavía no se está en el formulario: no hay a dónde regresar.
 
 export default function ModoScreen() {
   const t = es.onboarding.modo;
@@ -25,13 +27,21 @@ export default function ModoScreen() {
   const [mode, setMode] = useState<AppMode | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
+  const marcarRetomar = useOnboardingStore((s) => s.marcarRetomar);
+  useFocusEffect(useCallback(() => marcarRetomar(null), [marcarRetomar]));
 
   const onContinue = async () => {
     if (mode === null) return;
     if (mode === 'guiado') {
       // Si hay respuestas guardadas de esta misma cuenta, se conservan para retomarlas.
-      if (session) prepararFormulario(session.user.id);
-      router.push({ pathname: '/formulario/[paso]', params: { paso: '1' } });
+      if (session) {
+        // Un plan en revisión de otra cuenta no se retoma.
+        if (useOnboardingStore.getState().userId !== session.user.id) {
+          usePlanReviewStore.getState().limpiar();
+        }
+        prepararFormulario(session.user.id);
+      }
+      navegar.push({ pathname: '/formulario/[paso]', params: { paso: '1' } });
       return;
     }
     if (session === null) return;
@@ -41,6 +51,9 @@ export default function ModoScreen() {
       // Primero los ajustes por defecto (SDD 6.5); el modo se guarda al final porque cambia de zona.
       await guardarAjustesTradicionales(session.user.id);
       await chooseMode(mode);
+      // Ya no hay formulario ni plan que retomar.
+      useOnboardingStore.getState().reiniciar();
+      usePlanReviewStore.getState().limpiar();
     } catch {
       setError(true);
       setSaving(false);
@@ -52,7 +65,7 @@ export default function ModoScreen() {
       <View className="-ml-4">
         {/* Si la app se abrió directo aquí, no hay historial: la flecha lleva a Empezar. */}
         <BackButton
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/empezar'))}
+          onPress={() => (navegar.canGoBack() ? navegar.back() : navegar.replace('/empezar'))}
         />
       </View>
 

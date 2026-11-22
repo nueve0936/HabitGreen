@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -16,6 +16,7 @@ import { equiparAccesorio, leerJardin, type Accesorio } from '@/db/rewards-repos
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { HabitCheckCard } from '@/features/habits/components/habit-check-card';
+import { useAgregarHabito } from '@/features/habits/use-agregar-habito';
 import { useHabitActions } from '@/features/habits/use-habit-actions';
 import { ObjectGrid, TIPOS_OBJETO } from '@/features/rewards/components/object-grid';
 import { PhaseCarousel } from '@/features/rewards/components/phase-carousel';
@@ -23,6 +24,7 @@ import type { TipoAccesorio } from '@/features/rewards/domain/equipar';
 import { es, formatear } from '@/i18n/es';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
 
 // Detalles de la planta (SDD 9.4, mockups «Detalles #1», «#2» y «#2.1»): la planta en sus 3 fases y un
 // panel con Hábitos y Objetos, que cambia tocando o deslizando. Equipar es instantáneo y funciona sin
@@ -40,6 +42,8 @@ const PAGINA_OBJETOS = 1;
 // Los avisos flotan sobre las pestañas de tipo de Objetos y la barra del sistema.
 const MARGEN_AVISO = 72;
 
+type Aviso = { tipo: 'exito' | 'error'; texto: string };
+
 export default function PlantaScreen() {
   const t = es.planta;
   const params = useLocalSearchParams<{
@@ -47,6 +51,8 @@ export default function PlantaScreen() {
     pestana?: string;
     tipo?: string;
     llegada?: string;
+    puesto?: string;
+    quitado?: string;
   }>();
   const area = (AREAS as readonly string[]).includes(params.categoria)
     ? (params.categoria as Area)
@@ -62,12 +68,21 @@ export default function PlantaScreen() {
   const insets = useSafeAreaInsets();
   const margenAviso = insets.bottom + MARGEN_AVISO;
   const acciones = useHabitActions(userId, margenAviso);
+  const agregar = useAgregarHabito();
   const reducirMovimiento = useReducedMotion();
 
   const panel = useRef<PagerView>(null);
   const [pagina, setPagina] = useState(paginaPedida);
   const [tipo, setTipo] = useState<TipoAccesorio>(tipoPedido ?? 'sombrero');
-  const [aviso, setAviso] = useState<{ tipo: 'exito' | 'error'; texto: string } | null>(null);
+  // «Equipar ahora» reemplazó a otro objeto de la planta: se avisa al llegar, sin pedir confirmación.
+  const avisoReemplazo = (): Aviso | null =>
+    params.quitado && params.puesto
+      ? {
+          tipo: 'exito',
+          texto: formatear(t.reemplazado, { nuevo: params.puesto, anterior: params.quitado }),
+        }
+      : null;
+  const [aviso, setAviso] = useState<Aviso | null>(avisoReemplazo);
 
   // Al regresar desde la Tienda con «Equipar ahora», la pantalla ya abierta recibe parámetros nuevos.
   const llegada = `${params.pestana}|${params.tipo}|${params.llegada}`;
@@ -76,6 +91,8 @@ export default function PlantaScreen() {
     setLlegadaVista(llegada);
     if (params.pestana === 'objetos') setPagina(PAGINA_OBJETOS);
     if (tipoPedido) setTipo(tipoPedido);
+    const reemplazo = avisoReemplazo();
+    if (reemplazo) setAviso(reemplazo);
   }
 
   useEffect(() => {
@@ -90,20 +107,12 @@ export default function PlantaScreen() {
 
   const equipar = async (accesorio: Accesorio) => {
     if (!planta || !area) return;
-    const puesto = accesorio.categoriaEquipada === planta.categoryId;
+    // Tocar el que lleva esta planta se lo quita; cualquier otro se lo pone, aunque otra planta
+    // también lo lleve.
+    const puesto = accesorio.categoriasEquipadas.includes(planta.categoryId);
     setAviso(null);
     try {
-      const { movidoDe } = await equiparAccesorio(
-        userId,
-        accesorio,
-        puesto ? null : planta.categoryId,
-      );
-      if (movidoDe !== null) {
-        setAviso({
-          tipo: 'exito',
-          texto: formatear(t.movido, { categoria: es.onboarding.formulario.areas[area] }),
-        });
-      }
+      await equiparAccesorio(userId, accesorio, planta.categoryId, !puesto);
     } catch {
       setAviso({ tipo: 'error', texto: t.error });
     }
@@ -199,9 +208,7 @@ export default function PlantaScreen() {
                 </AppText>
                 <Button
                   label={es.habitos.agregar}
-                  onPress={() =>
-                    router.push({ pathname: '/habit/nuevo', params: { categoria: area } })
-                  }
+                  onPress={() => void agregar.abrir(area ?? undefined)}
                 />
               </View>
             ) : (
@@ -220,7 +227,7 @@ export default function PlantaScreen() {
             tipo={tipo}
             onCambiarTipo={setTipo}
             onTocar={(a) => void equipar(a)}
-            onIrATienda={() => router.push({ pathname: '/tienda', params: { desde: area } })}
+            onIrATienda={() => navegar.push({ pathname: '/tienda', params: { desde: area } })}
             margenInferior={insets.bottom}
           />
         </View>
@@ -245,6 +252,7 @@ export default function PlantaScreen() {
       </SafeAreaView>
       {acciones.capas}
       {acciones.aviso}
+      {agregar.dialogo}
       <Snackbar
         mensaje={aviso?.texto ?? null}
         variant={aviso?.tipo}

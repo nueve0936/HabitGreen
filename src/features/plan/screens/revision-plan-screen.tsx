@@ -1,0 +1,240 @@
+import { Redirect, useFocusEffect } from 'expo-router';
+import { Plus } from 'lucide-react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, View } from 'react-native';
+
+import { Alert } from '@/components/ui/alert';
+import { AppText } from '@/components/ui/app-text';
+import { BackButton } from '@/components/ui/back-button';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Screen } from '@/components/ui/screen';
+import { guardarPlan } from '@/db/plan-repository';
+import { leerAjustes, leerMinutosPorDia } from '@/db/settings-repository';
+import { useLocalQuery } from '@/db/use-local-query';
+import { useSession } from '@/features/auth/session-context';
+import { minutosPorDia } from '@/features/habits/domain/presupuesto';
+import { respuestasCompletas } from '@/features/onboarding/domain/form-rules';
+import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
+import { EditPlanHabitSheet } from '@/features/plan/components/edit-plan-habit-sheet';
+import { PlanHabitCard } from '@/features/plan/components/plan-habit-card';
+import { SecondNoticeToggle } from '@/features/plan/components/second-notice-toggle';
+import {
+  muestraNotaApoyo,
+  muestraSegundoAviso,
+  puedeAgregar,
+  puedeQuitar,
+  sugerenciasDisponibles,
+} from '@/features/plan/domain/plan-review';
+import { excesoDeTiempo } from '@/features/plan/domain/tiempo-libre';
+import { usePlanReviewStore } from '@/features/plan/plan-review-store';
+import { useRutasPlan } from '@/features/plan/use-rutas-plan';
+import { usePermisoAvisos } from '@/features/reminders/use-permiso-avisos';
+import { es, formatear } from '@/i18n/es';
+import type { HabitoPlan } from '@/schemas/plan';
+import { sincronizarAhora } from '@/sync/sync-engine';
+import { colors } from '@/theme';
+import { navegar } from '@/lib/navegar';
+
+// «Tu plan está listo» (SDD 5.8 y 9.4, mockups de la revisión del plan). El usuario edita, quita o
+// agrega hábitos (hasta 3) y al pulsar «Confirmar plan» se guarda todo. Hasta entonces el borrador
+// solo vive en el teléfono: si se cierra la app, al abrirla se vuelve a esta revisión.
+// Antes de guardar se explica y se pide el permiso de avisos (SDD 7.1). Si no se da, el plan se
+// guarda sin horas: sin permiso no hay recordatorios.
+// Desde la app (Perfil → Mis planes), el plan se suma a los hábitos que ya tiene: si no cabe en el
+// tiempo diario se avisa, y al guardar el tiempo sube solo a lo necesario. Un plan siguiente no
+// toca los ajustes ni las respuestas globales. Al terminar se vuelve a Hoy.
+
+export default function RevisionPlanScreen() {
+  const t = es.onboarding.revision;
+  const { session, chooseMode } = useSession();
+  const formulario = useOnboardingStore((s) => s.borrador);
+  const reiniciarFormulario = useOnboardingStore((s) => s.reiniciar);
+  const marcarRetomar = useOnboardingStore((s) => s.marcarRetomar);
+  const adicional = useOnboardingStore((s) => s.adicional);
+  const rutas = useRutasPlan();
+  const { enApp } = rutas;
+  useFocusEffect(
+    useCallback(() => {
+      if (!enApp) marcarRetomar({ pantalla: 'revision' });
+    }, [marcarRetomar, enApp]),
+  );
+  const userId = session?.user.id ?? '';
+  // Lo que ya ocupa el día y el tiempo diario actual (solo importan desde la app).
+  const ocupado = useLocalQuery('minutos-por-dia', leerMinutosPorDia);
+  const ajustesActuales = useLocalQuery(`ajustes-${userId}`, () => leerAjustes(userId));
+  const borrador = usePlanReviewStore((s) => s.borrador);
+  const ids = usePlanReviewStore((s) => s.ids);
+  const acciones = usePlanReviewStore.getState();
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState(false);
+  const [editando, setEditando] = useState<HabitoPlan | null>(null);
+  const [quitando, setQuitando] = useState<HabitoPlan | null>(null);
+  const guardado = useRef(false);
+  const permiso = usePermisoAvisos();
+
+  // Al confirmar, el layout raíz cambia a las pestañas y esta pantalla se desmonta: hasta
+  // entonces no se borran el formulario ni el borrador, para no redirigir a mitad del cambio.
+  useEffect(
+    () => () => {
+      if (!guardado.current) return;
+      reiniciarFormulario();
+      usePlanReviewStore.getState().limpiar();
+    },
+    [reiniciarFormulario],
+  );
+
+  const respuestas = respuestasCompletas(formulario);
+  if (borrador === null || ids === null || respuestas === null) {
+    return <Redirect href={rutas.generando} />;
+  }
+
+  // Tiempo diario contra el que se compara: el primer plan trae el suyo (P4); uno siguiente usa el
+  // que ya tiene el usuario.
+  const presupuestoBase =
+    adicional && ajustesActuales.data
+      ? ajustesActuales.data.presupuestoMin
+      : borrador.ajustes.presupuesto_min;
+  const exceso = enApp
+    ? excesoDeTiempo(ocupado.data ?? [], minutosPorDia(borrador.habitos), presupuestoBase)
+    : 0;
+
+  const confirmar = async (conRecordatorios: boolean) => {
+    if (session === null) return;
+    setGuardando(true);
+    setError(false);
+    try {
+      // Un plan por área: se completan los ids de plan de cada área antes de guardar.
+      const idsCompletos = usePlanReviewStore.getState().idsParaGuardar() ?? ids;
+      if (enApp) {
+        await guardarPlan(session.user.id, borrador, respuestas, idsCompletos, conRecordatorios, {
+          guardarAjustes: !adicional,
+          presupuestoMin: exceso > 0 ? presupuestoBase + exceso : undefined,
+        });
+        guardado.current = true;
+        // Baja el plan nuevo al teléfono antes de volver a Hoy.
+        await sincronizarAhora().catch(() => {});
+        navegar.dismissTo('/hoy');
+        return;
+      }
+      await guardarPlan(session.user.id, borrador, respuestas, idsCompletos, conRecordatorios);
+      guardado.current = true;
+      // Guarda el modo y marca el onboarding como completo: el layout lleva a «Hoy».
+      await chooseMode('guiado');
+    } catch {
+      setError(true);
+      setGuardando(false);
+    }
+  };
+
+  const conSugerencias = puedeAgregar(borrador) && sugerenciasDisponibles(borrador).length > 0;
+
+  return (
+    <Screen scroll contentClassName="gap-6 pt-2">
+      <View className="-ml-4">
+        <BackButton />
+      </View>
+
+      <View className="gap-2">
+        <AppText variant="h2">{t.titulo}</AppText>
+        <AppText tone="ink-soft">{t.subtitulo}</AppText>
+      </View>
+
+      <View className="gap-4">
+        {borrador.habitos.map((habito) => (
+          <PlanHabitCard
+            key={habito.objetivo}
+            habito={habito}
+            ventana={borrador.ventana_flexible}
+            acciones={[
+              {
+                label: t.editar,
+                tone: 'acento',
+                accessibilityLabel: `${t.editar}: ${habito.titulo}`,
+                onPress: () => setEditando(habito),
+              },
+              ...(puedeQuitar(borrador)
+                ? [
+                    {
+                      label: t.quitar,
+                      tone: 'peligro' as const,
+                      accessibilityLabel: `${t.quitar}: ${habito.titulo}`,
+                      onPress: () => setQuitando(habito),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        ))}
+      </View>
+
+      {conSugerencias ? (
+        <View className="gap-2">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t.agregarOtro}
+            onPress={() => navegar.push(rutas.sugerencias)}
+            className="min-h-14 flex-row items-center justify-center gap-2 rounded-card border-2 border-dashed border-divisor active:bg-accent-claro"
+          >
+            <Plus size={20} color={colors.ink} />
+            <AppText weight="semibold">{t.agregarOtro}</AppText>
+          </Pressable>
+          <AppText variant="small" tone="ink-soft" className="text-center">
+            {t.maximo}
+          </AppText>
+        </View>
+      ) : null}
+
+      {muestraSegundoAviso(respuestas) ? (
+        <SecondNoticeToggle
+          value={borrador.ajustes.segundo_aviso}
+          onChange={acciones.cambiarSegundoAviso}
+        />
+      ) : null}
+
+      {exceso > 0 ? (
+        <Alert variant="advertencia" message={formatear(t.excedeTiempo, { n: String(exceso) })} />
+      ) : null}
+      {muestraNotaApoyo(borrador) ? <Alert variant="info" message={t.apoyoProfesional} /> : null}
+      {error ? <Alert variant="error" message={t.errorGuardar} /> : null}
+
+      <View className="mt-auto gap-2">
+        <AppText variant="small" tone="ink-soft" className="text-center">
+          {t.notaAjuste}
+        </AppText>
+        <Button
+          label={t.empezar}
+          loading={guardando}
+          onPress={() => void permiso.conPermiso((concedido) => void confirmar(concedido))}
+        />
+      </View>
+
+      {permiso.dialogo}
+
+      {editando ? (
+        <EditPlanHabitSheet
+          habito={editando}
+          horaPorDefecto={borrador.ventana_flexible.inicio}
+          onCerrar={() => setEditando(null)}
+          onGuardar={(cambios) => {
+            acciones.editar(editando.objetivo, cambios);
+            setEditando(null);
+          }}
+        />
+      ) : null}
+
+      <ConfirmDialog
+        visible={quitando !== null}
+        tipo="peligro"
+        mensaje={formatear(t.quitarConfirmar, { titulo: quitando?.titulo ?? '' })}
+        cancelar={t.cancelar}
+        confirmar={t.eliminar}
+        onCancelar={() => setQuitando(null)}
+        onConfirmar={() => {
+          if (quitando) acciones.quitar(quitando.objetivo);
+          setQuitando(null);
+        }}
+      />
+    </Screen>
+  );
+}

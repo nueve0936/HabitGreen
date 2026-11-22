@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
@@ -10,15 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Screen } from '@/components/ui/screen';
 import { AuthHeader } from '@/features/auth/components/auth-header';
+import { SessionExpiredNotice } from '@/features/auth/components/session-expired-notice';
 import { authErrorMessage } from '@/features/auth/domain/auth-error-message';
 import { avisoDeFormulario } from '@/features/auth/domain/form-aviso';
 import {
+  EMAIL_MAX,
   loginSchema,
   type LoginInput,
   type LoginValues,
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
+import { navegar } from '@/lib/navegar';
 
 export default function LoginScreen() {
   const t = es.auth;
@@ -64,6 +66,7 @@ export default function LoginScreen() {
       <AuthHeader title={t.login.titulo} />
 
       <View className="gap-4">
+        <SessionExpiredNotice />
         <Controller
           control={control}
           name="email"
@@ -77,6 +80,7 @@ export default function LoginScreen() {
               invalido={Boolean(errors.email) || errorServidor}
               autoCapitalize="none"
               autoComplete="email"
+              maxLength={EMAIL_MAX}
               keyboardType="email-address"
               textContentType="emailAddress"
               returnKeyType="next"
@@ -106,7 +110,7 @@ export default function LoginScreen() {
             <Button
               variant="tertiary"
               label={t.login.olvidaste}
-              onPress={() => router.push('/recuperar')}
+              onPress={() => navegar.push('/recuperar')}
               className="px-0"
             />
           </View>
@@ -121,7 +125,7 @@ export default function LoginScreen() {
           <Button
             variant="tertiary"
             label={t.login.registrate}
-            onPress={() => router.replace('/registro')}
+            onPress={() => navegar.replace('/registro')}
           />
         </View>
       </View>

@@ -4,6 +4,7 @@ import { AccessibilityInfo } from 'react-native';
 import { completarHabito, deshacerHabito, RelojAtrasadoError } from '@/db/logs-repository';
 import { es, formatear } from '@/i18n/es';
 import { fechaLocal } from '@/lib/dates';
+import { useFechaHoy } from '@/lib/fecha-hoy';
 import type { Area } from '@/schemas/onboarding';
 
 import { DURACION_COIN_BURST } from '../rewards/components/coin-burst';
@@ -11,7 +12,8 @@ import type { Celebracion } from '../rewards/components/phase-celebration';
 
 // Marcar y deshacer un hábito de hoy (SDD 6.1), compartido por Hoy y Hábitos: guarda el check-in,
 // lanza la moneda animada o el mensaje del tope del día, avisa al lector de pantalla y abre la
-// celebración si la planta cambió de fase.
+// celebración si la planta cambió de fase. Si la lista en pantalla era de ayer (cambió el día y
+// aún no se actualizaba), no marca nada: actualiza la lista y lo explica.
 
 export type HabitoParaCheck = { id: string; category_id: string; categoria: Area };
 
@@ -86,7 +88,13 @@ export function useCheckIn(userId: string) {
       setError(null);
       setAviso(null);
     },
-    alternar: (habito: HabitoParaCheck, hecho: boolean) =>
-      hecho ? deshacer(habito) : completar(habito),
+    alternar: (habito: HabitoParaCheck, hecho: boolean) => {
+      if (useFechaHoy.getState().revisar()) {
+        setError(null);
+        setAviso(es.hoy.cambioDia);
+        return;
+      }
+      void (hecho ? deshacer(habito) : completar(habito));
+    },
   };
 }

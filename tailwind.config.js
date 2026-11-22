@@ -17,6 +17,11 @@ module.exports = {
       bold: [fonts.bold],
     },
     extend: {
+      // Zona táctil de 48 dp (guía de UX/UI, sección 6). NativeWind convierte `rem` con 14 px en
+      // nativo, así que `h-12` medía 42 dp; con este valor `h-12`, `min-h-12` y `w-12` miden 48 dp.
+      spacing: {
+        12: '48px',
+      },
       // Escala tipográfica de la guía de UX/UI, sección 3.
       fontSize: {
         h1: ['32px', '40px'],

@@ -15,6 +15,7 @@ import { guardarAjustes, leerAjustesPerfil, type CambiosAjustes } from '@/db/set
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { textoDuracion } from '@/features/habits/domain/formato';
+import { MisPlanes } from '@/features/plan/components/mis-planes';
 import { SecondNoticeToggle } from '@/features/plan/components/second-notice-toggle';
 import { fechaDesdeHora, horaDesdeFecha } from '@/features/plan/domain/plan-review';
 import { permisoConcedido } from '@/features/reminders/avisos';
@@ -24,7 +25,7 @@ import type { MomentoAviso } from '@/features/reminders/domain/planificar-avisos
 import { es, formatear } from '@/i18n/es';
 import { cardShadow, colors } from '@/theme';
 
-// Perfil (SDD 9.4): avisos, horas por momento, tiempo diario y la cuenta. Cada cambio se guarda al
+// Perfil (SDD 9.4): avisos, horas por momento, tiempo diario, mis planes y la cuenta. Cada cambio se guarda al
 // momento en el teléfono y se sube con la cola, así que funciona sin conexión (SDD 3.4) y los avisos
 // se recalculan solos. Las horas son las generales: cada hábito conserva la suya.
 
@@ -56,7 +57,7 @@ function Grupo({ children }: { children: ReactNode }) {
 
 export default function PerfilScreen() {
   const t = es.perfil;
-  const { session, profile, signOut } = useSession();
+  const { session, signOut } = useSession();
   const userId = session?.user.id ?? '';
   const perfil = useLocalQuery(`perfil-${userId}`, () => leerAjustesPerfil(userId));
   const [signingOut, setSigningOut] = useState(false);
@@ -198,17 +199,16 @@ export default function PerfilScreen() {
           </>
         )}
 
+        <Seccion titulo={t.planes.titulo}>
+          <MisPlanes userId={userId} />
+        </Seccion>
+
         <Seccion titulo={t.cuenta}>
           <Card className="gap-1">
             <AppText variant="small">{t.sesionIniciada}</AppText>
             <AppText variant="body" weight="semibold">
               {session?.user.email ?? ''}
             </AppText>
-            {profile?.modo ? (
-              <AppText variant="small" className="mt-2">
-                {profile.modo === 'guiado' ? t.modoGuiado : t.modoTradicional}
-              </AppText>
-            ) : null}
           </Card>
         </Seccion>
 

@@ -2,7 +2,7 @@ import { Check, CircleAlert, Eye, EyeOff, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, TextInput, type TextInputProps, View } from 'react-native';
 
-import { es } from '@/i18n/es';
+import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
 
 import { AppText } from './app-text';
@@ -23,6 +23,8 @@ export type FieldProps = Omit<TextInputProps, 'style' | 'secureTextEntry'> & {
   /** Muestra la marca de verificación (por ejemplo, tras intentar enviar el formulario). */
   valido?: boolean;
   password?: boolean;
+  /** Muestra «n/máximo» bajo el campo (campos con límite de caracteres). */
+  contador?: number;
 };
 
 export function Field({
@@ -31,10 +33,12 @@ export function Field({
   invalido = false,
   valido = false,
   password = false,
+  contador,
   onFocus,
   onBlur,
   ...inputProps
 }: FieldProps) {
+  const largo = inputProps.value?.length ?? 0;
   const [hidden, setHidden] = useState(password);
   const [enfocado, setEnfocado] = useState(false);
   const hasError = Boolean(error) || invalido;
@@ -96,12 +100,30 @@ export function Field({
           />
         ) : null}
       </View>
-      {error ? (
-        <View className="flex-row items-center gap-1" accessibilityLiveRegion="polite">
-          <CircleAlert size={16} color={colors.error} />
-          <AppText variant="small" className="flex-1">
-            {error}
-          </AppText>
+      {error || contador !== undefined ? (
+        <View className="flex-row items-start gap-2">
+          {error ? (
+            <View className="flex-1 flex-row items-center gap-1" accessibilityLiveRegion="polite">
+              <CircleAlert size={16} color={colors.error} />
+              <AppText variant="small" className="flex-1">
+                {error}
+              </AppText>
+            </View>
+          ) : (
+            <View className="flex-1" />
+          )}
+          {contador !== undefined ? (
+            <AppText
+              variant="small"
+              tone="ink-soft"
+              accessibilityLabel={formatear(es.comun.caracteres, {
+                n: largo,
+                max: contador,
+              })}
+            >
+              {`${largo}/${contador}`}
+            </AppText>
+          ) : null}
         </View>
       ) : null}
     </View>
