@@ -4,9 +4,14 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { cupoPlanes } from '@/db/limits-repository';
 import { leerGlobalesFormulario, leerMisPlanes } from '@/db/plan-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { ICONO_CATEGORIA } from '@/features/habits/categoria-icono';
+import {
+  type AvisoLimite,
+  LimiteHabitosDialog,
+} from '@/features/habits/components/limite-habitos-dialog';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { es, formatear } from '@/i18n/es';
 import { useAccionUnica } from '@/lib/use-accion-unica';
@@ -30,6 +35,7 @@ export function MisPlanes({ userId }: MisPlanesProps) {
   const areas = es.onboarding.formulario.areas;
   const planes = useLocalQuery(`mis-planes-${userId}`, () => leerMisPlanes(userId));
   const [abriendo, setAbriendo] = useState(false);
+  const [avisoLimite, setAvisoLimite] = useState<AvisoLimite | null>(null);
 
   const lista = planes.data ?? [];
   // Un toque doble rápido no abre el detalle dos veces.
@@ -38,9 +44,16 @@ export function MisPlanes({ userId }: MisPlanesProps) {
   );
   const todasOcupadas = lista.length >= AREAS.length;
 
+  // Los planes se ganan (fase 5): 1 más 1 por subida. Sin un plan disponible se explica cómo ganar
+  // otro y no se abre el formulario. Si la revisión falla, se abre igual.
   const crear = async () => {
     setAbriendo(true);
     try {
+      const cupo = await cupoPlanes(userId).catch(() => null);
+      if (cupo?.alcanzado && cupo.limite !== null) {
+        setAvisoLimite({ motivo: 'plan', limite: cupo.limite });
+        return;
+      }
       const globales = await leerGlobalesFormulario(userId);
       useOnboardingStore.getState().prepararNuevoPlan(
         userId,
@@ -116,6 +129,7 @@ export function MisPlanes({ userId }: MisPlanesProps) {
           {t.necesitaConexion}
         </AppText>
       )}
+      <LimiteHabitosDialog aviso={avisoLimite} onCerrar={() => setAvisoLimite(null)} />
     </View>
   );
 }

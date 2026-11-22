@@ -9,6 +9,7 @@ import {
   type Registro,
 } from '@/features/habits/domain/habitos-del-dia';
 import { nuevaVersionHorario } from '@/features/habits/domain/horario';
+import { cabe, limiteDelPlan } from '@/features/habits/domain/limite-habitos';
 import { avanceDelPlan, diasParaRevision, type Avance } from '@/features/plan/domain/detalle-plan';
 import type { FilaCatalogo } from '@/features/plan/domain/plan-engine';
 import { respuestasDelPlan } from '@/features/plan/domain/respuestas-plan';
@@ -16,7 +17,6 @@ import { sugerenciasPorNiveles } from '@/features/plan/domain/sugerencias-plan';
 import {
   decidir,
   esDelPlan,
-  llegoAlLimiteTotal,
   pasoHaciaAbajo,
   cumplimientoDe,
   tocaDesbloquear,
@@ -77,8 +77,6 @@ type FilaPlan = {
   limite_desbloqueado: boolean | null;
 };
 
-type FilaAjustesProgresion = { subidas_plan: number | null };
-
 /** Lo que comparten las revisiones de todos los planes. */
 type Comunes = Omit<EntradaProgresion, 'respuestas' | 'limiteDesbloqueado' | 'planId'> & {
   respuestas: Respuestas;
@@ -118,12 +116,9 @@ async function leerPlanesActivos(db: SQLiteDatabase, userId: string): Promise<Pl
 
 /** Datos comunes a todas las revisiones, o null si faltan ajustes o respuestas. */
 async function leerComunes(db: SQLiteDatabase, userId: string): Promise<Comunes | null> {
-  const [ajustesFila] = await leerFilas<FilaAjustesProgresion>(db, 'user_settings', 'user_id = ?', [
-    userId,
-  ]);
   const ajustes = await leerAjustesEn(db, userId);
   const respuestas = await leerRespuestas(db, userId);
-  if (!ajustesFila || !ajustes || !respuestas) return null;
+  if (!ajustes || !respuestas) return null;
 
   const hoy = fechaLocal();
   const habitos = await leerFilas<Habito>(db, 'habits', '1 = 1 ORDER BY created_at');
@@ -144,7 +139,6 @@ async function leerComunes(db: SQLiteDatabase, userId: string): Promise<Comunes 
     respuestas,
     configPlan: { presupuestos, horas: ajustes.horas },
     presupuestoMin: ajustes.presupuestoMin,
-    subidasPlan: ajustesFila.subidas_plan ?? 0,
     config,
   };
 }
@@ -384,11 +378,12 @@ async function crearHabitoDelPlan(
     (x) => esDelPlan(x) && x.activo && x.archivado_en === null,
   );
   const repetido = activos.some((x) => x.objetivo === h.objetivo);
-  // Límite de hábitos de este plan y límite total: el usuario pudo crear uno propio mientras tanto.
+  // Solo el tope de este plan (fase 5): los propios tienen su límite aparte.
   const delPlan = activos.filter((x) => x.plan_id === plan.id).length;
-  const lleno =
-    (!plan.limiteDesbloqueado && delPlan >= entrada.config.limite_habitos_plan) ||
-    llegoAlLimiteTotal(entrada);
+  const lleno = !cabe(
+    delPlan,
+    limiteDelPlan({ desbloqueado: plan.limiteDesbloqueado }, entrada.config.limite_habitos_plan),
+  );
   if (repetido || lleno) return null;
 
   const ahora = new Date().toISOString();
@@ -538,9 +533,10 @@ export async function leerDetallePlan(userId: string, planId: string): Promise<D
       entrada.config.dias_entre_evaluaciones,
     ),
     habitos,
-    puedeAgregar:
-      (plan.limiteDesbloqueado || activos < entrada.config.limite_habitos_plan) &&
-      !llegoAlLimiteTotal(entrada),
+    puedeAgregar: cabe(
+      activos,
+      limiteDelPlan({ desbloqueado: plan.limiteDesbloqueado }, entrada.config.limite_habitos_plan),
+    ),
   };
 }
 

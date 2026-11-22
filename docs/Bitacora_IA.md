@@ -95,8 +95,11 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Decisión | Propuesta por | Estado | Notas |
 |---|---|---|---|
 | Revisión cada 7 días; subir es opcional, bajar es automático con «Mantenerlo como estaba» | Definición v5 / Entrega 8 | Aceptada | Tarjetas en Hoy. |
-| Límite de 4 hábitos del plan y desbloqueo a los 90 días | Definición v5 | Modificada | Con varios planes, cada plan tiene su revisión y su desbloqueo. |
-| Límite de hábitos del usuario guiado | Usuario | Modificada | Primero 3 propios; luego 3 en total (plan y propios), más 1 por subida y libre a los 90 días; «Reanudar» también lo respeta. La fase 5 lo cambia a 3 por plan con planes que se ganan. |
+| Límite de 4 hábitos del plan y desbloqueo a los 90 días | Definición v5 | Modificada | Con varios planes, cada plan tiene su revisión y su desbloqueo, y el tope bajó a 3 (fase 5). |
+| Límite de hábitos del usuario guiado | Usuario | Modificada | Primero 3 propios; luego 3 en total (plan y propios), más 1 por subida y libre a los 90 días. En la fase 5 (22 nov): 3 por plan, 1 plan más por subida y propios aparte (3 + subidas, sin límite sin planes). |
+| El desbloqueo de cualquier plan libera también los propios | Claude, elegido por el usuario | Aceptada | Fase 5. |
+| «Sacar del plan» respeta el límite de propios; «Terminar plan» siempre se permite | Claude, elegido por el usuario | Aceptada | Evita sumar hábitos sin fin repitiendo sacar y agregar. |
+| «Crear plan» sin un plan disponible abre un diálogo que explica cómo ganar otro | Claude, elegido por el usuario | Aceptada | Mismo patrón que «+» y «Reanudar». |
 | Pausados no cuentan para el límite | Claude, elegido por el usuario | Aceptada | |
 | Detalle del plan: hacerlo más ligero, sacar del plan y agregar un hábito a mano | Claude, aprobado por el usuario | Aceptada | Subir sigue siendo solo con la revisión. |
 
@@ -239,13 +242,13 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Marcar el hábito o ver su avance desde el detalle del plan | Descartada | «Ninguna por ahora». |
 | Sugerencias de otras áreas o ampliar el catálogo | Modificada | Primero se eligieron las versiones de cada meta; después el usuario pidió 7 metas por área. |
 | Tiempo diario por plan | Modificada | Quedó un tiempo global. |
-| Límite solo de hábitos propios | Modificada | Pasó a total y luego a «3 por plan» (pendiente). |
+| Límite solo de hábitos propios | Modificada | Pasó a total y luego a «3 por plan» con los propios aparte (fase 5). |
 
 ## 5. Pendientes
 
 | Pendiente | Origen |
 |---|---|
-| Fase 5 de límites: 3 hábitos por plan y planes que se ganan con las subidas | Varios planes |
+| Prueba en el teléfono de la fase 5 de límites | Varios planes |
 | Título cortado «Alejar el» en un hábito | Visto en Hoy |
 | Entrega 9.1 y 9.2: recorrido completo con TalkBack y corrección de errores | Backlog |
 | Entrega 10: geofencing básico | Backlog |

@@ -2,13 +2,8 @@ import { useState } from 'react';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Snackbar } from '@/components/ui/snackbar';
-import {
-  archivarHabito,
-  cambiarActivo,
-  leerCupoHabitos,
-  type HabitoConHorario,
-} from '@/db/habits-repository';
-import { useSession } from '@/features/auth/session-context';
+import { archivarHabito, cambiarActivo, type HabitoConHorario } from '@/db/habits-repository';
+import { cupoReanudar } from '@/db/limits-repository';
 import { es, formatear } from '@/i18n/es';
 import { useFechaHoy } from '@/lib/fecha-hoy';
 import { navegar } from '@/lib/navegar';
@@ -16,7 +11,7 @@ import { navegar } from '@/lib/navegar';
 import { PhaseCelebration } from '../rewards/components/phase-celebration';
 import type { HabitCheckCardProps } from './components/habit-check-card';
 import { HabitMenu, type Ancla, type HabitMenuProps } from './components/habit-menu';
-import { LimiteHabitosDialog } from './components/limite-habitos-dialog';
+import { type AvisoLimite, LimiteHabitosDialog } from './components/limite-habitos-dialog';
 import { useCheckIn } from './use-check-in';
 
 // Lo que se puede hacer con un hábito de una lista: marcarlo y abrir su menú ⋮ (editar, pausar o
@@ -39,9 +34,8 @@ export function useHabitActions(
   const [menu, setMenu] = useState<{ item: HabitoConHorario; ancla: Ancla } | null>(null);
   const [eliminando, setEliminando] = useState<HabitoConHorario | null>(null);
   const [errorGuardar, setErrorGuardar] = useState(false);
-  // Límite alcanzado al intentar reanudar un hábito en pausa (usuario guiado).
-  const [limite, setLimite] = useState<number | null>(null);
-  const modo = useSession().profile?.modo ?? null;
+  // Límite alcanzado al intentar reanudar un hábito en pausa.
+  const [avisoLimite, setAvisoLimite] = useState<AvisoLimite | null>(null);
   // Al cambiar el día, el menú y la confirmación de eliminar muestran datos de ayer: se cierran.
   const fecha = useFechaHoy((s) => s.fecha);
   const [fechaVista, setFechaVista] = useState(fecha);
@@ -60,13 +54,21 @@ export function useHabitActions(
     }
   };
 
-  // Pausar libera un lugar y no se revisa. Reanudar respeta el límite de hábitos activos (el mismo
-  // de «+»): si ya se llegó, se explica y el hábito sigue en pausa. Si la revisión falla, se reanuda.
-  const cambiarActivoConLimite = async (habito: { id: string; activo: boolean }) => {
+  // Pausar libera un lugar y no se revisa. Reanudar respeta el límite (fase 5): el tope de su plan
+  // si es de un plan, o el de los propios (el mismo de «+»). Si ya se llegó, se explica y el hábito
+  // sigue en pausa. Si la revisión falla, se reanuda.
+  const cambiarActivoConLimite = async (habito: {
+    id: string;
+    activo: boolean;
+    plan_id: string | null;
+  }) => {
     if (!habito.activo) {
-      const cupo = await leerCupoHabitos(userId, modo).catch(() => null);
-      if (cupo?.alcanzado) {
-        setLimite(cupo.limite);
+      const cupo = await cupoReanudar(userId, habito.id).catch(() => null);
+      if (cupo?.alcanzado && cupo.limite !== null) {
+        setAvisoLimite({
+          motivo: habito.plan_id ? 'reanudarPlan' : 'reanudar',
+          limite: cupo.limite,
+        });
         return;
       }
     }
@@ -139,7 +141,7 @@ export function useHabitActions(
         }}
       />
 
-      <LimiteHabitosDialog motivo="reanudar" limite={limite} onCerrar={() => setLimite(null)} />
+      <LimiteHabitosDialog aviso={avisoLimite} onCerrar={() => setAvisoLimite(null)} />
 
       <PhaseCelebration celebracion={checkIn.celebracion} onCerrar={checkIn.cerrarCelebracion} />
     </>

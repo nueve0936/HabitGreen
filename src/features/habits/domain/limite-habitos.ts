@@ -1,31 +1,48 @@
-// Límite de hábitos del usuario guiado (pulidos antes del APK, decisión del usuario). Cuenta los
-// del plan y los propios juntos:
-//   - empieza en HABITOS_BASE y suma 1 cada vez que un hábito del plan sube de nivel (bajar no resta);
-//   - con el límite del plan desbloqueado (90 días con 85 % o más) ya no hay límite;
-//   - solo cuentan los activos: los pausados y los eliminados (archivados) no;
-//   - el modo tradicional no tiene límite.
-// Lo respetan «+» (crear un hábito propio) y la progresión (proponer un hábito nuevo al plan).
+import { AREAS } from '@/schemas/onboarding';
 
-/** Hábitos activos con los que empieza el usuario guiado. Cambia este número para ajustar el límite. */
-export const HABITOS_BASE = 3;
+// Límites de hábitos y de planes (varios planes, fase 5; decisiones del usuario del 20 y 22 nov):
+//   - cada plan tiene hasta `limite_habitos_plan` hábitos activos (app_config, 3); desbloqueado
+//     (90 días con 85 % o más) ya no tiene tope y solo cuenta el tiempo diario;
+//   - empiezas con 1 plan y ganas otro con cada subida de nivel de un hábito de tus planes, hasta
+//     uno por área;
+//   - los hábitos propios tienen su límite aparte: 3 + 1 por subida, contando solo los propios.
+//     Sin planes activos, o con alguno desbloqueado, no tienen límite;
+//   - solo cuentan los activos: los pausados y los eliminados (archivados) no.
+// Las subidas (`user_settings.subidas_plan`) dan a la vez un plan más y un propio más; bajar no resta.
 
-export type EntradaLimiteHabitos = {
-  modo: 'guiado' | 'tradicional' | null;
+/** Hábitos propios activos con los que se empieza al tener un plan. */
+export const HABITOS_PROPIOS_BASE = 3;
+
+/** Planes con los que se empieza. */
+export const PLANES_BASE = 1;
+
+export type PlanLimite = { id: string; desbloqueado: boolean; activos: number };
+
+export type EstadoLimites = {
+  /** Planes activos con sus hábitos activos. */
+  planes: readonly PlanLimite[];
+  /** Hábitos propios (sin plan) activos. */
+  propiosActivos: number;
   subidas: number;
-  desbloqueado: boolean;
 };
 
-/** Máximo de hábitos activos (plan y propios), o null si no hay límite. */
-export function limiteHabitos({
-  modo,
-  subidas,
-  desbloqueado,
-}: EntradaLimiteHabitos): number | null {
-  if (modo !== 'guiado' || desbloqueado) return null;
-  return HABITOS_BASE + Math.max(0, subidas);
+/** Máximo de hábitos propios activos, o null si no hay límite. */
+export function limitePropios({ planes, subidas }: EstadoLimites): number | null {
+  if (planes.length === 0 || planes.some((p) => p.desbloqueado)) return null;
+  return HABITOS_PROPIOS_BASE + Math.max(0, subidas);
 }
 
-/** True si ya no cabe otro hábito activo. */
-export function alcanzoLimiteHabitos(activos: number, limite: number | null): boolean {
-  return limite !== null && activos >= limite;
+/** Máximo de planes activos: 1 más 1 por subida, hasta uno por área. */
+export function limitePlanes(subidas: number): number {
+  return Math.min(AREAS.length, PLANES_BASE + Math.max(0, subidas));
+}
+
+/** Máximo de hábitos activos de un plan, o null si está desbloqueado. */
+export function limiteDelPlan(plan: Pick<PlanLimite, 'desbloqueado'>, tope: number): number | null {
+  return plan.desbloqueado ? null : tope;
+}
+
+/** True si con `activos` todavía cabe otro (null = sin límite). */
+export function cabe(activos: number, limite: number | null): boolean {
+  return limite === null || activos < limite;
 }

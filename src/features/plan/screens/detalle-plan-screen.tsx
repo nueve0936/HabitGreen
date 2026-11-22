@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Screen } from '@/components/ui/screen';
 import { Snackbar } from '@/components/ui/snackbar';
 import { leerHabitos, type HabitoConHorario } from '@/db/habits-repository';
+import { cupoPropios } from '@/db/limits-repository';
 import { sacarDelPlan, terminarPlan } from '@/db/plan-repository';
 import {
   hacerMasLigero,
@@ -20,6 +21,10 @@ import {
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
 import { ICONO_CATEGORIA } from '@/features/habits/categoria-icono';
+import {
+  type AvisoLimite,
+  LimiteHabitosDialog,
+} from '@/features/habits/components/limite-habitos-dialog';
 import { textoDuracion } from '@/features/habits/domain/formato';
 import { useHabitActions } from '@/features/habits/use-habit-actions';
 import { ProgressionCard } from '@/features/progression/components/progression-card';
@@ -68,10 +73,26 @@ export default function DetallePlanScreen() {
   const [masLigero, setMasLigero] = useState<HabitoDelDetalle | null>(null);
   const [sacando, setSacando] = useState<HabitoDelDetalle | null>(null);
   const [terminando, setTerminando] = useState(false);
+  const [avisoLimite, setAvisoLimite] = useState<AvisoLimite | null>(null);
   const [aviso, setAviso] = useState<{ texto: string; error: boolean } | null>(null);
 
   const plan = detalle.data;
   const delDetalle = new Map((plan?.habitos ?? []).map((h) => [h.habito.id, h]));
+
+  // «Sacar del plan» lo vuelve propio: si está activo y tus propios ya están en su límite, se explica
+  // y no se saca (fase 5). Sacar el último hábito termina el plan, que siempre se permite. Si la
+  // revisión falla, se pide la confirmación igual.
+  const pedirSacar = async (h: HabitoDelDetalle) => {
+    const eraElUltimo = (plan?.habitos.length ?? 0) <= 1;
+    if (h.habito.activo && !eraElUltimo) {
+      const cupo = await cupoPropios(userId).catch(() => null);
+      if (cupo?.alcanzado && cupo.limite !== null) {
+        setAvisoLimite({ motivo: 'sacar', limite: cupo.limite });
+        return;
+      }
+    }
+    setSacando(h);
+  };
 
   const acciones = useHabitActions(userId, undefined, {
     extras: (item: HabitoConHorario) => {
@@ -81,7 +102,7 @@ export default function DetallePlanScreen() {
         ...(h.masLigero
           ? [{ icono: Feather, label: t.menu.masLigero, onPress: () => setMasLigero(h) }]
           : []),
-        { icono: LogOut, label: t.menu.sacar, onPress: () => setSacando(h) },
+        { icono: LogOut, label: t.menu.sacar, onPress: () => void pedirSacar(h) },
       ];
     },
   });
@@ -287,6 +308,8 @@ export default function DetallePlanScreen() {
               .catch(fallo);
           }}
         />
+
+        <LimiteHabitosDialog aviso={avisoLimite} onCerrar={() => setAvisoLimite(null)} />
 
         <ConfirmDialog
           visible={terminando}

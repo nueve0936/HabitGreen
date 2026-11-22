@@ -501,15 +501,36 @@ export const es = {
       seguir: 'Seguir',
       cancelar: 'Cancelar',
     },
-    // Usuario guiado con su límite de hábitos, del plan y propios (crece al subir de nivel).
+    // Límites (varios planes, fase 5): propios, hábitos de un plan y planes que se ganan.
     limiteHabitos: {
-      titulo: 'Ya tienes {n} hábitos.',
-      mensaje:
-        'Para sumar otro, pausa o elimina uno. Conforme avances en tu plan podrás agregar más.',
-      // Al reanudar un hábito en pausa con el límite ya alcanzado.
-      tituloReanudar: 'Ya tienes {n} hábitos activos.',
-      mensajeReanudar:
-        'Para reanudar este, pausa o elimina otro. Conforme avances en tu plan podrás tener más.',
+      // «+» con los hábitos propios en su límite (3 + 1 por subida; sin planes no hay límite).
+      crear: {
+        titulo: 'Puedes tener hasta {n} hábitos propios.',
+        mensaje:
+          'Para sumar otro, pausa o elimina alguno. Cada vez que un hábito de tus planes sube de nivel, puedes tener uno más.',
+      },
+      // Reanudar un hábito propio en pausa con el límite ya alcanzado.
+      reanudar: {
+        titulo: 'Puedes tener hasta {n} hábitos propios activos.',
+        mensaje: 'Para reanudar este, pausa o elimina otro de tus hábitos propios.',
+      },
+      // Reanudar un hábito del plan con el plan lleno.
+      reanudarPlan: {
+        titulo: 'Este plan puede tener hasta {n} hábitos activos.',
+        mensaje: 'Para reanudar este, pausa otro hábito del plan.',
+      },
+      // «Crear plan» sin un plan disponible (se gana uno por subida, hasta uno por área).
+      plan: {
+        tituloUno: 'Por ahora puedes tener 1 plan.',
+        titulo: 'Por ahora puedes tener {n} planes.',
+        mensaje:
+          'Ganas otro cada vez que un hábito de tus planes sube de nivel. ¡Vas por buen camino!',
+      },
+      // «Sacar del plan» con los hábitos propios en su límite.
+      sacar: {
+        titulo: 'Tus hábitos propios están completos.',
+        mensaje: 'Para sacar este del plan, pausa o elimina uno de tus hábitos propios.',
+      },
       entendido: 'Entendido',
     },
     salir: {

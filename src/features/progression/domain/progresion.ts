@@ -4,7 +4,7 @@ import {
   type Habito,
   type Horario,
 } from '@/features/habits/domain/habitos-del-dia';
-import { alcanzoLimiteHabitos, limiteHabitos } from '@/features/habits/domain/limite-habitos';
+import { cabe as cabeEnLimite, limiteDelPlan } from '@/features/habits/domain/limite-habitos';
 import { minutosPorDia, type CargaHabito } from '@/features/habits/domain/presupuesto';
 import {
   elegirFilaCatalogo,
@@ -55,7 +55,7 @@ export const PROGRESION_POR_DEFECTO: ConfigProgresion = {
   dias_por_semana_baja_frecuencia: 2,
   minimo_ocurrencias: 4,
   dias_entre_evaluaciones: 7,
-  limite_habitos_plan: 4,
+  limite_habitos_plan: 3,
   dias_para_desbloqueo: 90,
   ventana_desbloqueo_dias: 28,
 };
@@ -105,8 +105,6 @@ export type EntradaProgresion = {
   configPlan: ConfigPlan;
   presupuestoMin: number;
   limiteDesbloqueado: boolean;
-  /** Subidas de nivel aceptadas: cada una da 1 lugar más en el límite total de hábitos. */
-  subidasPlan: number;
   /**
    * Plan que se revisa (varios planes por usuario, uno por área): solo se evalúan sus hábitos y el
    * hábito nuevo se busca solo en su área. Sin él se revisan todos los hábitos del plan juntos.
@@ -122,22 +120,6 @@ const esObjetivo = (o: unknown): o is Objetivo => (OBJETIVOS as readonly unknown
 /** Hábito del plan con nivel válido. */
 export function esDelPlan(h: Habito): h is Habito & { objetivo: Objetivo; nivel: Nivel } {
   return esObjetivo(h.objetivo) && esNivel(h.nivel);
-}
-
-/**
- * Límite total de hábitos activos (del plan y propios) del usuario guiado: si ya llegó, la
- * progresión no propone hábitos nuevos (decisión del usuario, pulidos antes del APK).
- */
-export function llegoAlLimiteTotal(
-  entrada: Pick<EntradaProgresion, 'habitos' | 'subidasPlan' | 'limiteDesbloqueado'>,
-): boolean {
-  const activos = entrada.habitos.filter((h) => h.activo && h.archivado_en === null).length;
-  const limite = limiteHabitos({
-    modo: 'guiado',
-    subidas: entrada.subidasPlan,
-    desbloqueado: entrada.limiteDesbloqueado,
-  });
-  return alcanzoLimiteHabitos(activos, limite);
 }
 
 /** Pasaron los días entre revisiones desde la última (o desde que empezó el plan). */
@@ -342,10 +324,11 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
   }
 
   if (quiereNuevo) {
-    const activosDelPlan = delPlan.length;
-    const hayLugar =
-      (entrada.limiteDesbloqueado || activosDelPlan < config.limite_habitos_plan) &&
-      !llegoAlLimiteTotal(entrada);
+    // Solo el tope de este plan (fase 5): los propios tienen su límite aparte.
+    const hayLugar = cabeEnLimite(
+      delPlan.length,
+      limiteDelPlan({ desbloqueado: entrada.limiteDesbloqueado }, config.limite_habitos_plan),
+    );
     if (hayLugar) {
       // No se repite un objetivo que ya está en el plan (aunque esté en pausa).
       const ocupados = new Set(

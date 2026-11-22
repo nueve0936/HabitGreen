@@ -118,7 +118,6 @@ function entrada(cambios: Partial<EntradaProgresion> = {}): EntradaProgresion {
     configPlan: CONFIG_PLAN,
     presupuestoMin: 60,
     limiteDesbloqueado: false,
-    subidasPlan: 0,
     config: CONFIG,
     ...cambios,
   };
@@ -333,21 +332,24 @@ describe('hábito nuevo y presupuesto', () => {
     expect(tipos(t)).toEqual(['nuevo']);
   });
 
-  it('con el límite total de hábitos alcanzado no propone otro, salvo con una subida más', () => {
+  it('los hábitos propios no ocupan lugar en el plan', () => {
     const a = habito('a', { nivel: 3, duracion_min: 5 });
     const b = habito('b', { objetivo: 'saber_gastos', nivel: 3, duracion_min: 5 });
-    const propio = habito('m', { objetivo: null, nivel: null, plan_id: null, duracion_min: 5 });
-    const datos = {
-      habitos: [a, b, propio],
-      horarios: [horario('a'), horario('b'), horario('m')],
-      ocurrencias: [...ocurrencias('a', 14, 14), ...ocurrencias('b', 14, 14)],
-    };
-    expect(decidir(entrada(datos))).toEqual([]);
-    expect(tipos(decidir(entrada({ ...datos, subidasPlan: 1 })))).toEqual(['nuevo']);
+    const propios = ['m', 'n'].map((id) =>
+      habito(id, { objetivo: null, nivel: null, plan_id: null, duracion_min: 5 }),
+    );
+    const t = decidir(
+      entrada({
+        habitos: [a, b, ...propios],
+        horarios: [horario('a'), horario('b'), horario('m'), horario('n')],
+        ocurrencias: [...ocurrencias('a', 14, 14), ...ocurrencias('b', 14, 14)],
+      }),
+    );
+    expect(tipos(t)).toEqual(['nuevo']);
   });
 
-  it('con 4 hábitos del plan no propone otro, salvo con el límite desbloqueado', () => {
-    const ids = ['a', 'b', 'c', 'd'];
+  it('con 3 hábitos del plan no propone otro, salvo con el límite desbloqueado', () => {
+    const ids = ['a', 'b', 'c'];
     const habitos = ids.map((id) => habito(id, { nivel: 3, duracion_min: 5 }));
     const datos = {
       habitos,

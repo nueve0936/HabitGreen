@@ -1,31 +1,41 @@
+import { useState } from 'react';
 import { Pressable } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { Dialog } from '@/components/ui/dialog';
 import { es, formatear } from '@/i18n/es';
 
-// Aviso con el límite de hábitos alcanzado (usuario guiado; cuenta los del plan y los propios), al
-// tocar «+» o al reanudar un hábito en pausa. Solo explica: no se crea ni se reanuda nada. Tocar fuera, «atrás» o «Entendido» lo cierran.
+// Aviso de límite alcanzado (varios planes, fase 5): al tocar «+», al reanudar un hábito en pausa,
+// al crear un plan o al sacar un hábito del plan. Solo explica: no se crea, reanuda ni saca nada.
+// Tocar fuera, «atrás» o «Entendido» lo cierran.
+
+export type MotivoLimite = 'crear' | 'reanudar' | 'reanudarPlan' | 'plan' | 'sacar';
+
+export type AvisoLimite = { motivo: MotivoLimite; limite: number };
 
 export type LimiteHabitosDialogProps = {
-  /** Límite alcanzado; null oculta el diálogo. */
-  limite: number | null;
-  /** Crear con «+» o reanudar un hábito en pausa: solo cambia el texto. */
-  motivo: 'crear' | 'reanudar';
+  /** Límite alcanzado y su motivo (solo cambia el texto); null oculta el diálogo. */
+  aviso: AvisoLimite | null;
   onCerrar: () => void;
 };
 
-export function LimiteHabitosDialog({ limite, motivo, onCerrar }: LimiteHabitosDialogProps) {
+function titulo({ motivo, limite }: AvisoLimite): string {
   const t = es.habitForm.limiteHabitos;
-  const reanudar = motivo === 'reanudar';
+  const n = { n: String(limite) };
+  if (motivo === 'plan') return limite === 1 ? t.plan.tituloUno : formatear(t.plan.titulo, n);
+  return formatear(t[motivo].titulo, n);
+}
+
+export function LimiteHabitosDialog({ aviso, onCerrar }: LimiteHabitosDialogProps) {
+  const t = es.habitForm.limiteHabitos;
+  // Mientras se desvanece al cerrar, sigue mostrando el último aviso (no una tarjeta vacía).
+  const [ultimo, setUltimo] = useState(aviso);
+  if (aviso !== null && aviso !== ultimo) setUltimo(aviso);
+  const visto = aviso ?? ultimo;
   return (
-    <Dialog
-      visible={limite !== null}
-      titulo={formatear(reanudar ? t.tituloReanudar : t.titulo, { n: String(limite ?? 0) })}
-      onCerrar={onCerrar}
-    >
+    <Dialog visible={aviso !== null} titulo={visto ? titulo(visto) : ''} onCerrar={onCerrar}>
       <AppText tone="ink-soft" className="text-center">
-        {reanudar ? t.mensajeReanudar : t.mensaje}
+        {visto ? t[visto.motivo].mensaje : ''}
       </AppText>
       <Pressable
         accessibilityRole="button"
