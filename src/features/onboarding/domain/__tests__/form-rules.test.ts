@@ -1,6 +1,7 @@
 import {
   alternarArea,
   alternarObjetivo,
+  maxObjetivos,
   alternarSeleccion,
   BORRADOR_VACIO,
   leerPaso,
@@ -48,6 +49,15 @@ describe('alternarObjetivo', () => {
   it('un tercer objetivo reemplaza al primero elegido', () => {
     const borrador: Borrador = { areas: ['salud_fisica'], objetivos: ['mover_mas', 'tomar_agua'] };
     expect(alternarObjetivo(borrador, 'dormir_mejor')).toEqual(['tomar_agua', 'dormir_mejor']);
+  });
+
+  it('con un solo lugar libre en el cupo, el nuevo reemplaza al elegido', () => {
+    const borrador: Borrador = { areas: ['salud_fisica'], objetivos: ['mover_mas'] };
+    expect(alternarObjetivo(borrador, 'dormir_mejor', 1)).toEqual(['dormir_mejor']);
+    expect(maxObjetivos(1)).toBe(1);
+    expect(maxObjetivos(0)).toBe(1);
+    expect(maxObjetivos(5)).toBe(2);
+    expect(maxObjetivos(null)).toBe(2);
   });
 });
 

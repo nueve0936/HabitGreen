@@ -66,8 +66,11 @@ export function quitarHabito(b: BorradorPlan, objetivo: Objetivo): BorradorPlan 
 export const MAX_HABITOS_PLAN_INICIAL = 3;
 export const SUGERENCIAS_POR_PAGINA = 4;
 
-export function puedeAgregar(b: BorradorPlan): boolean {
-  return b.habitos.length < MAX_HABITOS_PLAN_INICIAL;
+/** Con `lugares` (los libres en el cupo de hábitos; null = sin límite) el plan nuevo trae menos. */
+export function puedeAgregar(b: BorradorPlan, lugares: number | null = null): boolean {
+  const tope =
+    lugares === null ? MAX_HABITOS_PLAN_INICIAL : Math.min(MAX_HABITOS_PLAN_INICIAL, lugares);
+  return b.habitos.length < tope;
 }
 
 /** Sugerencias de objetivos que todavía no están en el plan. */
@@ -102,8 +105,12 @@ function conPresupuesto(b: BorradorPlan): BorradorPlan {
     : { ...b, ajustes: { ...b.ajustes, presupuesto_min: nuevoPresupuesto } };
 }
 
-export function agregarHabito(b: BorradorPlan, habito: HabitoPlan): BorradorPlan {
-  if (!puedeAgregar(b) || b.habitos.some((h) => h.objetivo === habito.objetivo)) return b;
+export function agregarHabito(
+  b: BorradorPlan,
+  habito: HabitoPlan,
+  lugares: number | null = null,
+): BorradorPlan {
+  if (!puedeAgregar(b, lugares) || b.habitos.some((h) => h.objetivo === habito.objetivo)) return b;
   return conPresupuesto({ ...b, habitos: [...b.habitos, habito] });
 }
 

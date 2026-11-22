@@ -198,6 +198,8 @@ export const es = {
         objetivos: {
           titulo: '¿Qué te gustaría lograr primero?',
           ayuda: 'Elige hasta 2.',
+          // Plan nuevo con un solo lugar libre en el cupo de hábitos.
+          ayudaUno: 'Elige una: es el lugar que te queda libre.',
         },
         historial: {
           titulo: 'Cuando has intentado crear un hábito, ¿qué suele pasar?',
@@ -501,35 +503,29 @@ export const es = {
       seguir: 'Seguir',
       cancelar: 'Cancelar',
     },
-    // Límites (varios planes, fase 5): propios, hábitos de un plan y planes que se ganan.
+    // Cupo total de hábitos (plan y propios juntos): 3 + 1 por subida; sin planes no hay límite.
     limiteHabitos: {
-      // «+» con los hábitos propios en su límite (3 + 1 por subida; sin planes no hay límite).
+      // «+» con el cupo lleno.
       crear: {
-        titulo: 'Puedes tener hasta {n} hábitos propios.',
+        titulo: 'Puedes tener hasta {n} hábitos.',
         mensaje:
-          'Para sumar otro, pausa o elimina alguno. Cada vez que un hábito de tus planes sube de nivel, puedes tener uno más.',
+          'Para sumar otro, pausa o elimina alguno. Ganas un lugar más cada vez que un hábito de tus planes sube de nivel.',
       },
-      // Reanudar un hábito propio en pausa con el límite ya alcanzado.
+      // Reanudar un hábito en pausa con el cupo lleno.
       reanudar: {
-        titulo: 'Puedes tener hasta {n} hábitos propios activos.',
-        mensaje: 'Para reanudar este, pausa o elimina otro de tus hábitos propios.',
+        titulo: 'Puedes tener hasta {n} hábitos activos.',
+        mensaje: 'Para reanudar este, pausa o elimina otro.',
       },
       // Reanudar un hábito del plan con el plan lleno.
       reanudarPlan: {
         titulo: 'Este plan puede tener hasta {n} hábitos activos.',
         mensaje: 'Para reanudar este, pausa otro hábito del plan.',
       },
-      // «Crear plan» sin un plan disponible (se gana uno por subida, hasta uno por área).
+      // «Crear plan» sin un lugar libre en el cupo (también el primero).
       plan: {
-        tituloUno: 'Por ahora puedes tener 1 plan.',
-        titulo: 'Por ahora puedes tener {n} planes.',
+        titulo: 'No tienes lugar para otro plan.',
         mensaje:
-          'Ganas otro cada vez que un hábito de tus planes sube de nivel. ¡Vas por buen camino!',
-      },
-      // «Sacar del plan» con los hábitos propios en su límite.
-      sacar: {
-        titulo: 'Tus hábitos propios están completos.',
-        mensaje: 'Para sacar este del plan, pausa o elimina uno de tus hábitos propios.',
+          'Puedes tener hasta {n} hábitos. Pausa alguno o espera a que uno suba de nivel para empezar otro plan.',
       },
       entendido: 'Entendido',
     },

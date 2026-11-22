@@ -9,7 +9,7 @@ Cambios de la v5:
 - **Geofencing básico vuelve** como última entrega y primer recorte. Lottie, Sentry y CI quedan fuera de la demo (2.5).
 - Cronograma por **entregas verticales** (2.2).
 - `generate-plan` devuelve un **borrador**: la app guarda el plan al confirmar. Sin conexión no se puede crear el plan (5.8).
-- Progresión definida: ventana de 14 días, mínimo de ocurrencias, 3 hábitos por plan, planes que se ganan y límite aparte de hábitos propios, con desbloqueo a los 90 días (6.3).
+- Progresión definida: ventana de 14 días, mínimo de ocurrencias, 3 hábitos por plan y un cupo total de hábitos (3 + 1 por subida), con desbloqueo a los 90 días (6.3).
 - Rachas por hábito (8). Hábitos archivados en vez de borrados. Categoría fija. Jardín con las 5 plantas desde el inicio. Un objeto puede estar en varias plantas a la vez, con uno de cada tipo por planta.
 - Correcciones: `uncomplete_habit` con la misma tolerancia que `complete_habit`, campo `notificar` para el estilo `minimo`, zona horaria actualizada desde el dispositivo y sin notificación matutina.
 
@@ -553,14 +553,14 @@ Solo aplica a los hábitos del plan (`objetivo` no nulo). Los hábitos manuales 
 
 Al llegar al nivel 3 con ≥ 85 % se propone un hábito nuevo (por ejemplo, la revisión semanal de gastos después de `saber_gastos`).
 
-**Límites de hábitos y de planes** (varios planes, fase 5; decisiones del usuario del 20 y 22 nov). Las reglas están en `src/features/habits/domain/limite-habitos.ts`. Solo cuentan los hábitos activos: los pausados y los archivados no.
+**Límites de hábitos** (varios planes; decisiones del usuario del 20 y 22 nov: «un solo cupo total» para no agobiar). Las reglas están en `src/features/habits/domain/limite-habitos.ts`. Solo cuentan los hábitos activos: los pausados y los archivados no.
 
 - **Hábitos de un plan:** como máximo **3 activos** por plan (`app_config.progresion.limite_habitos_plan`). El formulario crea 1 o 2; la progresión o «Agregar un hábito al plan» pueden completar 3.
 - **Desbloqueo:** a los 90 días desde `plans.creado_en`, si el cumplimiento de los hábitos de ese plan en los últimos 28 días es ≥ 85 %, se marca `plans.limite_desbloqueado`. Desde entonces ese plan solo lo limita `presupuesto_min`.
-- **Planes que se ganan:** se empieza con 1 plan activo y se gana otro cada vez que un hábito de los planes sube de nivel (`user_settings.subidas_plan`; bajar no resta), hasta 5 (uno por área). «Crear plan» sin un plan disponible muestra un diálogo que explica cómo ganar otro y no abre el formulario.
-- **Hábitos propios:** límite aparte de 3 activos más 1 por subida, contando solo los propios. Sin planes activos, o con alguno desbloqueado, no tienen límite. «+» con el límite alcanzado muestra un diálogo y no abre el asistente.
-- **Reanudar** (menú ⋮) respeta el tope de su plan o el de los propios; con el límite alcanzado lo explica y el hábito sigue en pausa.
-- **Sacar del plan** un hábito activo con los propios en su límite lo explica y no lo saca (sacar el último hábito termina el plan y sí se permite). **Terminar plan** siempre se permite: sus hábitos pasan a propios aunque se pase el límite, y no se puede crear otro propio hasta bajar.
+- **Cupo total:** con al menos un plan activo, el usuario tiene hasta **3 hábitos activos en total** (los de sus planes y los propios juntos), más 1 por cada vez que un hábito de sus planes sube de nivel (`user_settings.subidas_plan`; bajar no resta). Sin planes activos no hay límite. Con cualquier plan desbloqueado el cupo desaparece y solo cuenta `presupuesto_min`.
+- **Crear un plan** necesita un lugar libre en el cupo, también el primero (contando el plan nuevo, aunque hoy no haya planes). El plan nuevo trae solo los hábitos que caben: P2 permite tantos objetivos como lugares libres (máximo 2) y la revisión deja llegar a `min(3, lugares)`. «+» con el cupo lleno muestra un diálogo y no abre el asistente.
+- **Reanudar** (menú ⋮) respeta el tope de su plan (si es de un plan) y el cupo total; con el límite alcanzado lo explica y el hábito sigue en pausa. La progresión y «Agregar un hábito al plan» también necesitan lugar en el plan y en el cupo.
+- **Sacar del plan** y **Terminar plan** siempre se permiten: no cambian el total. Si al terminar el último plan ya no quedan planes, tampoco queda límite.
 - Quien ya tenía más hábitos que el límite nuevo no pierde nada: solo se bloquea agregar y reanudar.
 - Los textos de los diálogos están en `textos.md` («Asistente de hábito: salir y límites»).
 
@@ -628,7 +628,7 @@ Quien elige «Prefiero crear mis hábitos» no responde el formulario. Se crea `
 
 ### 6.6 Mezcla de modos
 
-- Un usuario guiado puede crear hábitos manuales con las mismas reglas que en 6.5: sin progresión, sin ocupar lugar en sus planes (tienen su propio límite, 6.3) y con el aviso de presupuesto.
+- Un usuario guiado puede crear hábitos manuales con las mismas reglas que en 6.5: sin progresión, contando en el cupo total de hábitos junto con los de sus planes (6.3) y con el aviso de presupuesto.
 - `profiles.modo` indica cómo empezó el usuario; no restringe qué tipo de hábitos puede tener. Perfil ya no lo muestra.
 - **Mis planes** (Perfil): un plan por área, cada uno con sus hábitos («(en pausa)» si lo están) y «Terminar plan». «Crear plan» (necesita conexión) abre el formulario en la ruta `/plan-nuevo`, dentro de la app: si el usuario ya hizo el formulario, solo pregunta 3 pasos (P1 «¿Para qué área es este plan?», P2 y P3) y reusa P4 a P7; si no, los 7. Las áreas que ya tienen plan salen deshabilitadas con «Ya tienes un plan de esta área». El plan nuevo se acomoda en el tiempo que dejan libre los hábitos que ya tiene (el día más cargado): si no alcanza, arranca en el nivel 1; si aun así pasa del tiempo diario, la revisión avisa «Este plan pasa tu tiempo diario por {n} min…» y al guardar el tiempo diario sube a lo necesario. Un plan siguiente no toca los ajustes ni las respuestas globales. Al guardar se vuelve a Hoy.
 - **Detalle del plan** (`/detalle-plan/[id]`, al tocar una tarjeta de Mis planes; decisión del usuario, acomodo «secciones apiladas»): encabezado con el área, «Desde el {día} de {mes}» y «Tu meta: {objetivos}»; «Resumen» en una tarjeta (cómo vas: hechos de las últimas 2 semanas con la barra de Hoy o, con menos de 4 días programados, «Todavía es pronto para medir…»; próxima revisión: días que faltan y «Cada 7 días vemos cómo te fue y te proponemos ajustes.») y, debajo, la propuesta pendiente de ese plan con sus mismos botones; si un hábito va por debajo del 50 % en su ventana, su fila sugiere «¿Lo hacemos más ligero?»; «Hábitos del plan» (filas tocables con días, hora, duración o «Sin duración fija», racha y «En pausa»; tocar abre la edición; el ⋮ suma «Hacerlo más ligero» y «Sacar del plan» a Editar, Pausar o Reanudar y Eliminar); «Agregar un hábito al plan» (si hay lugar) y, abajo del todo, «Terminar plan» como botón principal verde con confirmación (critique de Impeccable y decisión del usuario).
@@ -876,7 +876,7 @@ Se usa la lista de la sección 10 de [`docs/Guía de UX UI.md`](Guía%20de%20UX%
 - Fase 3 justo en el nivel 30. `semanas_y_suelta` empieza en nivel 1. Horas por defecto 08:00, 13:00, 17:00, 20:30 y resumen a las 21:00. Los hábitos simultáneos descuentan del presupuesto.
 - Proveedor de IA: Gemini con nivel gratuito detrás de `AiProvider` (3.2, 5.8).
 - Cuenta obligatoria con confirmación de correo (10).
-- Progresión: ventana de 14 días (28 para hábitos de 1–2 días por semana), mínimo 4 ocurrencias, 3 hábitos por plan, planes que se ganan y límite aparte de hábitos propios, con desbloqueo a los 90 días (6.3).
+- Progresión: ventana de 14 días (28 para hábitos de 1–2 días por semana), mínimo 4 ocurrencias, 3 hábitos por plan y un cupo total de hábitos (3 + 1 por subida), con desbloqueo a los 90 días (6.3).
 - Rachas por hábito (8). Check-in solo hoy (3.4). Sin notificación matutina (7.1).
 - Onboarding sin conexión: se bloquea con mensaje (5.8). Mezcla de modos (6.6). Jardín con las 5 plantas (9.4). Accesorios en una planta a la vez (6.4).
 - Textos: Claude los redacta en `docs/textos.md` para revisión.

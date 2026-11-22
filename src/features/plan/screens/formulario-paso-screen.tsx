@@ -14,6 +14,7 @@ import {
   totalPasos,
   type Borrador,
   type Paso,
+  maxObjetivos,
 } from '@/features/onboarding/domain/form-rules';
 import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import { useRutasPlan } from '@/features/plan/use-rutas-plan';
@@ -39,6 +40,7 @@ export default function FormularioPasoScreen() {
   const t = es.onboarding.formulario;
   const rutas = useRutasPlan();
   const adicional = useOnboardingStore((s) => s.adicional);
+  const lugares = useOnboardingStore((s) => s.lugares);
   const total = totalPasos(adicional);
   const paso = Math.min(leerPaso(useLocalSearchParams<{ paso: string }>().paso), total) as Paso;
   const borrador = useOnboardingStore((s) => s.borrador);
@@ -81,7 +83,9 @@ export default function FormularioPasoScreen() {
             {pregunta.titulo}
           </AppText>
           <AppText variant="small" tone="ink-soft" className="text-center">
-            {pregunta.ayuda}
+            {paso === 2 && maxObjetivos(lugares) === 1
+              ? t.preguntas.objetivos.ayudaUno
+              : pregunta.ayuda}
           </AppText>
         </View>
 

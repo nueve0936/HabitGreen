@@ -3,6 +3,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
+import { useOnboardingStore } from '@/features/onboarding/onboarding-store';
 import type { Objetivo } from '@/schemas/onboarding';
 import type { BorradorPlan, HabitoPlan } from '@/schemas/plan';
 
@@ -71,7 +72,11 @@ export const usePlanReviewStore = create<PlanReviewState>()(
             s.borrador === null || s.ids === null
               ? s
               : {
-                  borrador: revision.agregarHabito(s.borrador, habito),
+                  borrador: revision.agregarHabito(
+                    s.borrador,
+                    habito,
+                    useOnboardingStore.getState().lugares,
+                  ),
                   ids: {
                     ...s.ids,
                     habitos: {

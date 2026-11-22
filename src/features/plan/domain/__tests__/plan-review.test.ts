@@ -112,6 +112,13 @@ describe('agregar y editar hábitos en la revisión', () => {
     expect(agregarHabito(BORRADOR, BORRADOR.habitos[0]!)).toBe(BORRADOR);
   });
 
+  it('con menos lugares libres en el cupo, el plan nuevo trae menos hábitos', () => {
+    const [dormir] = BORRADOR.sugerencias;
+    expect(puedeAgregar(BORRADOR, 2)).toBe(false);
+    expect(agregarHabito(BORRADOR, dormir!, 2)).toBe(BORRADOR);
+    expect(puedeAgregar(BORRADOR, 3)).toBe(true);
+  });
+
   it('si se pasa del tiempo diario, este sube a la suma del día más cargado', () => {
     const justo = { ...BORRADOR, ajustes: { ...BORRADOR.ajustes, presupuesto_min: 20 } };
     // Lunes: 15 + 5 + 2 = 22 min.

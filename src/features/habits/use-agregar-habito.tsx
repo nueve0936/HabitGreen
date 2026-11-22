@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { cupoPropios } from '@/db/limits-repository';
+import { cupoHabitos } from '@/db/limits-repository';
 import { useSession } from '@/features/auth/session-context';
 import type { Area } from '@/schemas/onboarding';
 import { navegar } from '@/lib/navegar';
@@ -8,8 +8,8 @@ import { navegar } from '@/lib/navegar';
 import { type AvisoLimite, LimiteHabitosDialog } from './components/limite-habitos-dialog';
 
 // «+» de Hábitos y «Agregar hábito» de los detalles de una planta. Antes de abrir el asistente se
-// revisa el límite de hábitos propios (fase 5: 3 + 1 por subida, sin límite si no hay planes); si ya
-// llegó, se explica con un diálogo. Si la revisión falla, se abre el asistente igual: el límite no
+// revisa el cupo total de hábitos (plan y propios juntos; sin planes no hay límite); si ya llegó, se
+// explica con un diálogo. Si la revisión falla, se abre el asistente igual: el límite no
 // debe bloquear por un error.
 
 export function useAgregarHabito() {
@@ -19,7 +19,7 @@ export function useAgregarHabito() {
   const abrir = async (categoria?: Area) => {
     const userId = session?.user.id;
     if (userId) {
-      const cupo = await cupoPropios(userId).catch(() => null);
+      const cupo = await cupoHabitos(userId).catch(() => null);
       if (cupo?.alcanzado && cupo.limite !== null) {
         setAviso({ motivo: 'crear', limite: cupo.limite });
         return;

@@ -46,8 +46,20 @@ export function alternarArea(
   return { areas, objetivos };
 }
 
-export function alternarObjetivo(borrador: Borrador, objetivo: Objetivo): Objetivo[] {
-  return alternarSeleccion(borrador.objetivos, objetivo, MAX_OBJETIVOS);
+/**
+ * Objetivos de la pregunta 2: hasta 2, o menos si al plan nuevo le quedan menos lugares en el cupo
+ * de hábitos (`lugares`; null = sin límite).
+ */
+export function maxObjetivos(lugares: number | null): number {
+  return lugares === null ? MAX_OBJETIVOS : Math.max(1, Math.min(MAX_OBJETIVOS, lugares));
+}
+
+export function alternarObjetivo(
+  borrador: Borrador,
+  objetivo: Objetivo,
+  lugares: number | null = null,
+): Objetivo[] {
+  return alternarSeleccion(borrador.objetivos, objetivo, maxObjetivos(lugares));
 }
 
 /** Objetivos que se muestran en la pregunta 2, agrupados por las áreas elegidas. */

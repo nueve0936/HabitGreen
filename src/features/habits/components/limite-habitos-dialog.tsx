@@ -5,11 +5,11 @@ import { AppText } from '@/components/ui/app-text';
 import { Dialog } from '@/components/ui/dialog';
 import { es, formatear } from '@/i18n/es';
 
-// Aviso de límite alcanzado (varios planes, fase 5): al tocar «+», al reanudar un hábito en pausa,
-// al crear un plan o al sacar un hábito del plan. Solo explica: no se crea, reanuda ni saca nada.
+// Aviso de límite alcanzado (cupo total de hábitos): al tocar «+», al reanudar un hábito en pausa o
+// al crear un plan sin lugar libre. Solo explica: no se crea ni se reanuda nada.
 // Tocar fuera, «atrás» o «Entendido» lo cierran.
 
-export type MotivoLimite = 'crear' | 'reanudar' | 'reanudarPlan' | 'plan' | 'sacar';
+export type MotivoLimite = 'crear' | 'reanudar' | 'reanudarPlan' | 'plan';
 
 export type AvisoLimite = { motivo: MotivoLimite; limite: number };
 
@@ -22,7 +22,6 @@ export type LimiteHabitosDialogProps = {
 function titulo({ motivo, limite }: AvisoLimite): string {
   const t = es.habitForm.limiteHabitos;
   const n = { n: String(limite) };
-  if (motivo === 'plan') return limite === 1 ? t.plan.tituloUno : formatear(t.plan.titulo, n);
   return formatear(t[motivo].titulo, n);
 }
 
@@ -35,7 +34,7 @@ export function LimiteHabitosDialog({ aviso, onCerrar }: LimiteHabitosDialogProp
   return (
     <Dialog visible={aviso !== null} titulo={visto ? titulo(visto) : ''} onCerrar={onCerrar}>
       <AppText tone="ink-soft" className="text-center">
-        {visto ? t[visto.motivo].mensaje : ''}
+        {visto ? formatear(t[visto.motivo].mensaje, { n: String(visto.limite) }) : ''}
       </AppText>
       <Pressable
         accessibilityRole="button"

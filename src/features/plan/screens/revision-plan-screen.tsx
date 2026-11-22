@@ -52,6 +52,7 @@ export default function RevisionPlanScreen() {
   const reiniciarFormulario = useOnboardingStore((s) => s.reiniciar);
   const marcarRetomar = useOnboardingStore((s) => s.marcarRetomar);
   const adicional = useOnboardingStore((s) => s.adicional);
+  const lugares = useOnboardingStore((s) => s.lugares);
   const rutas = useRutasPlan();
   const { enApp } = rutas;
   useFocusEffect(
@@ -127,7 +128,8 @@ export default function RevisionPlanScreen() {
     }
   };
 
-  const conSugerencias = puedeAgregar(borrador) && sugerenciasDisponibles(borrador).length > 0;
+  const conSugerencias =
+    puedeAgregar(borrador, lugares) && sugerenciasDisponibles(borrador).length > 0;
 
   return (
     <Screen scroll contentClassName="gap-6 pt-2">

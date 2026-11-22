@@ -118,6 +118,7 @@ function entrada(cambios: Partial<EntradaProgresion> = {}): EntradaProgresion {
     configPlan: CONFIG_PLAN,
     presupuestoMin: 60,
     limiteDesbloqueado: false,
+    hayLugarTotal: true,
     config: CONFIG,
     ...cambios,
   };
@@ -330,6 +331,13 @@ describe('hábito nuevo y presupuesto', () => {
       }),
     );
     expect(tipos(t)).toEqual(['nuevo']);
+  });
+
+  it('sin lugar en el cupo total no propone otro', () => {
+    const a = habito('a', { nivel: 3, duracion_min: 5 });
+    const datos = { habitos: [a], horarios: [horario('a')], ocurrencias: ocurrencias('a', 14, 14) };
+    expect(tipos(decidir(entrada(datos)))).toEqual(['nuevo']);
+    expect(decidir(entrada({ ...datos, hayLugarTotal: false }))).toEqual([]);
   });
 
   it('los hábitos propios no ocupan lugar en el plan', () => {

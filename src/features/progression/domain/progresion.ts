@@ -105,6 +105,8 @@ export type EntradaProgresion = {
   configPlan: ConfigPlan;
   presupuestoMin: number;
   limiteDesbloqueado: boolean;
+  /** Queda lugar en el cupo total de hábitos (plan y propios juntos; ver `limite-habitos`). */
+  hayLugarTotal: boolean;
   /**
    * Plan que se revisa (varios planes por usuario, uno por área): solo se evalúan sus hábitos y el
    * hábito nuevo se busca solo en su área. Sin él se revisan todos los hábitos del plan juntos.
@@ -324,11 +326,13 @@ export function decidir(entrada: EntradaProgresion): Tarjeta[] {
   }
 
   if (quiereNuevo) {
-    // Solo el tope de este plan (fase 5): los propios tienen su límite aparte.
-    const hayLugar = cabeEnLimite(
-      delPlan.length,
-      limiteDelPlan({ desbloqueado: entrada.limiteDesbloqueado }, config.limite_habitos_plan),
-    );
+    // Tiene que caber en este plan y en el cupo total (plan y propios juntos).
+    const hayLugar =
+      entrada.hayLugarTotal &&
+      cabeEnLimite(
+        delPlan.length,
+        limiteDelPlan({ desbloqueado: entrada.limiteDesbloqueado }, config.limite_habitos_plan),
+      );
     if (hayLugar) {
       // No se repite un objetivo que ya está en el plan (aunque esté en pausa).
       const ocupados = new Set(

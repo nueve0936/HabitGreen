@@ -24,13 +24,23 @@ type OnboardingState = {
   adicional: boolean;
   /** Áreas que ya tienen un plan activo: no se pueden elegir en P1. */
   areasOcupadas: Area[];
+  /**
+   * Lugares libres en el cupo de hábitos para el plan nuevo: limitan los objetivos de P2 y los
+   * hábitos de la revisión. Null = sin límite (el primer formulario).
+   */
+  lugares: number | null;
   marcarRetomar: (retomar: Retomar | null) => void;
   prepararPara: (userId: string) => void;
   /**
    * Crear un plan desde la app (Perfil → Mis planes). Con `globales` es un plan siguiente de 3
    * pasos; sin ellas (nunca hizo el formulario) son los 7 pasos.
    */
-  prepararNuevoPlan: (userId: string, globales: Partial<Borrador> | null, ocupadas: Area[]) => void;
+  prepararNuevoPlan: (
+    userId: string,
+    globales: Partial<Borrador> | null,
+    ocupadas: Area[],
+    lugares: number | null,
+  ) => void;
   /** Con 2 ya elegidos, el nuevo reemplaza al primero que se eligió. */
   alternarArea: (area: Area) => void;
   alternarObjetivo: (objetivo: Objetivo) => void;
@@ -54,21 +64,23 @@ export const useOnboardingStore = create<OnboardingState>()(
       retomar: null,
       adicional: false,
       areasOcupadas: [],
+      lugares: null,
 
       marcarRetomar: (retomar) => set({ retomar }),
 
       prepararPara: (userId) => {
         if (get().userId !== userId) set({ userId, borrador: BORRADOR_VACIO, retomar: null });
-        set({ adicional: false, areasOcupadas: [] });
+        set({ adicional: false, areasOcupadas: [], lugares: null });
       },
 
-      prepararNuevoPlan: (userId, globales, ocupadas) =>
+      prepararNuevoPlan: (userId, globales, ocupadas, lugares) =>
         set({
           userId,
           borrador: { ...BORRADOR_VACIO, ...(globales ?? {}) },
           retomar: null,
           adicional: globales !== null,
           areasOcupadas: ocupadas,
+          lugares,
         }),
 
       alternarArea: (area) => {
@@ -77,14 +89,22 @@ export const useOnboardingStore = create<OnboardingState>()(
       },
 
       alternarObjetivo: (objetivo) => {
-        const { borrador } = get();
-        set({ borrador: { ...borrador, objetivos: alternarObjetivo(borrador, objetivo) } });
+        const { borrador, lugares } = get();
+        set({
+          borrador: { ...borrador, objetivos: alternarObjetivo(borrador, objetivo, lugares) },
+        });
       },
 
       responder: (pregunta, valor) => set({ borrador: { ...get().borrador, [pregunta]: valor } }),
 
       reiniciar: () =>
-        set({ borrador: BORRADOR_VACIO, retomar: null, adicional: false, areasOcupadas: [] }),
+        set({
+          borrador: BORRADOR_VACIO,
+          retomar: null,
+          adicional: false,
+          areasOcupadas: [],
+          lugares: null,
+        }),
     }),
     {
       name: 'habitgreen-onboarding',
@@ -96,6 +116,7 @@ export const useOnboardingStore = create<OnboardingState>()(
         retomar: state.retomar,
         adicional: state.adicional,
         areasOcupadas: state.areasOcupadas,
+        lugares: state.lugares,
       }),
     },
   ),

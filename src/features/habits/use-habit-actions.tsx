@@ -54,19 +54,15 @@ export function useHabitActions(
     }
   };
 
-  // Pausar libera un lugar y no se revisa. Reanudar respeta el límite (fase 5): el tope de su plan
-  // si es de un plan, o el de los propios (el mismo de «+»). Si ya se llegó, se explica y el hábito
-  // sigue en pausa. Si la revisión falla, se reanuda.
-  const cambiarActivoConLimite = async (habito: {
-    id: string;
-    activo: boolean;
-    plan_id: string | null;
-  }) => {
+  // Pausar libera un lugar y no se revisa. Reanudar respeta el tope de su plan (si es de un plan) y
+  // el cupo total (el mismo de «+»). Si ya se llegó, se explica y el hábito sigue en pausa. Si la
+  // revisión falla, se reanuda.
+  const cambiarActivoConLimite = async (habito: { id: string; activo: boolean }) => {
     if (!habito.activo) {
       const cupo = await cupoReanudar(userId, habito.id).catch(() => null);
       if (cupo?.alcanzado && cupo.limite !== null) {
         setAvisoLimite({
-          motivo: habito.plan_id ? 'reanudarPlan' : 'reanudar',
+          motivo: cupo.plan ? 'reanudarPlan' : 'reanudar',
           limite: cupo.limite,
         });
         return;

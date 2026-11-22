@@ -9,7 +9,7 @@ import {
   type Registro,
 } from '@/features/habits/domain/habitos-del-dia';
 import { nuevaVersionHorario } from '@/features/habits/domain/horario';
-import { cabe, limiteDelPlan } from '@/features/habits/domain/limite-habitos';
+import { cabe, limiteDelPlan, lugaresLibres } from '@/features/habits/domain/limite-habitos';
 import { avanceDelPlan, diasParaRevision, type Avance } from '@/features/plan/domain/detalle-plan';
 import type { FilaCatalogo } from '@/features/plan/domain/plan-engine';
 import { respuestasDelPlan } from '@/features/plan/domain/respuestas-plan';
@@ -45,6 +45,7 @@ import { actualizarFila, getDb, guardarFilas, leerFilas } from './database';
 import { avisarCambioLocal } from './db-version-store';
 import { categoriasPorId, guardarVersionHorario, idCategoria } from './habits-repository';
 import { descartarMovidasDelPatron } from './occurrences-repository';
+import { leerEstadoLimites } from './limits-repository';
 import { leerAjustesEn, leerConfigProgresion, leerPresupuestos } from './settings-repository';
 
 // Progresión (SDD 6.3). Cada 7 días, al abrir la app, se revisan los hábitos del plan: las
@@ -139,6 +140,7 @@ async function leerComunes(db: SQLiteDatabase, userId: string): Promise<Comunes 
     respuestas,
     configPlan: { presupuestos, horas: ajustes.horas },
     presupuestoMin: ajustes.presupuestoMin,
+    hayLugarTotal: lugaresLibres(await leerEstadoLimites(db, userId)) !== 0,
     config,
   };
 }
@@ -378,12 +380,14 @@ async function crearHabitoDelPlan(
     (x) => esDelPlan(x) && x.activo && x.archivado_en === null,
   );
   const repetido = activos.some((x) => x.objetivo === h.objetivo);
-  // Solo el tope de este plan (fase 5): los propios tienen su límite aparte.
+  // Tiene que caber en este plan y en el cupo total: el usuario pudo crear uno propio mientras tanto.
   const delPlan = activos.filter((x) => x.plan_id === plan.id).length;
-  const lleno = !cabe(
-    delPlan,
-    limiteDelPlan({ desbloqueado: plan.limiteDesbloqueado }, entrada.config.limite_habitos_plan),
-  );
+  const lleno =
+    !entrada.hayLugarTotal ||
+    !cabe(
+      delPlan,
+      limiteDelPlan({ desbloqueado: plan.limiteDesbloqueado }, entrada.config.limite_habitos_plan),
+    );
   if (repetido || lleno) return null;
 
   const ahora = new Date().toISOString();
@@ -533,10 +537,15 @@ export async function leerDetallePlan(userId: string, planId: string): Promise<D
       entrada.config.dias_entre_evaluaciones,
     ),
     habitos,
-    puedeAgregar: cabe(
-      activos,
-      limiteDelPlan({ desbloqueado: plan.limiteDesbloqueado }, entrada.config.limite_habitos_plan),
-    ),
+    puedeAgregar:
+      entrada.hayLugarTotal &&
+      cabe(
+        activos,
+        limiteDelPlan(
+          { desbloqueado: plan.limiteDesbloqueado },
+          entrada.config.limite_habitos_plan,
+        ),
+      ),
   };
 }
 

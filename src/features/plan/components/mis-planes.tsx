@@ -44,8 +44,9 @@ export function MisPlanes({ userId }: MisPlanesProps) {
   );
   const todasOcupadas = lista.length >= AREAS.length;
 
-  // Los planes se ganan (fase 5): 1 más 1 por subida. Sin un plan disponible se explica cómo ganar
-  // otro y no se abre el formulario. Si la revisión falla, se abre igual.
+  // Para crear un plan hace falta un lugar libre en el cupo de hábitos (también el primero); el plan
+  // nuevo trae solo los hábitos que caben. Sin lugar se explica y no se abre el formulario. Si la
+  // revisión falla, se abre igual, sin límite.
   const crear = async () => {
     setAbriendo(true);
     try {
@@ -59,6 +60,7 @@ export function MisPlanes({ userId }: MisPlanesProps) {
         userId,
         globales,
         lista.map((p) => p.area),
+        cupo?.libres ?? null,
       );
       usePlanReviewStore.getState().limpiar();
       navegar.push({ pathname: '/plan-nuevo/[paso]', params: { paso: '1' } });

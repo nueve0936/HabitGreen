@@ -106,6 +106,7 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Nombre largo | Usa {n} caracteres o menos. (30; al editar, el largo actual si era mayor) |
 | Descripción larga | Usa {n} caracteres o menos. (100) |
 | Contador (TalkBack) | {n} de {max} caracteres |
+| P2 de un plan nuevo con un solo lugar libre | Elige una: es el lugar que te queda libre. |
 | Correo largo | El correo puede tener hasta {n} caracteres. (50) |
 
 ## Estados de inactividad (pulidos antes del APK)
@@ -114,11 +115,10 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | --- | --- |
 | Casilla de una lista de ayer | Cambió el día. Ya actualizamos tu lista. |
 | Borrador al crear un hábito | Tienes un hábito sin terminar. ¿Seguimos? · Botones: «Cancelar», «Seguir» |
-| Límite de hábitos propios al tocar «+» (fase 5) | Puedes tener hasta {n} hábitos propios. · Para sumar otro, pausa o elimina alguno. Cada vez que un hábito de tus planes sube de nivel, puedes tener uno más. · Botón: «Entendido» |
-| Límite al reanudar un hábito propio en pausa | Puedes tener hasta {n} hábitos propios activos. · Para reanudar este, pausa o elimina otro de tus hábitos propios. · Botón: «Entendido» |
+| Cupo de hábitos lleno al tocar «+» | Puedes tener hasta {n} hábitos. · Para sumar otro, pausa o elimina alguno. Ganas un lugar más cada vez que un hábito de tus planes sube de nivel. · Botón: «Entendido» |
+| Cupo lleno al reanudar un hábito en pausa | Puedes tener hasta {n} hábitos activos. · Para reanudar este, pausa o elimina otro. · Botón: «Entendido» |
 | Límite al reanudar un hábito del plan | Este plan puede tener hasta {n} hábitos activos. · Para reanudar este, pausa otro hábito del plan. · Botón: «Entendido» |
-| «Crear plan» sin un plan disponible | Por ahora puedes tener 1 plan. (o «Por ahora puedes tener {n} planes.») · Ganas otro cada vez que un hábito de tus planes sube de nivel. ¡Vas por buen camino! · Botón: «Entendido» |
-| «Sacar del plan» con los propios completos | Tus hábitos propios están completos. · Para sacar este del plan, pausa o elimina uno de tus hábitos propios. · Botón: «Entendido» |
+| «Crear plan» sin lugar libre | No tienes lugar para otro plan. · Puedes tener hasta {n} hábitos. Pausa alguno o espera a que uno suba de nivel para empezar otro plan. · Botón: «Entendido» |
 | Sesión cerrada sola (bienvenida e inicio de sesión; se ve una vez y se quita a los 10 s) | Tu sesión caducó. Vuelve a iniciar sesión. |
 
 ## Varios planes (Mis planes)
