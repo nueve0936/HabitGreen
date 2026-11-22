@@ -169,6 +169,8 @@ Si al terminar la entrega 9 no quedan al menos 2 días, esta entrega se marca `r
 
 ## Pendientes para el refinamiento final (después de todas las entregas)
 
+- Registro de decisiones, propuestas y cambios del trabajo con IA: [Bitacora_IA.md](Bitacora_IA.md). Se actualiza al cerrar cada bloque.
+
 - Revertir los datos de prueba del historial de la Entrega 7 (206 registros desde el 1 de agosto y 2 hábitos de prueba). Por decisión del usuario se quedan para seguir probando. Script fuera del repositorio: `AppMovil/datos-prueba-habitgreen/datos-prueba-e7.cjs <proyecto> revertir`.
 - Zonas táctiles de 42 dp: en NativeWind, `h-12` / `w-12` miden 42 dp (1 rem = 14 dp en nativo). Afecta a los botones, el botón «atrás», la casilla y el ⋮ de las tarjetas, diálogos y campos (medido en la revisión de la Entrega 7). Hay que decidir entre subir la base de NativeWind (todo crece un 14 %) o fijar 48 dp en cada pieza.
 - Leyenda de Progreso: considerar agregar «Pendiente» (contorno punteado verde de hoy).

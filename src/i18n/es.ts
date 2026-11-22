@@ -773,7 +773,7 @@ export const es = {
       vacio: 'Todavía no tienes un plan. Crea uno y te proponemos pasos pequeños para un área.',
       planDe: 'Plan de {area}',
       verPlan: 'Ver el plan de {area}',
-      sinHabitos: 'Este plan ya no tiene hábitos activos.',
+      sinHabitos: 'Este plan se quedó sin hábitos. Ábrelo para agregar uno.',
       enPausa: '{titulo} (en pausa)',
       crear: 'Crear plan',
       necesitaConexion: 'Crear un plan necesita conexión.',

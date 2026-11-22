@@ -129,7 +129,7 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Perfil, sección | Mis planes |
 | Sin planes | Todavía no tienes un plan. Crea uno y te proponemos pasos pequeños para un área. |
 | Tarjeta de un plan | Plan de {área} · {hábitos separados por «·»; «{título} (en pausa)»} · «Terminar plan» |
-| Plan sin hábitos activos | Este plan ya no tiene hábitos activos. |
+| Plan sin hábitos (Mis planes) | Este plan se quedó sin hábitos. Ábrelo para agregar uno. |
 | Botón y notas | Crear plan · Crear un plan necesita conexión. · Ya tienes un plan para cada área. |
 | Confirmar terminar | ¿Terminar tu plan de {área}? Sus hábitos se quedan como tuyos, con su historial. · Botones: «Cancelar», «Terminar» |
 | Detalle del plan, encabezado | Plan de {área} · Desde el {día} de {mes} · Tu meta: {meta} / Tus metas: {a} y {b} |

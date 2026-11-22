@@ -37,7 +37,8 @@ export function MenuRow({
       accessibilityRole="button"
       accessibilityLabel={[titulo, valor, resumen].filter(Boolean).join(', ')}
       onPress={unaVez}
-      className={`min-h-16 flex-row items-center gap-3 px-4 py-3 active:bg-accent-claro ${
+      // Misma altura mínima para todas las filas, tengan resumen o no (critique de Impeccable).
+      className={`min-h-[72px] flex-row items-center gap-3 px-4 py-3 active:bg-accent-claro ${
         ultima ? '' : 'border-b border-divisor'
       }`}
     >

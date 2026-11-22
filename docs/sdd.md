@@ -1,4 +1,4 @@
-# Habit Green: Planeación y SDD del MVP (v5)undefined · Estirarme → `estirarme` · Salir al aire libre → `aire_libre` · Hacer pausas activas → `pausas_activas` |undefined · Leer más → `leer_mas` · Ordenar mi espacio → `ordenar_espacio` · Practicar una habilidad → `practicar_habilidad` · Concentrarme mejor → `concentrarme` |undefined · Agradecer más → `agradecer_mas` · Escribir lo que siento → `escribir_diario` · Meditar → `meditar` · Hacer algo creativo → `crear_algo` |undefined · Pagar a tiempo → `pagar_a_tiempo` · Aprender de finanzas → `aprender_finanzas` · Planear mis compras → `planear_compras` · Ordenar mis cuentas → `ordenar_cuentas` |undefined · Escuchar mejor → `escuchar_mejor` · Ayudar a alguien → `ayudar_a_alguien` · Agradecer a otros → `agradecer_a_otros` · Retomar una amistad → `retomar_amistad` |
+# Habit Green: Planeación y SDD del MVP (v5)
 
 Documento de planeación y diseño de software para la app móvil Habit Green (React Native + Expo). Alcance: MVP en 3 semanas, con base para escalar a tiendas.
 
@@ -255,11 +255,11 @@ La pantalla muestra las opciones agrupadas por área con encabezados H3.
 
 | Área | Opciones (texto → clave) |
 | --- | --- |
-| `salud_fisica` | Moverme más → `mover_mas` · Dormir mejor → `dormir_mejor` · Comer mejor → `comer_mejor` · Tomar más agua → `tomar_agua` |
-| `trabajo` | Organizar mejor mi día → `organizar_dia` · Procrastinar menos → `procrastinar_menos` · Aprender algo nuevo → `aprender_algo` |
-| `salud_mental` | Manejar mejor el estrés → `manejar_estres` · Desconectarme de las pantallas → `desconectar_pantallas` · Tomarme tiempo para mí → `tiempo_para_mi` |
-| `finanzas` | Saber en qué gasto → `saber_gastos` · Empezar a ahorrar → `empezar_ahorrar` · Evitar compras impulsivas → `evitar_impulsivas` |
-| `social` | Mantener contacto con las personas que quiero → `mantener_contacto` · Pasar tiempo de calidad con alguien → `tiempo_de_calidad` · Conocer gente nueva → `conocer_gente` |
+| `salud_fisica` | Moverme más → `mover_mas` · Dormir mejor → `dormir_mejor` · Comer mejor → `comer_mejor` · Tomar más agua → `tomar_agua` · Estirarme → `estirarme` · Salir al aire libre → `aire_libre` · Hacer pausas activas → `pausas_activas` |
+| `trabajo` | Organizar mejor mi día → `organizar_dia` · Procrastinar menos → `procrastinar_menos` · Aprender algo nuevo → `aprender_algo` · Leer más → `leer_mas` · Ordenar mi espacio → `ordenar_espacio` · Practicar una habilidad → `practicar_habilidad` · Concentrarme mejor → `concentrarme` |
+| `salud_mental` | Manejar mejor el estrés → `manejar_estres` · Desconectarme de las pantallas → `desconectar_pantallas` · Tomarme tiempo para mí → `tiempo_para_mi` · Agradecer más → `agradecer_mas` · Escribir lo que siento → `escribir_diario` · Meditar → `meditar` · Hacer algo creativo → `crear_algo` |
+| `finanzas` | Saber en qué gasto → `saber_gastos` · Empezar a ahorrar → `empezar_ahorrar` · Evitar compras impulsivas → `evitar_impulsivas` · Pagar a tiempo → `pagar_a_tiempo` · Aprender de finanzas → `aprender_finanzas` · Planear mis compras → `planear_compras` · Ordenar mis cuentas → `ordenar_cuentas` |
+| `social` | Mantener contacto con las personas que quiero → `mantener_contacto` · Pasar tiempo de calidad con alguien → `tiempo_de_calidad` · Conocer gente nueva → `conocer_gente` · Escuchar mejor → `escuchar_mejor` · Ayudar a alguien → `ayudar_a_alguien` · Agradecer a otros → `agradecer_a_otros` · Retomar una amistad → `retomar_amistad` |
 
 `tiempo_de_calidad` reemplaza a `tiempo_sin_celular` para no duplicar `desconectar_pantallas`: se centra en la presencia con otra persona, no en el celular.
 

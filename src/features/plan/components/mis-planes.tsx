@@ -86,8 +86,9 @@ export function MisPlanes({ userId }: MisPlanesProps) {
               >
                 <Icono size={22} color={colors.ink} />
               </View>
-              <AppText variant="h3" className="flex-1">
-                {formatear(t.planDe, { area: areas[plan.area] })}
+              {/* Solo el área: la pantalla ya se llama «Mis planes» (critique de Impeccable). */}
+              <AppText weight="bold" className="flex-1">
+                {areas[plan.area]}
               </AppText>
               <ChevronRight size={22} color={colors.ink} />
             </View>
