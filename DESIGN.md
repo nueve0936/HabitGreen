@@ -294,6 +294,10 @@ Celdas en 3 columnas, con pestañas de tipo fijas abajo. El objeto puesto lleva 
 
 Tarjeta blanca centrada sobre el fondo atenuado, con el título en negritas, una línea de apoyo gris y un solo botón verde «Entendido» de 48 dp. Se usa cuando algo no se puede hacer y basta con explicarlo, como el límite de hábitos. Tocar fuera o «atrás» lo cierran; el fondo atenuado no existe para TalkBack.
 
+### Diálogo de confirmación
+
+Tarjeta blanca con el mensaje en negritas, «Cancelar» con borde y la acción en rojo (peligro) o verde (confirmar), de al menos 48 dp. Lado a lado si los dos textos son cortos; si no caben (suman más de 22 caracteres) o la letra del sistema es de 1.3× o más, se apilan a lo ancho con la acción arriba. El texto se centra y, si ocupa dos renglones, el botón crece en vez de dejarlo salirse.
+
 ### Perfil
 
 Un índice corto: la cuenta arriba (círculo verde claro con la inicial y el correo) y una tarjeta blanca con filas de menú (`MenuRow`, todas de 72 dp aunque solo algunas tengan resumen): icono verde en un círculo verde claro, título en negritas, un resumen gris debajo o un valor a la derecha, y ›. Un estado como «Avisos apagados» lleva un icono de alerta, nunca solo color. «Mis planes» y «Avisos y horas» abren su pantalla; «Tiempo diario», sus ruedas. «Cerrar sesión» al final.
