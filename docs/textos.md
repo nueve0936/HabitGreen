@@ -49,6 +49,26 @@ Versiones cortas (para `distraccion`): «Tú puedes.», «Paso a paso.», «A tu
 
 La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo mensaje de Hoy.
 
+### Botón «Hecho» (RI-04)
+
+| Situación | Texto |
+| --- | --- |
+| Botón en el aviso de un hábito | Hecho |
+| «Hecho» tocado en un aviso de un día anterior (Hoy) | Ese aviso era de un día anterior. Aquí tienes tus hábitos de hoy. |
+
+### Alarmas exactas
+
+| Situación | Texto |
+| --- | --- |
+| Diálogo, una vez, después del permiso de avisos | Para que cada aviso llegue a su hora, permite «Alarmas y recordatorios» en la siguiente pantalla. Sin esto, Android puede retrasarlos hasta una hora. · Botones: «Ahora no», «Permitir» |
+| «Avisos y horas» sin el permiso | Tus avisos pueden llegar hasta una hora tarde. Permite «Alarmas y recordatorios» para que lleguen a su hora. · Botón: «Permitir hora exacta» |
+
+### Último hábito de un plan
+
+| Situación | Texto |
+| --- | --- |
+| «Eliminar» el último hábito de un plan | Es el último hábito de tu plan de {área}. Un plan necesita al menos un hábito. Si ya no quieres este plan, puedes terminarlo: sus hábitos pasan a ser tuyos. · Botones: «Cancelar», «Terminar plan» |
+
 ## 2. Permisos
 
 | Momento | Texto |

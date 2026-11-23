@@ -1,4 +1,5 @@
 import { Sun } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { ActivityIndicator, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Alert } from '@/components/ui/alert';
@@ -23,10 +24,13 @@ import { useProgresion } from '@/features/progression/use-progresion';
 import { DayDialog } from '@/features/reschedule/components/day-dialog';
 import { RescheduleCard } from '@/features/reschedule/components/reschedule-card';
 import { useReprogramacion } from '@/features/reschedule/use-reprogramacion';
+import { decidirHecho } from '@/features/reminders/domain/hecho-desde-aviso';
+import { useHechoPendiente } from '@/features/reminders/use-hecho-desde-aviso';
 import { descripcionPlanta, PlantImage } from '@/features/rewards/components/plant-image';
 import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
+import { fechaLocal } from '@/lib/dates';
 import { navegar } from '@/lib/navegar';
 
 // Hoy (SDD 9.4 y mockup «Pantalla Dashboard»): monedas, tu planta más avanzada, la barra de avance
@@ -58,6 +62,20 @@ export default function HoyScreen() {
   const checkIn = useCheckIn(userId);
   const reprogramar = useReprogramacion(userId);
   const progresion = useProgresion(userId);
+  // «Hecho» tocado en un aviso (RI-04): se marca aquí, con las monedas y la animación de siempre.
+  const pendiente = useHechoPendiente((s) => s.pendiente);
+  const otroDia = useHechoPendiente((s) => s.otroDia);
+  useEffect(() => {
+    if (pendiente === null || !hoy.data) return;
+    const hecho = useHechoPendiente.getState().tomar();
+    if (!hecho) return;
+    const decision = decidirHecho(hecho, fechaLocal(), hoy.data.items);
+    if (decision.tipo === 'marcar') {
+      checkIn.alternar({ ...decision.item.habito, categoria: decision.item.categoria }, false);
+    } else if (decision.tipo === 'otro_dia') {
+      useHechoPendiente.getState().marcarOtroDia(true);
+    }
+  }, [pendiente, hoy.data, checkIn]);
   const { height, fontScale } = useWindowDimensions();
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
 
@@ -214,10 +232,17 @@ export default function HoyScreen() {
   const error = checkIn.error ?? reprogramar.error ?? progresion.error;
   const avisoFlotante = (
     <Snackbar
-      mensaje={error ?? checkIn.aviso ?? reprogramar.aviso ?? progresion.aviso}
+      mensaje={
+        error ??
+        checkIn.aviso ??
+        (otroDia ? t.avisoOtroDia : null) ??
+        reprogramar.aviso ??
+        progresion.aviso
+      }
       variant={error ? 'error' : 'exito'}
       onCerrar={() => {
         checkIn.cerrarAvisos();
+        useHechoPendiente.getState().marcarOtroDia(false);
         reprogramar.cerrarAvisos();
         progresion.cerrarAvisos();
       }}

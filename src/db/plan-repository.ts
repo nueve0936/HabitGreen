@@ -293,3 +293,28 @@ export async function terminarPlan(userId: string, planId: string): Promise<void
     return operaciones;
   });
 }
+
+/**
+ * Si el hábito es el último de su plan activo (contando los pausados, sin los eliminados), el plan;
+ * si no, null. Un plan conserva al menos un hábito (decisión del usuario del 22 nov): el último no
+ * se elimina, y para quitarlo se termina el plan.
+ */
+export async function planSiEsUltimo(habitId: string): Promise<{ id: string; area: Area } | null> {
+  const db = await getDb();
+  const [habito] = await leerFilas<Habito>(db, 'habits', 'id = ?', [habitId]);
+  if (!habito?.plan_id) return null;
+  const [plan] = await leerFilas<{ id: string; area: string | null; activo: boolean }>(
+    db,
+    'plans',
+    'id = ?',
+    [habito.plan_id],
+  );
+  if (!plan?.activo || !(AREAS as readonly (string | null)[]).includes(plan.area)) return null;
+  const delPlan = await leerFilas<{ id: string }>(
+    db,
+    'habits',
+    'plan_id = ? AND archivado_en IS NULL',
+    [plan.id],
+  );
+  return delPlan.length <= 1 ? { id: plan.id, area: plan.area as Area } : null;
+}

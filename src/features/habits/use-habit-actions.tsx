@@ -4,6 +4,8 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Snackbar } from '@/components/ui/snackbar';
 import { archivarHabito, cambiarActivo, type HabitoConHorario } from '@/db/habits-repository';
 import { cupoReanudar } from '@/db/limits-repository';
+import { planSiEsUltimo, terminarPlan } from '@/db/plan-repository';
+import type { Area } from '@/schemas/onboarding';
 import { es, formatear } from '@/i18n/es';
 import { useFechaHoy } from '@/lib/fecha-hoy';
 import { navegar } from '@/lib/navegar';
@@ -22,6 +24,8 @@ import { useCheckIn } from './use-check-in';
 export type OpcionesAcciones = {
   /** Opciones extra del menú ⋮ para un hábito, después de Editar. */
   extras?: (item: HabitoConHorario) => NonNullable<HabitMenuProps['extras']>;
+  /** Después de terminar un plan desde «Eliminar» (el detalle del plan vuelve atrás). */
+  onPlanTerminado?: () => void;
 };
 
 export function useHabitActions(
@@ -33,6 +37,8 @@ export function useHabitActions(
   const checkIn = useCheckIn(userId);
   const [menu, setMenu] = useState<{ item: HabitoConHorario; ancla: Ancla } | null>(null);
   const [eliminando, setEliminando] = useState<HabitoConHorario | null>(null);
+  // «Eliminar» el último hábito de un plan: no se elimina; se ofrece terminar el plan.
+  const [ultimoDe, setUltimoDe] = useState<{ id: string; area: Area } | null>(null);
   const [errorGuardar, setErrorGuardar] = useState(false);
   // Límite alcanzado al intentar reanudar un hábito en pausa.
   const [avisoLimite, setAvisoLimite] = useState<AvisoLimite | null>(null);
@@ -106,8 +112,13 @@ export function useHabitActions(
           if (habito) void cambiarActivoConLimite(habito);
         }}
         onEliminar={() => {
-          setEliminando(menu?.item ?? null);
+          const item = menu?.item ?? null;
           setMenu(null);
+          if (!item) return;
+          // Si la revisión falla, se pide la confirmación de siempre.
+          planSiEsUltimo(item.habito.id)
+            .catch(() => null)
+            .then((plan) => (plan ? setUltimoDe(plan) : setEliminando(item)));
         }}
         extras={(menu && opciones.extras ? opciones.extras(menu.item) : []).map((extra) => ({
           ...extra,
@@ -134,6 +145,26 @@ export function useHabitActions(
           const habito = eliminando?.habito;
           setEliminando(null);
           if (habito) void guardar(() => archivarHabito(userId, habito));
+        }}
+      />
+
+      <ConfirmDialog
+        visible={ultimoDe !== null}
+        tipo="confirmar"
+        mensaje={formatear(t.ultimoDelPlan.mensaje, {
+          area: ultimoDe ? es.onboarding.formulario.areas[ultimoDe.area] : '',
+        })}
+        cancelar={t.ultimoDelPlan.cancelar}
+        confirmar={t.ultimoDelPlan.terminar}
+        onCancelar={() => setUltimoDe(null)}
+        onConfirmar={() => {
+          const plan = ultimoDe;
+          setUltimoDe(null);
+          if (!plan) return;
+          void guardar(async () => {
+            await terminarPlan(userId, plan.id);
+            opciones.onPlanTerminado?.();
+          });
         }}
       />
 

@@ -198,6 +198,7 @@ La P7 decide cuántas notificaciones llegan; la P6 solo ajusta su contenido o mo
 ### Hábitos
 
 - La categoría se fija al crear el hábito y no cambia.
+- Cada plan conserva al menos un hábito: el último no se elimina; para quitarlo se termina el plan (sus hábitos pasan a propios). Pausarlo sí se permite.
 - «Eliminar» archiva: se oculta y se cancelan sus avisos, pero el historial se conserva. Si dio monedas ese día, se devuelven hasta donde alcance el saldo y el pago sigue contando para el tope (SDD 6.1).
 - El check-in solo se puede marcar y deshacer para hoy.
 - Rachas por hábito: ocurrencias programadas seguidas completadas; los días no programados no la rompen.

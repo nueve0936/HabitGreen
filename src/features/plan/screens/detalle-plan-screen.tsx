@@ -84,6 +84,8 @@ export default function DetallePlanScreen() {
         { icono: LogOut, label: t.menu.sacar, onPress: () => setSacando(h) },
       ];
     },
+    // Terminar el plan desde «Eliminar» su último hábito: este detalle ya no existe.
+    onPlanTerminado: () => navegar.back(),
   });
 
   const fallo = () => setAviso({ texto: t.error, error: true });

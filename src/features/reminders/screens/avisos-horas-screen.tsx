@@ -19,7 +19,8 @@ import { cardShadow, colors } from '@/theme';
 
 import { StyleDialog } from '../components/style-dialog';
 import type { MomentoAviso } from '../domain/planificar-avisos';
-import { useAvisosActivos } from '../use-avisos-activos';
+import { useAlarmasExactas, useAvisosActivos } from '../use-avisos-activos';
+import { pedirAlarmasExactas } from '../avisos';
 
 // «Avisos y horas» (Perfil → Avisos y horas; decisión del usuario, Perfil como índice): el estilo
 // de avisos, el segundo aviso y las horas por momento. Cada cambio se guarda al momento en el
@@ -58,6 +59,7 @@ export default function AvisosHorasScreen() {
   const userId = session?.user.id ?? '';
   const perfil = useLocalQuery(`perfil-${userId}`, () => leerAjustesPerfil(userId));
   const avisosActivos = useAvisosActivos();
+  const exactas = useAlarmasExactas();
   const [eligiendoEstilo, setEligiendoEstilo] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState(false);
   const ajustes = perfil.data?.ajustes ?? null;
@@ -102,6 +104,17 @@ export default function AvisosHorasScreen() {
                     variant="secondary"
                     label={t.abrirAjustes}
                     onPress={() => void Linking.openSettings()}
+                  />
+                </View>
+              )}
+              {/* Sin alarmas exactas, Android puede retrasar los avisos hasta 1 hora. */}
+              {!avisosActivos || exactas ? null : (
+                <View className="gap-2">
+                  <Alert variant="advertencia" message={t.horaExactaApagada} />
+                  <Button
+                    variant="secondary"
+                    label={t.permitirHoraExacta}
+                    onPress={() => void pedirAlarmasExactas().catch(() => {})}
                   />
                 </View>
               )}

@@ -6,6 +6,8 @@ import {
   fechaHora,
   HORAS_POR_DEFECTO,
   planificarAvisos,
+  repartirAvisos,
+  type AvisoPlaneado,
   type DatosAvisos,
 } from '../planificar-avisos';
 
@@ -317,5 +319,42 @@ describe('planificarAvisos', () => {
       AHORA,
     );
     expect(primero?.cuerpo).toBe('Es un buen momento para tus 1 h 25 min.');
+  });
+});
+
+describe('repartirAvisos', () => {
+  const aviso = (id: string, hora: number): AvisoPlaneado => ({
+    id,
+    fecha: new Date(2026, 10, 16, hora, 0),
+    titulo: 't',
+    cuerpo: 'c',
+    habitId: id,
+  });
+  const ahora = new Date(2026, 10, 16, 9, 0);
+
+  it('conserva un aviso retrasado que sigue pendiente y cancela lo que ya no toca', () => {
+    const r = repartirAvisos(
+      [aviso('retrasado', 8), aviso('futuro', 10)],
+      ahora,
+      new Set(['retrasado', 'hecho', 'futuro']),
+    );
+    expect(r.conservar).toEqual(['retrasado']);
+    expect(r.cancelar).toEqual(['hecho', 'futuro']);
+    expect(r.programar.map((a) => a.id)).toEqual(['futuro']);
+  });
+
+  it('un aviso que ya pasó y ya llegó no se vuelve a programar', () => {
+    const r = repartirAvisos([aviso('llego', 8)], ahora, new Set());
+    expect(r).toEqual({ programar: [], conservar: [], cancelar: [] });
+  });
+});
+
+describe('planificarAvisos con margen', () => {
+  it('deja entrar los avisos que acaban de pasar', () => {
+    const despues = new Date(2026, 10, 16, 8, 30);
+    const desde = new Date(2026, 10, 16, 7, 0);
+    const conMargen = planificarAvisos(datos(), despues, desde).map((a) => a.id);
+    const sinMargen = planificarAvisos(datos(), despues).map((a) => a.id);
+    expect(conMargen.length).toBeGreaterThan(sinMargen.length);
   });
 });

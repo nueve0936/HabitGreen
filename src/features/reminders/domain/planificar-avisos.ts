@@ -103,7 +103,15 @@ function animo(mensajes: readonly string[], fecha: string, habitId: string): str
   return mensajes[(numeroDeDia(fecha) + semilla(habitId)) % mensajes.length] ?? '';
 }
 
-export function planificarAvisos(datos: DatosAvisos, ahora: Date): AvisoPlaneado[] {
+/**
+ * Avisos de la ventana. `desde` (por defecto, `ahora`) deja entrar los que acaban de pasar: sin
+ * alarmas exactas Android los retrasa hasta 1 hora, y un aviso pendiente no se debe perder.
+ */
+export function planificarAvisos(
+  datos: DatosAvisos,
+  ahora: Date,
+  desde: Date = ahora,
+): AvisoPlaneado[] {
   const t = es.avisos;
   const { estilo, horas, config } = datos;
   const hoy = fechaLocal(ahora);
@@ -227,7 +235,7 @@ export function planificarAvisos(datos: DatosAvisos, ahora: Date): AvisoPlaneado
 
   // Tope: se quedan los más cercanos y se deja lugar para la invitación final.
   const programados = avisos
-    .filter((a) => a.fecha.getTime() > ahora.getTime())
+    .filter((a) => a.fecha.getTime() > desde.getTime())
     .sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
     .slice(0, Math.max(0, config.tope_programadas - 1));
 
@@ -243,4 +251,33 @@ export function planificarAvisos(datos: DatosAvisos, ahora: Date): AvisoPlaneado
     });
   }
   return programados;
+}
+
+/** Margen para los avisos retrasados: Android retrasa los aproximados hasta 1 hora. */
+export const GRACIA_AVISOS_MS = 90 * 60_000;
+
+export type Reparto = {
+  /** Avisos por programar (o reprogramar): los que todavía no llegan a su hora. */
+  programar: AvisoPlaneado[];
+  /** Pendientes cuya hora ya pasó (Android los retrasó) y siguen tocando: no se cancelan. */
+  conservar: string[];
+  /** Pendientes que ya no tocan: hábito hecho, pausado, eliminado o cambiado. */
+  cancelar: string[];
+};
+
+/**
+ * Qué hacer con lo planeado frente a lo que ya está programado en el teléfono. Antes se cancelaba
+ * todo y se volvía a programar solo lo futuro, y así se perdían los avisos retrasados.
+ */
+export function repartirAvisos(
+  avisos: readonly AvisoPlaneado[],
+  ahora: Date,
+  pendientes: ReadonlySet<string>,
+): Reparto {
+  const programar = avisos.filter((a) => a.fecha.getTime() > ahora.getTime());
+  const conservar = avisos
+    .filter((a) => a.fecha.getTime() <= ahora.getTime() && pendientes.has(a.id))
+    .map((a) => a.id);
+  const quedan = new Set(conservar);
+  return { programar, conservar, cancelar: [...pendientes].filter((id) => !quedan.has(id)) };
 }

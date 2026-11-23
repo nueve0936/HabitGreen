@@ -151,7 +151,9 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 |---|---|---|---|
 | Ventana móvil de 7 días con tope de 60 avisos | Definición v4 | Aceptada | Por el límite de 64 de iOS. |
 | La P7 decide cuántos avisos llegan; la P6 solo su contenido | Definición v3 | Aceptada | |
-| Avisos a hora aproximada, sin pedir alarmas exactas | Claude (9 nov) | Aceptada | En Android 14 las alarmas exactas exigen una pantalla de Ajustes. |
+| Avisos a hora aproximada, sin pedir alarmas exactas | Claude (9 nov) | Modificada | Claude dijo que llegarían «unos minutos» tarde, pero Android los retrasa hasta 1 hora. El 22 nov, al no llegar dos avisos, el usuario eligió pedir el permiso de alarmas exactas (con development build nueva). |
+| No perder los avisos retrasados: al recalcular se conservan los pendientes de hábitos sin marcar | Claude (22 nov), tras un error que reportó el usuario | Aceptada | Antes se cancelaba todo y se perdían. |
+| Botón «Hecho» en el aviso: abre Hoy y lo marca (RI-04) | Claude, elegido por el usuario | Aceptada | Sin marcar en segundo plano: haría falta `expo-task-manager` y no es fiable con la app cerrada. |
 | Pedir el permiso al guardar un hábito con hora | Claude | Modificada | El usuario decidió que los recordatorios empiecen apagados y que el hábito nuevo empiece en «Ninguno» hasta que acepte el permiso. |
 | Si rechaza el permiso al confirmar el plan, se quitan las horas | Claude | Aceptada | |
 | «Avisarme» es la fila «Recordatorios» del hábito, sin interruptor nuevo | Claude | Aceptada | |
@@ -210,6 +212,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Detalle del plan, acomodo «secciones apiladas» | Claude (vista previa), elegido por el usuario | Modificada | Tras el critique: meta del plan, «Resumen» único y sugerencia de «más ligero». |
 | «Terminar plan» como enlace rojo | Claude | Modificada | El usuario pidió botón verde ovalado abajo, con confirmación. |
 | Perfil como índice con pantallas | Claude, elegido por el usuario | Aceptada | El correo pasa a un encabezado arriba. |
+| Cada plan conserva al menos un hábito; «Eliminar» el último ofrece «Terminar plan» | Usuario (22 nov), diálogo propuesto por Claude | Aceptada | Pausarlo sí se permite. |
 | Un solo toque por acción (candado en botones y en la navegación) | Claude, a partir de un error que reportó el usuario | Aceptada | |
 
 ### 3.11 Calidad y repositorio

@@ -10,6 +10,8 @@ export const es = {
   },
   avisos: {
     canal: 'Recordatorios de hábitos',
+    // Botón de los avisos de un hábito (RI-04): abre la app y lo marca en Hoy.
+    hecho: 'Hecho',
     explicacion:
       'Te avisaremos a la hora de cada hábito, de forma suave. Puedes cambiarlo cuando quieras en Perfil.',
     ahoraNo: 'Ahora no',
@@ -17,6 +19,10 @@ export const es = {
     explicacionAjustes:
       'Los avisos están apagados en tu teléfono. Para usar recordatorios, actívalos en Ajustes.',
     abrirAjustes: 'Abrir ajustes',
+    // Permiso de alarmas exactas, ofrecido una vez después del de avisos.
+    exactasExplicacion:
+      'Para que cada aviso llegue a su hora, permite «Alarmas y recordatorios» en la siguiente pantalla. Sin esto, Android puede retrasarlos hasta una hora.',
+    exactasPermitir: 'Permitir',
     apagadosHabito:
       'Los avisos están apagados en tu teléfono: este recordatorio no sonará hasta que los actives.',
     // Notificaciones (docs/textos.md §1). {habito} va en el título de cada aviso por hábito.
@@ -392,6 +398,8 @@ export const es = {
     errorGuardar: 'No pudimos guardar el cambio. Inténtalo de nuevo.',
     errorReloj: 'Revisa la fecha de tu teléfono: parece estar atrasada.',
     cambioDia: 'Cambió el día. Ya actualizamos tu lista.',
+    // «Hecho» tocado en un aviso de un día anterior: solo se marca lo de hoy.
+    avisoOtroDia: 'Ese aviso era de un día anterior. Aquí tienes tus hábitos de hoy.',
     sinHabitos: {
       titulo: 'Tu jardín está listo para empezar',
       descripcion: 'Crea tu primer hábito, pequeño y a tu ritmo.',
@@ -429,6 +437,13 @@ export const es = {
       devolucion: 'Se devolverán las monedas que te haya dado hoy.',
       cancelar: 'Cancelar',
       confirmar: 'Eliminar',
+    },
+    // «Eliminar» el último hábito de un plan: un plan conserva al menos uno.
+    ultimoDelPlan: {
+      mensaje:
+        'Es el último hábito de tu plan de {area}. Un plan necesita al menos un hábito. Si ya no quieres este plan, puedes terminarlo: sus hábitos pasan a ser tuyos.',
+      terminar: 'Terminar plan',
+      cancelar: 'Cancelar',
     },
     pausado: '{titulo}, en pausa',
   },
@@ -806,6 +821,9 @@ export const es = {
     avisos: 'Avisos',
     avisosApagados:
       'Los avisos están apagados en tu teléfono. Actívalos para recibir tus recordatorios.',
+    horaExactaApagada:
+      'Tus avisos pueden llegar hasta una hora tarde. Permite «Alarmas y recordatorios» para que lleguen a su hora.',
+    permitirHoraExacta: 'Permitir hora exacta',
     abrirAjustes: 'Abrir ajustes',
     estilo: 'Estilo',
     estiloTitulo: '¿Cómo te acompañamos?',
