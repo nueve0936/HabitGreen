@@ -572,6 +572,16 @@ export async function hacerMasLigero(
   return resultado;
 }
 
+/** Si el hábito es del plan y todavía tiene un paso más ligero (solo lee; ver `hacerMasLigero`). */
+export async function puedeHacerseMasLigero(userId: string, habitId: string): Promise<boolean> {
+  const db = await getDb();
+  const comunes = await leerComunes(db, userId);
+  const habito = comunes?.habitos.find((h) => h.id === habitId);
+  const plan = (await leerPlanesActivos(db, userId)).find((p) => p.id === habito?.plan_id);
+  if (!comunes || !habito || !plan || !esDelPlan(habito)) return false;
+  return pasoHaciaAbajo(habito, entradaDelPlan(comunes, plan)) !== null;
+}
+
 /**
  * Sugerencias para «Agregar un hábito al plan»: las 3 versiones de cada meta libre de su área,
  * primero las más ligeras, sin repetir metas que ya estén en algún plan.

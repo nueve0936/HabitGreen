@@ -156,8 +156,8 @@ Ajustes después de los varios planes: avisos, botón «Hecho» y reglas de los 
 | A.1 | Botón «Hecho» en el aviso de un hábito: abre Hoy y lo marca con sus monedas | en curso (falta tu prueba en el teléfono) |
 | A.2 | Avisos: no perder los avisos retrasados al recalcular y pedir el permiso de alarmas exactas (necesita development build nueva) | en curso (falta la build y tu prueba) |
 | A.3 | Cada plan conserva al menos un hábito: «Eliminar» el último ofrece «Terminar plan» | en curso (falta tu prueba en el teléfono) |
-| A.4 | En la tarjeta de reprogramación, preguntar qué pasó (tiempo, energía o recursos) y sugerir un ajuste en un toque | pendiente |
-| A.5 | Elegir la hora del resumen nocturno en «Avisos y horas» | pendiente |
+| A.4 | «¿Qué pasó?» opcional en la tarjeta de reprogramación (tiempo, energía, recursos u olvido) con un ajuste en un toque; la respuesta no se guarda | hecho (probado por el usuario) |
+| A.5 | Elegir la hora del resumen nocturno en «Avisos y horas» (ya existía: fila «Resumen» con el estilo «Resumen nocturno») | en curso (falta tu prueba en el teléfono) |
 
 ## Entrega 9: Cierre (días 18–19, ~6 h)
 

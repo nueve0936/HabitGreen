@@ -63,6 +63,19 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Diálogo, una vez, después del permiso de avisos | Para que cada aviso llegue a su hora, permite «Alarmas y recordatorios» en la siguiente pantalla. Sin esto, Android puede retrasarlos hasta una hora. · Botones: «Ahora no», «Permitir» |
 | «Avisos y horas» sin el permiso | Tus avisos pueden llegar hasta una hora tarde. Permite «Alarmas y recordatorios» para que lleguen a su hora. · Botón: «Permitir hora exacta» |
 
+### «¿Qué pasó?» en la tarjeta de reprogramación
+
+| Situación | Texto |
+| --- | --- |
+| Enlace | ¿Qué pasó? |
+| Causas | Me faltó tiempo · No tenía energía · No tenía lo necesario · Se me olvidó |
+| Más ligero (hábito del plan) | ¿Lo hacemos más ligero por ahora? Un paso más pequeño también cuenta. · Botón: «Hacerlo más ligero» · Listo: ahora es «{titulo}». |
+| Bajar la duración | ¿Le bajamos la duración? Unos minutos menos también cuentan. · Botón: «Editar hábito» |
+| Otro día | Elige un día en que te quede mejor. · Botón: «Elegir otro día» |
+| Sin recordatorio | ¿Le ponemos un recordatorio para que te avise a su hora? · Botón: «Editar hábito» |
+| Segundo aviso apagado | ¿Activamos el segundo aviso? Te avisamos otra vez 2 horas después. · Botón: «Activar segundo aviso» · Listo: te avisaremos otra vez 2 horas después. |
+| Con todo activo | Pasa. Los avisos te seguirán acompañando. |
+
 ### Último hábito de un plan
 
 | Situación | Texto |

@@ -153,6 +153,7 @@ export default function HoyScreen() {
       {/* Reprogramación (SDD 6.2): una propuesta a la vez, arriba de los hábitos. */}
       {reprogramar.actual ? (
         <RescheduleCard
+          userId={userId}
           propuesta={reprogramar.actual}
           hoy={reprogramar.hoy}
           indice={reprogramar.indice}
