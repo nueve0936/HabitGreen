@@ -13,6 +13,7 @@ import {
   newPasswordSchema,
   type NewPasswordInput,
   type NewPasswordValues,
+  PASSWORD_MAX,
 } from '@/features/auth/domain/auth-schemas';
 import { useSession } from '@/features/auth/session-context';
 import { es } from '@/i18n/es';
@@ -65,6 +66,7 @@ export default function NuevaContrasenaScreen() {
               <Field
                 label={t.nuevaContrasena}
                 password
+                maxLength={PASSWORD_MAX}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -81,6 +83,7 @@ export default function NuevaContrasenaScreen() {
               <Field
                 label={t.confirmarContrasena}
                 password
+                maxLength={PASSWORD_MAX}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}

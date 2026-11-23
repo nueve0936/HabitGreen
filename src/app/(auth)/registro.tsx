@@ -17,6 +17,7 @@ import {
   registerSchema,
   type RegisterInput,
   type RegisterValues,
+  PASSWORD_MAX,
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
@@ -114,6 +115,7 @@ export default function RegistroScreen() {
             <Field
               label={t.contrasena}
               password
+              maxLength={PASSWORD_MAX}
               value={value}
               onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}
@@ -130,6 +132,7 @@ export default function RegistroScreen() {
             <Field
               label={t.confirmarContrasena}
               password
+              maxLength={PASSWORD_MAX}
               value={value}
               onChangeText={(texto) => escribir(onChange, texto)}
               onBlur={onBlur}

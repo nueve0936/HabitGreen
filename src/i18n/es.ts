@@ -147,6 +147,7 @@ export const es = {
       correoLargo: 'El correo puede tener hasta {n} caracteres.',
       contrasenaRequerida: 'Escribe tu contraseña.',
       contrasenaCorta: 'Usa al menos 8 caracteres.',
+      contrasenaLarga: 'Usa {n} caracteres o menos.',
       contrasenasDistintas: 'Las contraseñas deben ser iguales. Por favor, inténtalo de nuevo.',
       // Aviso único al pulsar el botón con campos vacíos (mockups «Login/Registrar #1.2»).
       loginVacios: 'Por favor, ingresa tu correo y contraseña.',

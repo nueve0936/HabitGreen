@@ -7,6 +7,11 @@ const v = es.auth.validacion;
 export const MIN_PASSWORD_LENGTH = 8;
 /** Largo máximo del correo (decisión del usuario). Cámbialo aquí: lo usan el esquema y los campos. */
 export const EMAIL_MAX = 50;
+/**
+ * Largo máximo de la contraseña: Supabase Auth (bcrypt) no acepta más de 72. Sin este tope, una
+ * contraseña más larga fallaba en el servidor con un error poco claro.
+ */
+export const PASSWORD_MAX = 72;
 
 const email = z
   .string()
@@ -19,7 +24,8 @@ const email = z
 const newPassword = z
   .string()
   .min(1, v.contrasenaRequerida)
-  .min(MIN_PASSWORD_LENGTH, v.contrasenaCorta);
+  .min(MIN_PASSWORD_LENGTH, v.contrasenaCorta)
+  .max(PASSWORD_MAX, formatear(v.contrasenaLarga, { n: PASSWORD_MAX }));
 
 export const loginSchema = z.object({
   email,

@@ -17,6 +17,7 @@ import {
   loginSchema,
   type LoginInput,
   type LoginValues,
+  PASSWORD_MAX,
 } from '@/features/auth/domain/auth-schemas';
 import { es } from '@/i18n/es';
 import { supabase } from '@/lib/supabase';
@@ -95,6 +96,7 @@ export default function LoginScreen() {
               <Field
                 label={t.contrasena}
                 password
+                maxLength={PASSWORD_MAX}
                 value={value}
                 onChangeText={(texto) => escribir(onChange, texto)}
                 onBlur={onBlur}

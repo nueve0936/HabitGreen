@@ -128,6 +128,7 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Contador (TalkBack) | {n} de {max} caracteres |
 | P2 de un plan nuevo con un solo lugar libre | Elige una: es el lugar que te queda libre. |
 | Correo largo | El correo puede tener hasta {n} caracteres. (50) |
+| Contraseña larga (registro y nueva contraseña) | Usa {n} caracteres o menos. (72, el límite de Supabase; el campo no deja escribir más) |
 
 ## Estados de inactividad (pulidos antes del APK)
 

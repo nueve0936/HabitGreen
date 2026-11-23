@@ -2,6 +2,7 @@ import { es, formatear } from '@/i18n/es';
 
 import {
   EMAIL_MAX,
+  PASSWORD_MAX,
   loginSchema,
   newPasswordSchema,
   recoveryCodeSchema,
@@ -98,5 +99,23 @@ describe('newPasswordSchema', () => {
       confirmPassword: 'nueva12',
     });
     expect(firstError(result)).toBe(v.contrasenasDistintas);
+  });
+});
+
+describe('tope de contraseña', () => {
+  it('acepta hasta 72 caracteres y rechaza más, con mensaje claro', () => {
+    const ok = 'a'.repeat(PASSWORD_MAX);
+    const largo = 'a'.repeat(PASSWORD_MAX + 1);
+    expect(
+      registerSchema.safeParse({ email: 'a@b.co', password: ok, confirmPassword: ok }).success,
+    ).toBe(true);
+    expect(
+      firstError(
+        registerSchema.safeParse({ email: 'a@b.co', password: largo, confirmPassword: largo }),
+      ),
+    ).toBe(formatear(v.contrasenaLarga, { n: PASSWORD_MAX }));
+    expect(
+      firstError(newPasswordSchema.safeParse({ password: largo, confirmPassword: largo })),
+    ).toBe(formatear(v.contrasenaLarga, { n: PASSWORD_MAX }));
   });
 });
