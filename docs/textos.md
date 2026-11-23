@@ -49,7 +49,7 @@ Versiones cortas (para `distraccion`): «Tú puedes.», «Paso a paso.», «A tu
 
 La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo mensaje de Hoy.
 
-### Botón «Hecho» (RI-04)
+### Botón «Hecho»
 
 | Situación | Texto |
 | --- | --- |

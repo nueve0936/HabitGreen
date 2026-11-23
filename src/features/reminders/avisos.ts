@@ -51,7 +51,7 @@ export async function prepararAvisos(): Promise<void> {
     importance: AndroidImportance.DEFAULT,
     lightColor: colors.accent,
   });
-  // Botón «Hecho» de los avisos de un hábito (RI-04): abre la app y lo marca en Hoy.
+  // Botón «Hecho» de los avisos de un hábito: abre la app y lo marca en Hoy.
   await setNotificationCategoryAsync(CATEGORIA_HABITO, [
     {
       identifier: ACCION_HECHO,

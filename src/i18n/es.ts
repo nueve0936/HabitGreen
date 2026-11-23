@@ -10,7 +10,7 @@ export const es = {
   },
   avisos: {
     canal: 'Recordatorios de hábitos',
-    // Botón de los avisos de un hábito (RI-04): abre la app y lo marca en Hoy.
+    // Botón de los avisos de un hábito: abre la app y lo marca en Hoy.
     hecho: 'Hecho',
     explicacion:
       'Te avisaremos a la hora de cada hábito, de forma suave. Puedes cambiarlo cuando quieras en Perfil.',

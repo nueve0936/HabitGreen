@@ -147,17 +147,17 @@ Un plan por área (hasta 5), cada uno con hasta 3 hábitos; el modo deja de ser 
 | V.4 | «Mis planes» en Perfil (crear y terminar plan, ruta `/plan-nuevo` con las mismas pantallas del formulario), **detalle del plan** (`/detalle-plan/[id]`: cómo vas, próxima revisión, hábitos con ⋮, más ligero, sacar del plan y agregar un hábito) y quitar el modo | en curso (falta tu prueba en el teléfono) |
 | V.5 | Límites: un solo cupo total de hábitos (plan y propios juntos: 3 + 1 por subida, sin límite sin planes, libre a los 90 días) y hasta 3 por plan; crear un plan necesita un lugar libre y trae solo los hábitos que caben (la primera versión, con planes que se ganan y propios aparte, se cambió por agobio) | en curso (falta tu prueba en el teléfono) |
 
-## Requerimientos del SRS fáciles de cerrar (decisión del usuario, 22 nov)
+## Ajustes (decisiones del usuario, 22 nov)
 
-Salen de la [comparativa con el SRS](Comparativa_SRS.md). Cada uno termina con la prueba del usuario.
+Ajustes después de los varios planes: avisos, botón «Hecho» y reglas de los planes. Cada uno termina con la prueba del usuario.
 
 | # | Tarea | Estado |
 | --- | --- | --- |
-| S.1 | RI-04: botón «Hecho» en el aviso de un hábito; abre Hoy y lo marca con sus monedas | en curso (falta tu prueba en el teléfono) |
-| S.2 | RF-17 y RF-19 (UC-10): en la tarjeta de reprogramación, preguntar qué pasó y sugerir un ajuste en un toque | pendiente |
-| S.1b | Avisos: no perder los avisos retrasados al recalcular y pedir el permiso de alarmas exactas (necesita development build nueva) | en curso (falta la build y tu prueba) |
-| S.1c | Cada plan conserva al menos un hábito: «Eliminar» el último ofrece «Terminar plan» | en curso (falta tu prueba en el teléfono) |
-| S.3 | RF-18: elegir la hora del resumen nocturno en «Avisos y horas» | pendiente |
+| A.1 | Botón «Hecho» en el aviso de un hábito: abre Hoy y lo marca con sus monedas | en curso (falta tu prueba en el teléfono) |
+| A.2 | Avisos: no perder los avisos retrasados al recalcular y pedir el permiso de alarmas exactas (necesita development build nueva) | en curso (falta la build y tu prueba) |
+| A.3 | Cada plan conserva al menos un hábito: «Eliminar» el último ofrece «Terminar plan» | en curso (falta tu prueba en el teléfono) |
+| A.4 | En la tarjeta de reprogramación, preguntar qué pasó (tiempo, energía o recursos) y sugerir un ajuste en un toque | pendiente |
+| A.5 | Elegir la hora del resumen nocturno en «Avisos y horas» | pendiente |
 
 ## Entrega 9: Cierre (días 18–19, ~6 h)
 

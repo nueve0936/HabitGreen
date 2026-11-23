@@ -43,6 +43,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | 20 nov | Se descarta el APK de preview. Empieza «Varios planes por usuario». |
 | 20–21 nov | Varios planes, fases 1 a 4; detalle del plan; arreglo de SonarQube; fusión en `master`. |
 | 21–22 nov | 7 metas por área, candado de un solo toque, Perfil como índice y esta bitácora. |
+| 22 nov | Ajustes: un solo cupo total de hábitos, botón «Hecho» en los avisos, avisos retrasados que ya no se pierden, permiso de alarmas exactas y cada plan con al menos un hábito. |
 
 ## 3. Decisiones por tema
 
@@ -153,7 +154,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | La P7 decide cuántos avisos llegan; la P6 solo su contenido | Definición v3 | Aceptada | |
 | Avisos a hora aproximada, sin pedir alarmas exactas | Claude (9 nov) | Modificada | Claude dijo que llegarían «unos minutos» tarde, pero Android los retrasa hasta 1 hora. El 22 nov, al no llegar dos avisos, el usuario eligió pedir el permiso de alarmas exactas (con development build nueva). |
 | No perder los avisos retrasados: al recalcular se conservan los pendientes de hábitos sin marcar | Claude (22 nov), tras un error que reportó el usuario | Aceptada | Antes se cancelaba todo y se perdían. |
-| Botón «Hecho» en el aviso: abre Hoy y lo marca (RI-04) | Claude, elegido por el usuario | Aceptada | Sin marcar en segundo plano: haría falta `expo-task-manager` y no es fiable con la app cerrada. |
+| Botón «Hecho» en el aviso: abre Hoy y lo marca | Claude, elegido por el usuario | Aceptada | Sin marcar en segundo plano: haría falta `expo-task-manager` y no es fiable con la app cerrada. |
 | Pedir el permiso al guardar un hábito con hora | Claude | Modificada | El usuario decidió que los recordatorios empiecen apagados y que el hábito nuevo empiece en «Ninguno» hasta que acepte el permiso. |
 | Si rechaza el permiso al confirmar el plan, se quitan las horas | Claude | Aceptada | |
 | «Avisarme» es la fila «Recordatorios» del hábito, sin interruptor nuevo | Claude | Aceptada | |

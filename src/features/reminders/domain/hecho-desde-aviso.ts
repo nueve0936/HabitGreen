@@ -1,4 +1,4 @@
-// Botón «Hecho» en el aviso de un hábito (RI-04 del SRS; decisión del usuario del 22 nov): al
+// Botón «Hecho» en el aviso de un hábito (ajustes, decisión del usuario del 22 nov): al
 // tocarlo se abre la app en Hoy y el hábito se marca ahí, con sus monedas y su animación. Solo los
 // avisos de un hábito llevan el botón; los que hablan de varios (resumen nocturno, «olvido»), no.
 // El check-in solo se puede marcar para hoy: un aviso de un día anterior solo abre la app.

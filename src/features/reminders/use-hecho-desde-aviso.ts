@@ -10,7 +10,7 @@ import { navegar } from '@/lib/navegar';
 
 import { leerHechoDeAviso, type HechoPendiente } from './domain/hecho-desde-aviso';
 
-// Botón «Hecho» del aviso (RI-04): se escucha en las pestañas, que solo se montan con la sesión
+// Botón «Hecho» del aviso: se escucha en las pestañas, que solo se montan con la sesión
 // lista. Abre Hoy y deja el hábito pendiente; Hoy lo marca con el check-in de siempre (monedas,
 // animación y tope del día) en cuanto tiene su lista. Funciona también con la app cerrada: al
 // abrirse, `useLastNotificationResponse` entrega la última respuesta.

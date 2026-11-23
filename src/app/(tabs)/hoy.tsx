@@ -62,7 +62,7 @@ export default function HoyScreen() {
   const checkIn = useCheckIn(userId);
   const reprogramar = useReprogramacion(userId);
   const progresion = useProgresion(userId);
-  // «Hecho» tocado en un aviso (RI-04): se marca aquí, con las monedas y la animación de siempre.
+  // «Hecho» tocado en un aviso: se marca aquí, con las monedas y la animación de siempre.
   const pendiente = useHechoPendiente((s) => s.pendiente);
   const otroDia = useHechoPendiente((s) => s.otroDia);
   useEffect(() => {
