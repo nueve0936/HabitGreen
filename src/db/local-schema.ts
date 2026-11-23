@@ -41,6 +41,7 @@ export const TABLAS = [
       ultima_evaluacion: T,
       limite_plan_desbloqueado: B,
       subidas_plan: N,
+      planta_hoy: T,
       updated_at: T,
     },
   },

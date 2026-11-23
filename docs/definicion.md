@@ -227,6 +227,7 @@ Solo para hábitos del plan. Cumplimiento en los últimos 14 días (28 para háb
 
 ### Jardín y tienda
 
+- Hoy muestra la planta equipada con «Equipar» en Detalles de la planta («Equipada»); sin elección, la más avanzada. Se sincroniza con la cuenta.
 - Las 5 plantas se ven desde el inicio; las de áreas sin hábitos, en fase 1 con una invitación a agregar un hábito.
 - Un mismo objeto puede estar en varias plantas a la vez; cada planta lleva como máximo uno de cada tipo. Nombres de los 15 accesorios: provisionales hasta que el usuario los defina.
 

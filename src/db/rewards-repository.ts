@@ -37,7 +37,13 @@ export type PlantaJardin = {
   equipados: Accesorio[];
 };
 
-export type Jardin = { plantas: PlantaJardin[]; accesorios: Accesorio[]; saldo: number };
+export type Jardin = {
+  plantas: PlantaJardin[];
+  accesorios: Accesorio[];
+  saldo: number;
+  /** La planta equipada en Hoy, o null si se usa la automática. */
+  plantaHoy: Area | null;
+};
 
 const ORDEN_TIPOS: TipoAccesorio[] = ['maceta', 'lentes', 'sombrero'];
 
@@ -100,7 +106,14 @@ export async function leerJardin(userId: string): Promise<Jardin> {
       },
     ];
   });
-  return { plantas, accesorios, saldo: await leerSaldo(db, userId) };
+  const ajustes = await db.getFirstAsync<{ planta_hoy: string | null }>(
+    'SELECT planta_hoy FROM user_settings WHERE user_id = ?',
+    [userId],
+  );
+  const plantaHoy = (AREAS as readonly (string | null)[]).includes(ajustes?.planta_hoy ?? null)
+    ? (ajustes?.planta_hoy as Area)
+    : null;
+  return { plantas, accesorios, saldo: await leerSaldo(db, userId), plantaHoy };
 }
 
 /**

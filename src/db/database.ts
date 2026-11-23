@@ -25,7 +25,8 @@ const NOMBRE = 'habitgreen.db';
 // 3: se agrega onboarding_answers (Entrega 5). 4: habits.nivel_desde (Entrega 8).
 // 5: user_settings.subidas_plan. 6: user_accessories.categorias_equipadas (pulidos antes del APK).
 // 7: plans.area, respuestas, ultima_evaluacion y limite_desbloqueado (un plan por área).
-const ESQUEMA_VERSION = 7;
+// 8: user_settings.planta_hoy (la planta equipada en Hoy).
+const ESQUEMA_VERSION = 8;
 
 let abierta: Promise<SQLite.SQLiteDatabase> | null = null;
 

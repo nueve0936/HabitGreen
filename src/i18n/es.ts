@@ -697,6 +697,14 @@ export const es = {
     abrir: 'Abre los detalles de tu planta de {categoria}',
   },
   planta: {
+    // «Equipar» la planta para que se vea en Hoy (decisión del usuario del 22 nov).
+    enHoy: {
+      equipar: 'Equipar',
+      equipada: 'Equipada',
+      equiparA11y: 'Equipar la planta de {area} en Hoy',
+      equipadaA11y: 'Planta de {area} equipada en Hoy',
+      listo: 'Listo: tu planta de {area} se verá en Hoy.',
+    },
     pestanaHabitos: 'Hábitos',
     pestanaObjetos: 'Objetos',
     faseBloqueada: 'Sigue cuidando tu planta para descubrirla.',

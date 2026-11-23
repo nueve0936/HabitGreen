@@ -282,6 +282,10 @@ Tarjeta blanca con imagen, nombre y precio en píldora dorada. Al tocarla, una h
 
 Las 3 fases de la planta en páginas horizontales, con puntos debajo. Las no alcanzadas son una silueta con candado.
 
+### Planta equipada en Hoy
+
+En Detalles de la planta, debajo de los puntos de las fases, para no separar la planta de sus fases: «Equipar» es un botón con borde, icono de casa y 48 dp de alto. Ya elegida, se cambia por la píldora «Equipada»: fondo verde rocío, ✓ verde brote y texto verde en negritas, sin acción.
+
 ### Cuadrícula de objetos
 
 Celdas en 3 columnas, con pestañas de tipo fijas abajo. El objeto puesto lleva relleno verde rocío, borde verde brote y ✓.

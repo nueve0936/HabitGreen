@@ -27,7 +27,7 @@ import { useReprogramacion } from '@/features/reschedule/use-reprogramacion';
 import { decidirHecho } from '@/features/reminders/domain/hecho-desde-aviso';
 import { useHechoPendiente } from '@/features/reminders/use-hecho-desde-aviso';
 import { descripcionPlanta, PlantImage } from '@/features/rewards/components/plant-image';
-import { plantaDestacada } from '@/features/rewards/domain/planta-destacada';
+import { plantaEnHoy } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { colors } from '@/theme';
 import { fechaLocal } from '@/lib/dates';
@@ -84,7 +84,8 @@ export default function HoyScreen() {
   const hechos = items.filter((i) => i.hecho).length;
   const avance = items.length === 0 ? 0 : (hechos / items.length) * 100;
   const todoHecho = items.length > 0 && hechos === items.length;
-  const planta = plantaDestacada(jardin.data?.plantas ?? []);
+  // La equipada desde Detalles de la planta o, si no hay, la más avanzada.
+  const planta = plantaEnHoy(jardin.data?.plantas ?? [], jardin.data?.plantaHoy ?? null);
   const tamanoPlanta = height < ALTO_PLANTA_GRANDE ? PLANTA_CHICA : PLANTA_GRANDE;
 
   const encabezado = (

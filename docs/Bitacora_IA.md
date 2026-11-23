@@ -142,6 +142,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Quitar el mensaje «Lleva x objeto» | Usuario | Aceptada | |
 | Jardín: frase corta para las plantas sin hábitos y saldo junto a la bolsa | Claude (Impeccable) | Aceptada | |
 | Hoy muestra la planta más avanzada; «Tu planta crece con cada paso» | Claude (Impeccable) | Aceptada | Antes decía «árbol». |
+| Elegir la planta de Hoy con «Equipar» en Detalles de la planta («Equipada») | Usuario (22 nov) | Aceptada | Claude advirtió que «equipar» ya se usa con los accesorios y propuso «Mostrar en Hoy»; el usuario prefirió «Equipar». Se sincroniza y no hay vuelta a la automática. |
 | Un accesorio en una sola planta a la vez | Definición v5 | Modificada | El usuario pidió que **un objeto pueda estar en varias plantas**, con uno por tipo en cada una. |
 | Aviso «Le pusimos … en lugar de …» al reemplazar desde la Tienda | Claude | Aceptada | |
 | Bloquear la planta si se borra un hábito antes de 24 h | Usuario (lista de pulidos) | Descartada | Claude recomendó no hacerlo: choca con 4 reglas y no evita abusos. |

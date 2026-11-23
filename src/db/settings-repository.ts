@@ -15,6 +15,7 @@ import {
 } from '@/features/progression/domain/progresion';
 import { supabase } from '@/lib/supabase';
 import {
+  type Area,
   ACOMPANAMIENTOS,
   OBSTACULOS,
   TIEMPOS,
@@ -199,6 +200,8 @@ export type CambiosAjustes = Partial<{
   estilo_notificaciones: Acompanamiento;
   segundo_aviso: boolean;
   horas_por_momento: HorasAvisos;
+  /** La planta equipada en Hoy (Detalles de la planta). */
+  planta_hoy: Area;
 }>;
 
 /** Cambia ajustes desde Perfil: se guardan en el teléfono y se suben con la cola (SDD 3.4). */

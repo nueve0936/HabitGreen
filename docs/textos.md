@@ -103,6 +103,7 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Objetos, sin compras | Todavía no tienes {tipo}. Consíguelos en la Tienda. |
 | Objeto que también lleva otra planta (TalkBack) | {nombre}, también lo lleva tu planta de {categorías}. Toca para ponérselo. |
 | «Equipar ahora» reemplazó otro objeto | Le pusimos {nuevo} en lugar de {anterior}. |
+| Detalles de la planta: elegir la planta de Hoy | Botón «Equipar» · Etiqueta «Equipada» · Aviso: Listo: tu planta de {área} se verá en Hoy. · TalkBack: «Equipar la planta de {área} en Hoy» / «Planta de {área} equipada en Hoy» |
 
 ## 4. Reprogramación
 

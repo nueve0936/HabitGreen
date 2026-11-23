@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
+import { Check, House } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -12,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Snackbar } from '@/components/ui/snackbar';
 import { StableBoldText } from '@/components/ui/stable-bold-text';
 import { leerHabitos } from '@/db/habits-repository';
+import { guardarAjustes } from '@/db/settings-repository';
 import { equiparAccesorio, leerJardin, type Accesorio } from '@/db/rewards-repository';
 import { useLocalQuery } from '@/db/use-local-query';
 import { useSession } from '@/features/auth/session-context';
@@ -21,6 +23,7 @@ import { useHabitActions } from '@/features/habits/use-habit-actions';
 import { ObjectGrid, TIPOS_OBJETO } from '@/features/rewards/components/object-grid';
 import { PhaseCarousel } from '@/features/rewards/components/phase-carousel';
 import type { TipoAccesorio } from '@/features/rewards/domain/equipar';
+import { plantaEnHoy } from '@/features/rewards/domain/planta-destacada';
 import { es, formatear } from '@/i18n/es';
 import { AREAS, type Area } from '@/schemas/onboarding';
 import { colors } from '@/theme';
@@ -101,6 +104,24 @@ export default function PlantaScreen() {
   }, [pagina, reducirMovimiento]);
 
   const planta = jardin.data?.plantas.find((p) => p.area === area);
+  // La que se ve en Hoy: la equipada o, si no se ha elegido ninguna, la automática.
+  const enHoy =
+    jardin.data !== undefined &&
+    plantaEnHoy(jardin.data.plantas, jardin.data.plantaHoy)?.area === area;
+
+  const equiparEnHoy = async () => {
+    if (!area) return;
+    setAviso(null);
+    try {
+      await guardarAjustes(userId, { planta_hoy: area });
+      setAviso({
+        tipo: 'exito',
+        texto: formatear(t.enHoy.listo, { area: es.onboarding.formulario.areas[area] }),
+      });
+    } catch {
+      setAviso({ tipo: 'error', texto: t.error });
+    }
+  };
   const lista = (habitos.data ?? []).filter((h) => h.categoria === area);
   const todoDesplazable = fontScale >= ESCALA_MAXIMA_FIJA || height < ALTO_MINIMO_FIJO;
   const tamanoPlanta = Math.min(height * PROPORCION_PLANTA, width * PROPORCION_ANCHO);
@@ -151,6 +172,31 @@ export default function PlantaScreen() {
           </AppText>
         </View>
       </PhaseCarousel>
+      {/* Pulido de Impeccable: debajo de los puntos, para no separar la planta de sus fases. */}
+      <View className="items-center px-8 pb-4">
+        {/* «Equipar» elige la planta de Hoy (decisión del usuario del 22 nov). La equipada lo
+          dice con icono y texto, no solo con color. */}
+        {enHoy ? (
+          <View
+            accessible
+            accessibilityLabel={formatear(t.enHoy.equipadaA11y, { area: nombreArea })}
+            className="min-h-12 flex-row items-center gap-2 rounded-chip bg-accent-claro px-5"
+          >
+            <Check size={20} color={colors.accent} strokeWidth={3} />
+            <AppText weight="bold" tone="acento">
+              {t.enHoy.equipada}
+            </AppText>
+          </View>
+        ) : (
+          <Button
+            variant="secondary"
+            label={t.enHoy.equipar}
+            accessibilityLabel={formatear(t.enHoy.equiparA11y, { area: nombreArea })}
+            icon={<House size={20} color={colors.ink} />}
+            onPress={equiparEnHoy}
+          />
+        )}
+      </View>
     </View>
   );
 
