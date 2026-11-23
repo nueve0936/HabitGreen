@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { getProfile, saveMode, type AppMode, type Profile } from '@/db/profile-repository';
-import { asegurarDuenoBaseLocal, vaciarBaseLocal } from '@/db/database';
+import { asegurarDuenoBaseLocal, contarPendientes, vaciarBaseLocal } from '@/db/database';
 import { cancelarAvisos } from '@/features/reminders/avisos';
 import { borrarSesionGuardada, leerSesionGuardada, supabase } from '@/lib/supabase';
 import { deviceTimeZone } from '@/lib/time-zone';
@@ -166,19 +166,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const finishRecovery = useCallback(() => setIsRecovery(false), []);
 
-  const signOut = useCallback(async () => {
+  const signOut = useCallback(async (opciones?: { revisarPendientes?: boolean }) => {
     // Antes de salir se intenta subir lo pendiente; después se borran los datos locales para que
     // la siguiente cuenta empiece limpia.
+    // Si sin conexión quedan cambios sin subir, se perderían: con `revisarPendientes` no se cierra
+    // y quien llama pregunta antes (Perfil).
+    await sincronizarAhora().catch(() => {});
+    if (opciones?.revisarPendientes && (await contarPendientes().catch(() => 0)) > 0) {
+      return 'pendientes';
+    }
     // El borrado va en finally: ocurre aunque falle el cierre en Supabase.
     cerrandoAMano.current = true;
     try {
-      await sincronizarAhora().catch(() => {});
       await supabase.auth.signOut();
     } finally {
       cerrandoAMano.current = false;
       await vaciarBaseLocal().catch(() => {});
       await cancelarAvisos().catch(() => {});
     }
+    return 'cerrada';
   }, []);
 
   const value = useMemo<SessionContextValue>(

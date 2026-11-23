@@ -112,6 +112,9 @@ export const es = {
       titulo: 'Revisa tu correo',
       descripcion:
         'Te enviamos un enlace a {correo}. Ábrelo desde este teléfono para confirmar tu cuenta.',
+      // Si se abre en la computadora, el enlace no puede abrir la app y el navegador muestra un error.
+      enComputadora:
+        'Si lo abriste en la computadora, intenta iniciar sesión aquí. Si no entra, abre el correo desde este teléfono.',
       reenviar: 'Reenviar correo',
       reenviado: 'Listo, te enviamos otro correo.',
       irALogin: 'Ya confirmé, iniciar sesión',
@@ -827,12 +830,23 @@ export const es = {
       cancelar: 'Cancelar',
     },
     cerrarSesion: 'Cerrar sesión',
+    // Cerrar sesión sin conexión con cambios sin subir: se perderían.
+    pendientes: {
+      mensaje:
+        'Tienes cambios sin subir. Si cierras sesión sin conexión, se perderán. Conéctate a internet para guardarlos.',
+      cancelar: 'Cancelar',
+      cerrar: 'Cerrar sesión de todos modos',
+    },
     avisos: 'Avisos',
     avisosApagados:
       'Los avisos están apagados en tu teléfono. Actívalos para recibir tus recordatorios.',
     horaExactaApagada:
       'Tus avisos pueden llegar hasta una hora tarde. Permite «Alarmas y recordatorios» para que lleguen a su hora.',
     permitirHoraExacta: 'Permitir hora exacta',
+    // Solo en teléfonos Samsung: la suspensión de apps puede bloquear los avisos.
+    bateriaSamsung:
+      'Si tus avisos no llegan, revisa que Habit Green no esté en suspensión: en los ajustes de la app, Batería → Sin restricciones.',
+    abrirAjustesApp: 'Abrir ajustes de la app',
     abrirAjustes: 'Abrir ajustes',
     estilo: 'Estilo',
     estiloTitulo: '¿Cómo te acompañamos?',

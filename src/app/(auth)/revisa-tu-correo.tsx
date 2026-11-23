@@ -57,6 +57,9 @@ export default function RevisaTuCorreoScreen() {
         <AppText variant="body" className="text-center">
           {formatear(t.descripcion, { correo: correo ?? '' })}
         </AppText>
+        <AppText variant="small" tone="ink-soft" className="text-center">
+          {t.enComputadora}
+        </AppText>
       </View>
 
       {feedback ? <Alert variant={feedback.variant} message={feedback.message} /> : null}

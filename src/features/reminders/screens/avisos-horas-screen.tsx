@@ -15,6 +15,7 @@ import { useSession } from '@/features/auth/session-context';
 import { SecondNoticeToggle } from '@/features/plan/components/second-notice-toggle';
 import { fechaDesdeHora, horaDesdeFecha } from '@/features/plan/domain/plan-review';
 import { es } from '@/i18n/es';
+import { esSamsung } from '@/lib/fabricante';
 import { cardShadow, colors } from '@/theme';
 
 import { StyleDialog } from '../components/style-dialog';
@@ -135,6 +136,17 @@ export default function AvisosHorasScreen() {
                   </View>
                 )}
               </Grupo>
+              {/* Samsung puede poner la app en suspensión y bloquear los avisos (solo ahí). */}
+              {avisosActivos && esSamsung() ? (
+                <View className="gap-2">
+                  <Alert variant="info" message={t.bateriaSamsung} />
+                  <Button
+                    variant="secondary"
+                    label={t.abrirAjustesApp}
+                    onPress={() => void Linking.openSettings()}
+                  />
+                </View>
+              ) : null}
             </Seccion>
 
             <Seccion titulo={t.horas}>

@@ -63,6 +63,15 @@ La notificación del lunes usa el título de la tabla y, como cuerpo, el mismo m
 | Diálogo, una vez, después del permiso de avisos | Para que cada aviso llegue a su hora, permite «Alarmas y recordatorios» en la siguiente pantalla. Sin esto, Android puede retrasarlos hasta una hora. · Botones: «Ahora no», «Permitir» |
 | «Avisos y horas» sin el permiso | Tus avisos pueden llegar hasta una hora tarde. Permite «Alarmas y recordatorios» para que lleguen a su hora. · Botón: «Permitir hora exacta» |
 
+### Casos límite (ajustes, 22 nov)
+
+| Situación | Texto |
+| --- | --- |
+| Cerrar sesión sin conexión con cambios sin subir (Perfil) | Tienes cambios sin subir. Si cierras sesión sin conexión, se perderán. Conéctate a internet para guardarlos. · Botones: «Cancelar», «Cerrar sesión de todos modos» (rojo) |
+| «Revisa tu correo», debajo de la explicación | Si lo abriste en la computadora, intenta iniciar sesión aquí. Si no entra, abre el correo desde este teléfono. |
+| «Avisos y horas», solo en teléfonos Samsung | Si tus avisos no llegan, revisa que Habit Green no esté en suspensión: en los ajustes de la app, Batería → Sin restricciones. · Botón: «Abrir ajustes de la app» |
+| Plantilla del correo de confirmación (panel de Supabase) | Abre este enlace desde tu teléfono, donde tienes instalada Habit Green. |
+
 ### Último hábito de un plan
 
 | Situación | Texto |

@@ -115,6 +115,13 @@ export async function leerFilas<T>(
   return filas.map((f) => desdeValoresLocales<T>(tabla, f));
 }
 
+/** Cambios hechos en el teléfono que todavía no se suben (cola de salida). */
+export async function contarPendientes(): Promise<number> {
+  const db = await getDb();
+  const fila = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM outbox');
+  return fila?.n ?? 0;
+}
+
 /** Borra todos los datos locales: al cerrar sesión o si entra otra cuenta en el teléfono. */
 export async function vaciarBaseLocal(): Promise<void> {
   const db = await getDb();

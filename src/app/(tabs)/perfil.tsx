@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { Alert } from '@/components/ui/alert';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { MenuRow } from '@/components/ui/menu-row';
 import { Screen } from '@/components/ui/screen';
 import { Snackbar } from '@/components/ui/snackbar';
@@ -34,6 +35,8 @@ export default function PerfilScreen() {
   const planes = useLocalQuery(`mis-planes-${userId}`, () => leerMisPlanes(userId));
   const avisosActivos = useAvisosActivos();
   const [signingOut, setSigningOut] = useState(false);
+  // Sin conexión y con cambios sin subir: se pregunta antes de cerrar sesión (se perderían).
+  const [conPendientes, setConPendientes] = useState(false);
   const [eligiendoTiempo, setEligiendoTiempo] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState(false);
 
@@ -47,10 +50,11 @@ export default function PerfilScreen() {
         ? t.indice.unPlan
         : formatear(t.indice.planes, { n: String(cuantos) });
 
-  const onSignOut = async () => {
+  const onSignOut = async (forzar = false) => {
     setSigningOut(true);
     try {
-      await signOut();
+      const resultado = await signOut({ revisarPendientes: !forzar });
+      if (resultado === 'pendientes') setConPendientes(true);
     } finally {
       setSigningOut(false);
     }
@@ -136,10 +140,23 @@ export default function PerfilScreen() {
             variant="secondary"
             label={t.cerrarSesion}
             loading={signingOut}
-            onPress={onSignOut}
+            onPress={() => void onSignOut()}
             icon={<LogOut size={20} color={colors.ink} />}
           />
         </View>
+
+        <ConfirmDialog
+          visible={conPendientes}
+          tipo="peligro"
+          mensaje={t.pendientes.mensaje}
+          cancelar={t.pendientes.cancelar}
+          confirmar={t.pendientes.cerrar}
+          onCancelar={() => setConPendientes(false)}
+          onConfirmar={() => {
+            setConPendientes(false);
+            void onSignOut(true);
+          }}
+        />
 
         {ajustes && eligiendoTiempo ? (
           <BudgetDialog

@@ -18,7 +18,11 @@ export type SessionContextValue = {
   reloadProfile: () => void;
   chooseMode: (mode: AppMode) => Promise<void>;
   finishRecovery: () => void;
-  signOut: () => Promise<void>;
+  /**
+   * Cierra sesión y borra los datos del teléfono. Con `revisarPendientes`, si después de intentar
+   * sincronizar quedan cambios sin subir, no cierra y devuelve 'pendientes' para preguntar antes.
+   */
+  signOut: (opciones?: { revisarPendientes?: boolean }) => Promise<'cerrada' | 'pendientes'>;
 };
 
 export const SessionContext = createContext<SessionContextValue | null>(null);

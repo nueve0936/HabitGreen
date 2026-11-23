@@ -158,6 +158,7 @@ Ajustes después de los varios planes: avisos, botón «Hecho» y reglas de los 
 | A.3 | Cada plan conserva al menos un hábito: «Eliminar» el último ofrece «Terminar plan» | en curso (falta tu prueba en el teléfono) |
 | A.4 | ~~«¿Qué pasó?» opcional en la tarjeta de reprogramación~~ | descartado (decisión del usuario, 22 nov: se quitó antes del APK) |
 | A.6 | «Equipar» una planta en Detalles de la planta para que se vea en Hoy («Equipada»), sincronizado | en curso (falta tu prueba en el teléfono) |
+| A.7 | Casos límite: avisar antes de cerrar sesión sin conexión con cambios sin subir; nota en «Revisa tu correo» si se abrió en la computadora; nota de batería en «Avisos y horas» (solo Samsung) | en curso (falta tu prueba en el teléfono) |
 | A.5 | Elegir la hora del resumen nocturno en «Avisos y horas» (ya existía: fila «Resumen» con el estilo «Resumen nocturno») | en curso (falta tu prueba en el teléfono) |
 
 ## Entrega 9: Cierre (días 18–19, ~6 h)
