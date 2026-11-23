@@ -53,9 +53,9 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 |---|---|---|---|
 | Dos modos de uso: tradicional y guiado (formulario de 7 preguntas) | Definición del proyecto | Modificada | El 20 nov el modo deja de ser una restricción (3.3). |
 | Demo solo en Android; iOS después | Definición v5 | Aceptada | |
-| Demo en 10 entregas verticales; geofencing al final como primer recorte | Definición v5 | Aceptada | Entrega 10 pendiente. |
+| Demo en 10 entregas verticales; geofencing al final como primer recorte | Definición v5 | Aceptada | El 22 nov el usuario recortó el geofencing (Entrega 10) y el recorrido con TalkBack (9.1 y 9.2) para generar el APK. |
 | Terminar las entregas con arte provisional y, al cerrar la 4, revisar el diseño desde la Entrega 1 | Usuario (3 nov) | Aceptada | |
-| APK de preview como cierre de la demo (Entrega 9.3) | Definición v4/v5 | Descartada | El usuario la quitó el 20 nov; la entrega es la app en el teléfono. |
+| APK de preview como cierre de la demo (Entrega 9.3) | Definición v4/v5 | Aceptada | El usuario la quitó el 20 nov y la retomó el 22 nov para poder compartir la app. Antes se crearon las variables `EXPO_PUBLIC_*` en EAS: sin ellas, el APK se cerraba al abrir. |
 | Fuera de la demo: Lottie, Sentry, CI, temporizador de `distraccion`, eliminar cuenta | Definición v5 | Aceptada | Se agregan antes de publicar. |
 | Borrar las tablas del prototipo anterior en Supabase (2 oct) | Claude | Aceptada | No chocaban con las nuevas, pero eran de otro diseño. |
 | Correos de Auth con un SMTP propio de Gmail | Claude (opción 1), elegida por el usuario | Aceptada | La contraseña de aplicación de Gmail se escribe solo en el panel de Supabase. |
@@ -182,7 +182,7 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Navegación: pestañas dentro de la pantalla, sin menú lateral ni pila | Claude, a pedido del usuario | Aceptada | Deslizar ya cambia entre las pestañas de abajo. |
 | Botón «Hoy» y recorrido por semanas de lunes a domingo | Usuario | Aceptada | |
 | Cambiar de semana deslizando | Usuario | Modificada | Al probarlo, el deslizamiento cambiaba de pantalla; el usuario pidió flechas. |
-| Datos de prueba desde el 1 de agosto en 2 hábitos reales y 2 de prueba | Usuario pidió los datos; Claude propuso el alcance | Aceptada | Se revierten al terminar todas las entregas. |
+| Datos de prueba desde el 1 de agosto en 2 hábitos reales y 2 de prueba | Usuario pidió los datos; Claude propuso el alcance | Aceptada | Al revisar antes del APK (22 nov) ya no existían: la cuenta de prueba se había reemplazado. |
 
 ### 3.9 Sesión y sin conexión
 
@@ -255,10 +255,8 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 | Prueba en el teléfono del cupo total de hábitos | Varios planes |
 | Título cortado «Alejar el» en un hábito | Visto en Hoy |
 | Entrega 9.1 y 9.2: recorrido completo con TalkBack y corrección de errores | Backlog |
-| Entrega 10: geofencing básico | Backlog |
 | Nombres de los 15 accesorios, arte final y validación de textos del catálogo | Definición §15 |
 | Frecuencias por mes, por año y «cada cierto tiempo» al crear un hábito | Mockup «Crear hábito», para después |
-| Revertir los datos de prueba del historial (Entrega 7) al terminar todas las entregas | Decisión del usuario |
 
 ## 6. Reglas de trabajo acordadas
 
@@ -267,5 +265,5 @@ Registro de las decisiones importantes del proyecto desde su inicio: qué se pro
 - Las pantallas de Figma no se modifican; los cambios van en la app.
 - No enviar toques al teléfono del usuario sin permiso; las capturas y lecturas son solo de consulta.
 - Las claves (IA, servicio de Supabase, contraseña de correo) nunca van en la app ni se escriben en la conversación.
-- No se tocan la configuración de SonarQube ni los datos de prueba hasta terminar las entregas.
+- No se toca la configuración de SonarQube.
 - Explicar cada pieza en español: qué hace, por qué así y cómo probarla.

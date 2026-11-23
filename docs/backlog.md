@@ -163,9 +163,9 @@ Ajustes después de los varios planes: avisos, botón «Hecho» y reglas de los 
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 9.1 | Recorrido completo en el teléfono, lista 9.7 con TalkBack y texto al 130 % | 9.7 | pendiente |
-| 9.2 | Corrección de errores | — | pendiente |
-| 9.3 | ~~APK de preview con EAS~~ | 11 | descartado (decisión del usuario, 20 nov) |
+| 9.1 | Recorrido completo en el teléfono, lista 9.7 con TalkBack y texto al 130 % | 9.7 | recortado (decisión del usuario, 22 nov) |
+| 9.2 | Corrección de errores | — | recortado (decisión del usuario, 22 nov) |
+| 9.3 | APK de preview con EAS (variables `EXPO_PUBLIC_*` en el entorno `preview` de EAS) | 11 | en curso (retomado por el usuario el 22 nov) |
 
 **Criterio de prueba:** en tu teléfono haces el flujo completo de la definición de terminado sin errores. El APK de preview quedó fuera por decisión del usuario.
 
@@ -173,8 +173,8 @@ Ajustes después de los varios planes: avisos, botón «Hecho» y reglas de los 
 
 | # | Tarea | SDD | Estado |
 | --- | --- | --- | --- |
-| 10.1 | `habit_places`: agregar hasta 3 lugares desde el detalle del hábito | 7.2 | pendiente |
-| 10.2 | Geofencing con tope de 20 regiones, una notificación al día por hábito y permiso en segundo plano | 7.2 | pendiente |
+| 10.1 | `habit_places`: agregar hasta 3 lugares desde el detalle del hábito | 7.2 | recortado (decisión del usuario, 22 nov) |
+| 10.2 | Geofencing con tope de 20 regiones, una notificación al día por hábito y permiso en segundo plano | 7.2 | recortado (decisión del usuario, 22 nov) |
 
 **Criterio de prueba:** al llegar a un lugar guardado, llega un aviso del hábito si está programado para hoy y no está hecho.
 Si al terminar la entrega 9 no quedan al menos 2 días, esta entrega se marca `recortado` y esos días son margen.
